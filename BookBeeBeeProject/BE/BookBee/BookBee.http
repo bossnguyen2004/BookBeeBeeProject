@@ -1,0 +1,6 @@
+@BookBee_HostAddress = http://localhost:5120
+
+GET {{BookBee_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###

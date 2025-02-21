@@ -1,0 +1,37 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.10.35122.118
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BookBee", "BookBee.csproj", "{57EFCE2A-980C-4FC4-AC11-5789F28CCD59}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Fe_Admin", "..\..\FE\Fe_Admin\Fe_Admin.csproj", "{6B116460-5D3B-43AD-9507-3DABBCC39426}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Fe_User", "..\..\FE\Fe_User\Fe_User.csproj", "{D1FD974B-7F7A-47D3-902F-C73481EAFAC8}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{57EFCE2A-980C-4FC4-AC11-5789F28CCD59}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{57EFCE2A-980C-4FC4-AC11-5789F28CCD59}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{57EFCE2A-980C-4FC4-AC11-5789F28CCD59}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{57EFCE2A-980C-4FC4-AC11-5789F28CCD59}.Release|Any CPU.Build.0 = Release|Any CPU
+		{6B116460-5D3B-43AD-9507-3DABBCC39426}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{6B116460-5D3B-43AD-9507-3DABBCC39426}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{6B116460-5D3B-43AD-9507-3DABBCC39426}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{6B116460-5D3B-43AD-9507-3DABBCC39426}.Release|Any CPU.Build.0 = Release|Any CPU
+		{D1FD974B-7F7A-47D3-902F-C73481EAFAC8}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D1FD974B-7F7A-47D3-902F-C73481EAFAC8}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D1FD974B-7F7A-47D3-902F-C73481EAFAC8}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D1FD974B-7F7A-47D3-902F-C73481EAFAC8}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {5A22F140-EABA-4363-B384-2BB33C14154E}
+	EndGlobalSection
+EndGlobal
