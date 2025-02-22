@@ -1,0 +1,143 @@
+@{
+    var httpContext = ViewContext.HttpContext;
+    var accessRole = httpContext.Session.GetString("Result");
+    var accessToken = httpContext.Session.GetString("AccessToken");
+}
+
+
+@if (!string.IsNullOrEmpty(accessToken) && accessRole == "admin" || !string.IsNullOrEmpty(accessToken) && accessRole == "nhanvien")
+{
+    <ul class="sidebar-nav" id="sidebar-nav">
+
+        <li class="nav-item">
+            <a class="nav-link " href="/BanHangTaiQuay/DanhSachHoaDonCho">
+                <i class="bi bi-grid"></i>
+                <span>Bán Hàng Tại Quầy</span>
+            </a>
+        </li>
+
+        <li class="nav-item">
+            <a class="nav-link collapsed" data-bs-target="#charts-nav" data-bs-toggle="collapse" href="#">
+                <i class="bi bi-bar-chart"></i><span>Thống Kê</span><i class="bi bi-chevron-down ms-auto"></i>
+            </a>
+            <ul id="charts-nav" class="nav-content collapse " data-bs-parent="#sidebar-nav">
+                <li>
+                    <a asp-controller="ThongKe" asp-action="Index">
+                        <i class="bi bi-circle"></i><span>Thống kê doanh thu</span>
+                    </a>
+                </li>
+                <li>
+                    <a asp-controller="ThongKe" asp-action="IndexMain">
+                        <i class="bi bi-circle"></i><span>Thống kê sản phẩm</span>
+                    </a>
+                </li>
+            </ul>
+        </li>
+
+
+        <li class="nav-item">
+            <a class="nav-link collapsed" href="/Voucher">
+                <i class="bi bi-menu-button-wide"></i><span>Quản Lý Khách Hàng</span>
+            </a>
+        </li>
+
+        <li class="nav-item">
+            <a class="nav-link collapsed" href="@Url.Action("Index", "Staff")">
+                <i class="bi bi-menu-button-wide"></i><span>Quản Lý Nhân Viên</span>
+            </a>
+        </li>
+
+
+        <li class="nav-item">
+            <a class="nav-link collapsed" data-bs-target="#charts-lav" data-bs-toggle="collapse" href="#">
+                <i class="bi bi-menu-button-wide"></i><span>Quản Lý Hoa Đơn</span><i class="bi bi-chevron-down ms-auto"></i>
+            </a>
+            <ul id="charts-lav" class="nav-content collapse " data-bs-parent="#sidebar-nav">
+                <li class="nav-item">
+                    <a class="nav-link collapsed" data-bs-target="#forms-nav" href="/HoaDon/DanhSachHoaDon">
+                        <i class="fas fa-file-invoice"></i><span>Quản Lý Hóa Đơn</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link collapsed" data-bs-target="#forms-nav" href="/HoaDon/DanhSachPhanTrangThai">
+                        <i class="fas fa-truck"></i><span>Quản Lý Trạng Thái Giao Hàng</span>
+                    </a>
+                </li>
+
+
+
+            </ul>
+        </li>
+
+        <li class="nav-item">
+            <a class="nav-link collapsed" href="/QuanLyTaiKhoanNhanVien">
+                <i class="bi bi-menu-button-wide"></i><span>Quản Lý Đánh Giá</span>
+            </a>
+        </li>
+
+        <li class="nav-item">
+            <a class="nav-link collapsed" href="@Url.Action("Index", "Tag")">
+                <i class="bi bi-menu-button-wide"></i><span>Quản Lý Thể Loại</span>
+            </a>
+        </li>
+
+
+        <li class="nav-item">
+            <a class="nav-link collapsed" data-bs-target="#charts-navs" data-bs-toggle="collapse" href="#">
+                <i class="bi bi-menu-button-wide"></i><span>Quản Lý Voucher</span><i class="bi bi-chevron-down ms-auto"></i>
+            </a>
+            <ul id="charts-navs" class="nav-content collapse " data-bs-parent="#sidebar-nav">
+                <li>
+                    <a href="/SanPhamChiTiet">
+                        <i class="bi bi-circle"></i><span>Voucher Cửa Hàng </span>
+                    </a>
+                </li>
+                <li>
+                    <a href="@Url.Action("Index", "Voucher")">
+                        <i class="bi bi-circle"></i><span>Khuyến Mại</span>
+                    </a>
+                </li>
+
+                <li>
+                    <a href="@Url.Action("Index", "Author")">
+                        <i class="bi bi-circle"></i><span>Sản Phẩm Khuyến Mại</span>
+                    </a>
+                </li>
+
+            </ul>
+        </li>
+
+        <li class="nav-item">
+            <a class="nav-link collapsed" data-bs-target="#components-nav" data-bs-toggle="collapse" href="#">
+                <i class="bi bi-menu-button-wide"></i><span>Quản Lý Sản Phẩm</span><i class="bi bi-chevron-down ms-auto"></i>
+            </a>
+            <ul id="components-nav" class="nav-content collapse " data-bs-parent="#sidebar-nav">
+                <li>
+                    <a href="@Url.Action("Index", "Book")">
+                        <i class="bi bi-circle"></i><span>Danh Sách Sản Phẩm</span>
+                    </a>
+                </li>
+
+                <li>
+                    <a href="@Url.Action("Index", "Author")">
+                        <i class="bi bi-circle"></i><span>Danh Sách Tác Giả</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="@Url.Action("Index", "Publisher")">
+                        <i class="bi bi-circle"></i><span>Danh Sách Nhà Xuất Bản</span>
+                    </a>
+                </li>
+
+               
+
+            </ul>
+        </li>
+
+        <li class="nav-item">
+            <a class="nav-link collapsed" href="@Url.Action("Index", "ShippingMode")">
+                <i class="bi bi-menu-button-wide"></i><span>Quản Lý Đơn Vị Vận Chuyển</span>
+            </a>
+        </li>
+    </ul>
+}
