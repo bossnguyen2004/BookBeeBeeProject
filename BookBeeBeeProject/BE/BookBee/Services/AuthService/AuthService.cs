@@ -1,5 +1,7 @@
-﻿using BookBee.DTO.Account;
+﻿using AutoMapper;
+using BookBee.DTO.Account;
 using BookBee.DTO.Response;
+using BookBee.DTO.User;
 using BookBee.Model;
 using BookBee.Persistences.Repositories.AddressRepository;
 using BookBee.Persistences.Repositories.CartRepository;
@@ -14,7 +16,7 @@ namespace BookBee.Services.AuthService
 {
     public class AuthService : IAuthService
     {
-   
+        private readonly IMapper _mapper;
         private readonly IUserAccountRepository _userRepository;
         private readonly ICartRepository _cartRepository;
         private readonly ITokenService _tokenService;
@@ -217,7 +219,7 @@ namespace BookBee.Services.AuthService
 
 
         public AuthService(IUserAccountRepository userRepository,
-           ICartRepository cartRepository,
+           ICartRepository cartRepository, IMapper mapper,
            ITokenService tokenService,
            ICacheService cacheService,
            UserAccessor userAccessor,
@@ -225,103 +227,141 @@ namespace BookBee.Services.AuthService
         {
             _userRepository = userRepository;
             _cartRepository = cartRepository;
-
+            _mapper = mapper;
             _tokenService = tokenService;
             _cacheService = cacheService;
             _userAccessor = userAccessor;
             _mailService = mailService;
             _addressRepository = addressRepository;
         }
-        //public ResponseDTO Login(string username, string password)
-        //{
-        //    var user = _userRepository.GetUserByUsername(username);
+        public ResponseDTO Login(string username, string password)
+        {
+            //var user = _userRepository.GetUserByUsername(username);
 
-        //    if (user is { IsDeleted: false })
-        //    {
-        //        if (PasswordHelper.VerifyPasswordHash(password, user.PasswordHash, user.PasswordSalt))
-        //        {
-        //            var token = _tokenService.GenerateToken(user);
-        //            //var data = _mapper.Map<UserDTO>(user);
-        //            data.Token = token;
-        //            return new ResponseDTO()
-        //            {
-        //                Message = "Login thành công",
-        //                Data = data
-        //            };
-        //        }
-        //    }
-        //    return new ResponseDTO()
-        //    {
-        //        Code = 401,
-        //        Message = "Tài khoản hoặc mật khẩu không chính xác"
-        //    };
+            //if (user is { IsDeleted: false })
+            //{
+            //    if (PasswordHelper.VerifyPasswordHash(password, user.PasswordHash, user.PasswordSalt))
+            //    {
+            //        var token = _tokenService.GenerateToken(user);
+            //        var data = _mapper.Map<UserAccountDTO>(user);
+            //        data.Token = token;
+            //        return new ResponseDTO()
+            //        {
+            //            Message = "Login thành công",
+            //            Data = data
+            //        };
+            //    }
+            //}
+            //return new ResponseDTO()
+            //{
+            //    Code = 401,
+            //    Message = "Tài khoản hoặc mật khẩu không chính xác"
+            //}; var user = _userRepository.GetUserByUsername(username);
 
-        //}
+            var user = _userRepository.GetUserByUsername(username);
+            if (user == null || user.IsDeleted)
+            {
+                return new ResponseDTO()
+                {
+                    Code = 401,
+                    Message = "Tài khoản hoặc mật khẩu không chính xác"
+                };
+            }
 
-        //public async Task<ResponseDTO> Register(RegisterUserDTO registerUserDTO)
-        //{
-        //    var user = _userRepository.GetUserByUsername(registerUserDTO.Username);
-        //    if (user != null)
-        //        return new ResponseDTO()
-        //        {
-        //            Code = 400,
-        //            Message = "Username đã đăng ký"
-        //        };
+            if (!PasswordHelper.VerifyPasswordHash(password, user.PasswordHash, user.PasswordSalt))
+            {
+                return new ResponseDTO()
+                {
+                    Code = 401,
+                    Message = "Tài khoản hoặc mật khẩu không chính xác"
+                };
+            }
 
-        //    var email = _userRepository.GetUserByEmail(registerUserDTO.Email);
-        //    if (email != null)
-        //        return new ResponseDTO()
-        //        {
-        //            Code = 400,
-        //            Message = "Email đã đăng ký"
-        //        };
+            var token = _tokenService.GenerateToken(user);
 
-        //    if (registerUserDTO.Password != registerUserDTO.CfPassword)
-        //        return new ResponseDTO()
-        //        {
-        //            Code = 400,
-        //            Message = "Password không trùng khớp"
-        //        };
+            var data = _mapper.Map<UserAccountDTO>(user);
+            if (data == null)
+            {
+                return new ResponseDTO()
+                {
+                    Code = 500,
+                    Message = "Lỗi ánh xạ dữ liệu"
+                };
+            }
 
-        //    user = _mapper.Map<User>(registerUserDTO);
-        //    user.RoleId = 2;
+            data.Token = token;
+            return new ResponseDTO()
+            {
+                Message = "Login thành công",
+                Data = data
+            };
 
-        //    PasswordHelper.CreatePasswordHash(registerUserDTO.Password, out var passwordHash, out var passwordSalt);
-        //    user.PasswordHash = passwordHash;
-        //    user.PasswordSalt = passwordSalt;
+        }
 
-        //    _userRepository.CreateUser(user);
-        //    if (!_userRepository.IsSaveChanges())
-        //    {
-        //        return new ResponseDTO()
-        //        {
-        //            Code = 400,
-        //            Message = "Tạo thất bại"
-        //        };
-        //    }
+        public async Task<ResponseDTO> Register(RegisterUserDTO registerUserDTO)
+        {
+            var user = _userRepository.GetUserByUsername(registerUserDTO.Username);
+            if (user != null)
+                return new ResponseDTO()
+                {
+                    Code = 400,
+                    Message = "Username đã đăng ký"
+                };
 
-        //    var address = new Address
-        //    {
-        //        UserProfileId = user.Id,
-        //        Name = string.Empty,
-        //        Phone = string.Empty,
-        //        Street = string.Empty,
-        //        City = string.Empty,
-        //        State = "Mua hàng tại quầy",
-        //        Create = DateTime.Now,
-        //        Update = DateTime.Now,
-        //        IsDeleted = true
-        //    };
+            var email = _userRepository.GetUserByEmail(registerUserDTO.Email);
+            if (email != null)
+                return new ResponseDTO()
+                {
+                    Code = 400,
+                    Message = "Email đã đăng ký"
+                };
 
-        //    _addressRepository.CreateAddress(address);
+            if (registerUserDTO.Password != registerUserDTO.CfPassword)
+                return new ResponseDTO()
+                {
+                    Code = 400,
+                    Message = "Password không trùng khớp"
+                };
 
-        //    await _mailService.SendEmailAsync(user.Email, "Chào mừng tới BookBee", RegistrationSuccessEmailTemplate);
+            user = _mapper.Map<UserAccount>(registerUserDTO);
+            user.RoleId = 2;
 
-        //    return new ResponseDTO()
-        //    {
-        //        Message = "Đăng ký tài khoản thành công"
-        //    };
-        //}
+            PasswordHelper.CreatePasswordHash(registerUserDTO.Password, out var passwordHash, out var passwordSalt);
+            user.PasswordHash = passwordHash;
+            user.PasswordSalt = passwordSalt;
+
+            _userRepository.CreateUser(user);
+            if (!_userRepository.IsSaveChanges())
+            {
+                return new ResponseDTO()
+                {
+                    Code = 400,
+                    Message = "Tạo thất bại"
+                };
+            }
+
+            var address = new Address
+            {
+                UserAccountId = user.Id,
+                Name = string.Empty,
+                Phone = string.Empty,
+                Street = string.Empty,
+                City = string.Empty,
+                State = "Mua hàng tại quầy",
+                Create = DateTime.Now,
+                Update = DateTime.Now,
+                IsDeleted = true
+            };
+
+            _addressRepository.CreateAddress(address);
+
+            await _mailService.SendEmailAsync(user.Email, "Chào mừng tới BookBee", RegistrationSuccessEmailTemplate);
+
+            return new ResponseDTO()
+            {
+                Message = "Đăng ký tài khoản thành công"
+            };
+        }
 
 
         public ResponseDTO ChangePassword(ChangePasswordDTO changePasswordDTO)

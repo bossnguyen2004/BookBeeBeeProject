@@ -1,4 +1,9 @@
-﻿using Microsoft.AspNetCore.Cors.Infrastructure;
+﻿using BookBee.Services.AuthService;
+using BookBee.Services.CacheService;
+using BookBee.Services.MailService;
+using BookBee.Services.TokenService;
+using BookBee.Utilities;
+using Microsoft.AspNetCore.Cors.Infrastructure;
 
 namespace BookBee.Extensions
 {
@@ -6,24 +11,24 @@ namespace BookBee.Extensions
     {
         public static void AddServices(this IServiceCollection services, IConfiguration configuration)
         {
-        //    services.AddMemoryCache();
-        //    services.AddScoped<IAuthService, AuthService>();
-        //    services.AddSingleton<ICacheService, InMemoryCacheService>();
-        //    services.AddScoped<IAddressService, AddressService>();
-        //    services.AddScoped<IAuthorService, AuthorService>();
-        //    services.AddScoped<IBookService, BookService>();
-        //    services.AddScoped<ICartService, CartService>();
-        //    services.AddScoped<IOrderService, OrderService>();
-        //    services.AddScoped<IPublisherService, PublisherService>();
-        //    services.AddScoped<IStatisticalService, StatisticalService>();
-        //    services.AddScoped<ITagService, TagService>();
-        //    services.AddScoped<IUserService, UserService>();
-        //    services.AddScoped<ITokenService, TokenService>();
-        //    services.AddScoped<IVNPayService, VNPayService>();
-        //    services.AddScoped<IFileStorageService, FileStorageService>();
-        //    services.AddScoped<IMailService, MailService>();
-        //    services.AddScoped<IShippingModeService, ShippingModeService>();
-        //    services.AddScoped<IVoucherService, VoucherService>();
+             services.AddMemoryCache();
+            services.AddScoped<IAuthService, AuthService>();
+            services.AddSingleton<ICacheService, InMemoryCacheService>();
+            services.AddScoped<IMailService, MailService>();
+            services.AddScoped<ITokenService, TokenService>();
+            //    services.AddScoped<IAddressService, AddressService>();
+            //    services.AddScoped<IAuthorService, AuthorService>();
+            //    services.AddScoped<IBookService, BookService>();
+            //    services.AddScoped<ICartService, CartService>();
+            //    services.AddScoped<IOrderService, OrderService>();
+            //    services.AddScoped<IPublisherService, PublisherService>();
+            //    services.AddScoped<IStatisticalService, StatisticalService>();
+            //    services.AddScoped<ITagService, TagService>();
+            //    services.AddScoped<IUserService, UserService>();
+            //    services.AddScoped<IVNPayService, VNPayService>();
+            //    services.AddScoped<IFileStorageService, FileStorageService>();
+            //    services.AddScoped<IShippingModeService, ShippingModeService>();
+            //    services.AddScoped<IVoucherService, VoucherService>();
         }
 
         public static void AddUtilities(this IServiceCollection services, IConfiguration configuration)

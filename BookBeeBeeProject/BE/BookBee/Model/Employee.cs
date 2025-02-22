@@ -25,5 +25,6 @@ namespace BookBee.Model
         [Required]
         public int UserAccountId { get; set; }
         public virtual UserAccount UserAccount { get; set; }
+        public virtual ICollection<Order>? Orders { get; set; }
     }
 }

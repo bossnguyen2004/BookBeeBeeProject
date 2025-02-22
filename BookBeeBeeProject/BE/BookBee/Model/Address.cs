@@ -20,7 +20,7 @@ namespace BookBee.Model
         public DateTime Update { get; set; } = DateTime.Now;
         public bool IsDeleted { get; set; } = false;
         [Required]
-        public int UserProfileId { get; set; }
-        public virtual UserProfile UserProfiles { get; set; }
+        public int UserAccountId { get; set; }
+        public virtual UserAccount UserAccount { get; set; }
     }
 }

@@ -1,13 +1,11 @@
 ﻿using BookBee.Model;
 using Microsoft.EntityFrameworkCore;
-using System.Collections.Generic;
-using System.Reflection.Emit;
 
 namespace BookBee.Persistences
 {
-    public class DataContext : DbContext
+    public class DataContext:DbContext
     {
-        public DataContext() { }
+        public DataContext(){}
         public DataContext(DbContextOptions<DataContext> options) : base(options) { }
         public DbSet<Image> Images { get; set; }
         public DbSet<Role> Roles { get; set; }
@@ -27,18 +25,33 @@ namespace BookBee.Persistences
         public DbSet<Voucher> Vouchers { get; set; }
         public DbSet<OrderVoucher> OrderVouchers { get; set; }
         public DbSet<VoucherDetail> VoucherDetails { get; set; }
-        public DbSet<UserProfile> UserProfiles { get; set; }
         public DbSet<UserAccount> UserAccounts { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             modelBuilder.Entity<Order>()
-                .HasOne(o => o.UserProfile)
+                .HasOne(o => o.UserAccount)
                 .WithMany(u => u.Orders)
-                .HasForeignKey(o => o.UserProfileId)
+                .HasForeignKey(o => o.UserAccountId)
                 .OnDelete(DeleteBehavior.Restrict);
 
+            modelBuilder.Entity<Order>()
+                       .HasOne(o => o.Employee)
+                       .WithMany()
+                       .HasForeignKey(o => o.EmployeeId)
+                       .OnDelete(DeleteBehavior.NoAction); // Ngăn xóa Employee gây lỗi
 
+            modelBuilder.Entity<Order>()
+                .HasOne(o => o.Address)
+                .WithMany()
+                .HasForeignKey(o => o.AddressId)
+                .OnDelete(DeleteBehavior.Cascade); // Giữ lại Cascade nếu cần
+
+            modelBuilder.Entity<Order>()
+                .HasOne(o => o.OrderVoucher)
+                .WithMany()
+                .HasForeignKey(o => o.OrderVoucherId)
+                .OnDelete(DeleteBehavior.NoAction);
         }
     }
 }

@@ -35,5 +35,4 @@ namespace BookBee.Services.MailService
             await client.SendEmailAsync(msg);
         }
     }
-    }
 }

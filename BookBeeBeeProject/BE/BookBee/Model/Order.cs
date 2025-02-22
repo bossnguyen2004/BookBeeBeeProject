@@ -24,8 +24,8 @@ namespace BookBee.Model
 
 
         [Required]
-        public int UserProfileId { get; set; }
-        public virtual UserProfile UserProfile { get; set; }
+        public int UserAccountId { get; set; }
+        public virtual UserAccount UserAccount { get; set; }
         [Required]
         public int EmployeeId { get; set; }
         public virtual Employee Employee { get; set; }

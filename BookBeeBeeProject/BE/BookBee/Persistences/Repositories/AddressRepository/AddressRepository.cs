@@ -25,13 +25,13 @@ namespace BookBee.Persistences.Repositories.AddressRepository
         public Model.Address GetAddressById(int? id = 0)
         {
             if (id != 0)
-                return _dataContext.Addresses.Include(a => a.UserProfiles).FirstOrDefault(a => a.Id == id && a.IsDeleted == false);
-            else return _dataContext.Addresses.Include(a => a.UserProfiles).Where(a => a.UserProfiles.Id == 2 && a.IsDeleted == false).OrderBy(a => a.Id).LastOrDefault();
+                return _dataContext.Addresses.Include(a => a.UserAccount).FirstOrDefault(a => a.Id == id && a.IsDeleted == false);
+            else return _dataContext.Addresses.Include(a => a.UserAccount).Where(a => a.UserAccount.Id == 2 && a.IsDeleted == false).OrderBy(a => a.Id).LastOrDefault();
         }
 
         public List<Model.Address> GetAddressByUser(int userId)
         {
-            return _dataContext.Addresses.Include(a => a.UserProfiles).Where(a => a.UserProfiles.Id == userId && a.IsDeleted == false).ToList();
+            return _dataContext.Addresses.Include(a => a.UserAccount).Where(a => a.UserAccount.Id == userId && a.IsDeleted == false).ToList();
         }
 
         public int GetAddressCount()
@@ -41,7 +41,7 @@ namespace BookBee.Persistences.Repositories.AddressRepository
 
         public List<Model.Address> GetAddresses(int? page = 1, int? pageSize = 10, string? key = "", string? sortBy = "ID")
         {
-            var query = _dataContext.Addresses.Include(a => a.UserProfiles).AsQueryable();
+            var query = _dataContext.Addresses.Include(a => a.UserAccount).AsQueryable();
 
             if (!string.IsNullOrEmpty(key))
             {

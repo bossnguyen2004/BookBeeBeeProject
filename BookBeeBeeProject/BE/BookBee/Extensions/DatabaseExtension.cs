@@ -1,4 +1,7 @@
 ﻿using BookBee.Persistences;
+using BookBee.Persistences.Repositories.AddressRepository;
+using BookBee.Persistences.Repositories.CartRepository;
+using BookBee.Persistences.Repositories.UserRepository;
 using Microsoft.EntityFrameworkCore;
 
 namespace BookBee.Extensions
@@ -35,17 +38,9 @@ namespace BookBee.Extensions
 
         public static void AddRepositories(this IServiceCollection services, IConfiguration configuration)
         {
-        //    services.AddScoped<IUserRepository, UserRepository>();
-        //    services.AddScoped<IAuthorRepository, AuthorRepository>();
-        //    services.AddScoped<IPublisherRepository, PublisherRepository>();
-        //    services.AddScoped<IAddressRepository, AddressRepository>();
-        //    services.AddScoped<ITagRepository, TagRepository>();
-        //    services.AddScoped<IBookRepository, BookRepository>();
-        //    services.AddScoped<IOrderRepository, OrderRepository>();
-        //    services.AddScoped<IQuantityRepository, QuantityRepository>();
-        //    services.AddScoped<ICartRepository, CartRepository>();
-        //    services.AddScoped<IShippingModeRepository, ShippingModeRepository>();
-        //    services.AddScoped<IVoucherRepository, VoucherRepository>();
+            services.AddScoped<IUserAccountRepository, UserAccountRepository>();
+            services.AddScoped<IAddressRepository, AddressRepository>();
+            services.AddScoped<ICartRepository, CartRepository>();
         }
 
     }

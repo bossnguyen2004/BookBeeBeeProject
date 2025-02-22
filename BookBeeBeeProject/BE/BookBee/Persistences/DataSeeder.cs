@@ -15,185 +15,159 @@ namespace BookBee.Persistences
 
         private static async Task SeedRoles(this DataContext dbContext)
         {
-            if (!dbContext.Roles.Any())
+            if (!await dbContext.Roles.AnyAsync())
             {
-                await dbContext.Roles.AddRangeAsync(new Role
+                var roles = new List<Role>
                 {
-                    Name = "admin"
-                }, new Role
-                {
-                    Name = "user"
-                }, new Role
-                {
-                    Name = "nhanvien"
-                }
+                    new() { Name = "admin" },
+                    new() { Name = "user" },
+                    new() { Name = "nhanvien" }
+                };
 
-                );
+                await dbContext.Roles.AddRangeAsync(roles);
                 await dbContext.SaveChangesAsync();
             }
         }
 
         private static async Task SeedUsers(this DataContext dbContext)
         {
-            if (!dbContext.UserAccounts.Any())
+            if (!await dbContext.UserAccounts.AnyAsync())
             {
                 const string defaultPassword = "1234@Abcd";
                 PasswordHelper.CreatePasswordHash(defaultPassword, out var passwordHash, out var passwordSalt);
 
-                var adminRoleId = dbContext.Roles.First(r => r.Name == "admin").Id;
-                var userRoleId = dbContext.Roles.First(r => r.Name == "user").Id;
-                var staffRoleId = dbContext.Roles.First(r => r.Name == "nhanvien").Id;
+                // Lấy ID các role
+                var adminRole = await dbContext.Roles.FirstAsync(r => r.Name == "admin");
+                var userRole = await dbContext.Roles.FirstAsync(r => r.Name == "user");
+                var staffRole = await dbContext.Roles.FirstAsync(r => r.Name == "nhanvien");
 
-                var adminAccount = new UserAccount
+                // Tạo tài khoản với đầy đủ thông tin bắt buộc
+                var users = new List<UserAccount>
                 {
-                    Username = "admin",
-                    PasswordSalt = passwordSalt,
-                    PasswordHash = passwordHash,
-                    RoleId = adminRoleId,
-                    IsVerified = true
+                   new()
+                   {
+                       Username = "admin",
+                       PasswordHash = passwordHash,
+                       PasswordSalt = passwordSalt,
+                       RoleId = (await dbContext.Roles.FirstAsync(r => r.Name == "admin")).Id,
+                       FirstName = "Quản trị",
+                       LastName = "Hệ Thống",
+                       Email = "admin@store.com",
+                       Phone = "0901112223"
+                   },
+                   new()
+                   {
+                       Username = "khachhang",
+                       PasswordHash = passwordHash,
+                       PasswordSalt = passwordSalt,
+                       RoleId =(await dbContext.Roles.FirstAsync(r => r.Name == "user")).Id,
+                       FirstName = "Khách",
+                       LastName = "Hàng",
+                       Email = "customer@store.com",
+                       Phone = "0903334445",
+
+                   }, new()
+                    {
+                        Username = "guest",
+                        FirstName = "Khách vãng lai",
+                        LastName = string.Empty,
+                        Email = "guest@test.com",
+                        Phone = "0000000000",
+                        PasswordSalt = passwordSalt,
+                        PasswordHash = passwordHash,
+                        RoleId = (await dbContext.Roles.FirstAsync(r => r.Name == "user")).Id,
+                    },
+                   new()
+                   {
+                       Username = "nhanvien1",
+                       PasswordHash = passwordHash,
+                       PasswordSalt = passwordSalt,
+                        RoleId = (await dbContext.Roles.FirstAsync(r => r.Name == "nhanvien")).Id,
+                       FirstName = "Nhân",
+                       LastName = "Viên 1",
+                       Email = "staff1@store.com",
+                       Phone = "0905556667",
+                   }
                 };
 
-                var userAccount = new UserAccount
-                {
-                    Username = "user",
-                    PasswordSalt = passwordSalt,
-                    PasswordHash = passwordHash,
-                    RoleId = userRoleId,
-                    IsVerified = true
-                };
-
-                var guestAccount = new UserAccount
-                {
-                    Username = "guest",
-                    PasswordSalt = passwordSalt,
-                    PasswordHash = passwordHash,
-                    RoleId = userRoleId,
-                    IsVerified = true
-                };
-
-                var staffAccount = new UserAccount
-                {
-                    Username = "nhanvien",
-                    PasswordSalt = passwordSalt,
-                    PasswordHash = passwordHash,
-                    RoleId = staffRoleId,
-                    IsVerified = true
-                };
-
-                await dbContext.UserAccounts.AddRangeAsync(adminAccount, userAccount, guestAccount, staffAccount);
+                await dbContext.UserAccounts.AddRangeAsync(users);
                 await dbContext.SaveChangesAsync();
 
-                // Tạo UserProfile tương ứng
-                var adminProfile = new UserProfile
-                {
-                    FirstName = "Admin",
-                    LastName = "",
-                    Email = "admin@test.com",
-                    Phone = "0123456789",
-                    UserAccountId = adminAccount.Id
-                };
-
-                var userProfile = new UserProfile
-                {
-                    FirstName = "User",
-                    LastName = "",
-                    Email = "user@test.com",
-                    Phone = "0123456789",
-                    UserAccountId = userAccount.Id
-                };
-
-                var guestProfile = new UserProfile
-                {
-                    FirstName = "Khách",
-                    LastName = "Vãng lai",
-                    Email = "guest@test.com",
-                    Phone = "0123456789",
-                    UserAccountId = guestAccount.Id
-                };
-
-                var staffProfile = new UserProfile
-                {
-                    FirstName = "Nhân",
-                    LastName = "Viên",
-                    Email = "nhanvien@test.com",
-                    Phone = "0123456789",
-                    UserAccountId = staffAccount.Id
-                };
-
-                await dbContext.UserProfiles.AddRangeAsync(adminProfile, userProfile, guestProfile, staffProfile);
-                await dbContext.SaveChangesAsync();
-
-                // Tạo Employee tương ứng với staff
+                // Tạo hồ sơ nhân viên
+                var staffAccount = users.First(u => u.Username == "nhanvien1");
                 var employee = new Employee
                 {
-                    LastName = "Nhân viên",
-                    Gender = 1, // 1: Nam, 0: Nữ
-                    BirthYear = new DateTime(1990, 1, 1),
-                    Phone = "0987654321",
-                    Hometown = "Hà Nội",
+                    LastName = "Nguyễn",
+                    Gender = 1,
+                    BirthYear = new DateTime(1995, 5, 15),
+                    Phone = staffAccount.Phone,
+                    Hometown = "TP.HCM",
                     UserAccountId = staffAccount.Id
                 };
 
                 await dbContext.Employees.AddAsync(employee);
                 await dbContext.SaveChangesAsync();
             }
+
         }
 
         private static async Task SeedAddresses(this DataContext dbContext)
         {
-            if (!dbContext.Addresses.Any())
+            if (!await dbContext.Addresses.AnyAsync())
             {
-                await dbContext.Addresses.AddRangeAsync(
-                    new Address
-                    {
-                        UserProfileId = 1, // Admin
-                        Name = "Admin",
-                        Phone = "0123456789",
-                        Street = "Admin Street",
-                        City = "Admin City",
-                        State = "Admin State",
-                        Create = DateTime.Now,
-                        Update = DateTime.Now
-                    },
-                    new Address
-                    {
-                        UserProfileId = 2, // User
-                        Name = "User",
-                        Phone = "0123456789",
-                        Street = "User Street",
-                        City = "User City",
-                        State = "User State",
-                        Create = DateTime.Now,
-                        Update = DateTime.Now
-                    },
-                    new Address
-                    {
-                        UserProfileId = 3, // Khách vãng lai (ẩn danh)
-                        Name = string.Empty,
-                        Phone = string.Empty,
-                        Street = string.Empty,
-                        City = string.Empty,
-                        State = "Mua hàng tại quầy",
-                        IsDeleted = true,
-                        Create = DateTime.Now,
-                        Update = DateTime.Now
-                    },
-                    new Address
-                    {
-                        UserProfileId = 4, // Nhân viên
-                        Name = "NhanVien",
-                        Phone = "0987654321",
-                        Street = "Đường Số 1",
-                        City = "Thành phố A",
-                        State = "Tỉnh B",
-                        Create = DateTime.Now,
-                        Update = DateTime.Now
-                    }
-                );
+                var admin = await dbContext.UserAccounts.FirstAsync(u => u.Username == "admin");
+                var customer = await dbContext.UserAccounts.FirstAsync(u => u.Username == "khachhang");
+                var staff = await dbContext.UserAccounts.FirstAsync(u => u.Username == "nhanvien1");
 
+                var addresses = new List<Address>
+        {
+                      new()
+                      {
+                          UserAccountId = 1,
+                          Name = "Trụ sở chính",
+                          Street = "123 Đường Lê Lợi",
+                          City = "Quận 1",
+                          State = "TP.HCM",
+                          Phone = admin.Phone,
+                          Create = DateTime.Now
+                      },
+                      new()
+                      {
+                          UserAccountId = 2,
+                          Name = "Nhà riêng",
+                          Street = "45 Đường Nguyễn Huệ",
+                          City = "Quận 1",
+                          State = "TP.HCM",
+                          Phone = customer.Phone,
+                          Create = DateTime.Now
+                      },new ()
+                       {
+                           UserAccountId = 3,
+                           Name = string.Empty,
+                           Phone = string.Empty,
+                           Street = string.Empty,
+                           City = string.Empty,
+                           State = "Mua hàng tại quầy",
+                           IsDeleted = true,
+                           Create = DateTime.Now,
+                           Update = DateTime.Now
+                       },
+                      new()
+                      {
+                          UserAccountId = 4,
+                          Name = "Chi nhánh Q3",
+                          Street = "78 Đường Võ Văn Tần",
+                          City = "Quận 3",
+                          State = "TP.HCM",
+                          Phone = staff.Phone,
+                          Create = DateTime.Now
+                      }
+                };
+
+                await dbContext.Addresses.AddRangeAsync(addresses);
                 await dbContext.SaveChangesAsync();
             }
-        }
 
+        }
     }
 }
