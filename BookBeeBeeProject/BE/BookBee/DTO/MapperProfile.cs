@@ -1,6 +1,7 @@
 ﻿using AutoMapper;
 using BookBee.DTO.Account;
 using BookBee.DTO.Address;
+using BookBee.DTO.Image;
 using BookBee.DTO.Role;
 using BookBee.DTO.User;
 using BookBee.Model;
@@ -16,6 +17,7 @@ namespace BookBee.DTO
             CreateMap<RegisterUserDTO, Model.UserAccount>().ReverseMap();
             CreateMap<RoleDTO, Model.Role>().ReverseMap();
             CreateMap<AddressDTO, Model.Address>().ReverseMap();
+            CreateMap<ImageDTO, Model.Image>().ReverseMap();
 
         }
     }

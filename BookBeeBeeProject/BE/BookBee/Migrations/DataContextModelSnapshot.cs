@@ -296,7 +296,7 @@ namespace BookBee.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"), 1L, 1);
 
-                    b.Property<int?>("BookId")
+                    b.Property<int>("BookId")
                         .HasColumnType("int");
 
                     b.Property<DateTime>("Create")
@@ -308,6 +308,9 @@ namespace BookBee.Migrations
                     b.Property<string>("MaAnh")
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<int>("TagId")
+                        .HasColumnType("int");
+
                     b.Property<string>("URL")
                         .HasColumnType("nvarchar(max)");
 
@@ -317,6 +320,8 @@ namespace BookBee.Migrations
                     b.HasKey("Id");
 
                     b.HasIndex("BookId");
+
+                    b.HasIndex("TagId");
 
                     b.ToTable("Images");
                 });
@@ -869,9 +874,21 @@ namespace BookBee.Migrations
 
             modelBuilder.Entity("BookBee.Model.Image", b =>
                 {
-                    b.HasOne("BookBee.Model.Book", null)
+                    b.HasOne("BookBee.Model.Book", "Book")
                         .WithMany("Imgs")
-                        .HasForeignKey("BookId");
+                        .HasForeignKey("BookId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("BookBee.Model.Tag", "Tag")
+                        .WithMany("Imgs")
+                        .HasForeignKey("TagId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Book");
+
+                    b.Navigation("Tag");
                 });
 
             modelBuilder.Entity("BookBee.Model.Order", b =>
@@ -1026,6 +1043,11 @@ namespace BookBee.Migrations
             modelBuilder.Entity("BookBee.Model.PaymentMethod", b =>
                 {
                     b.Navigation("DetailedPayments");
+                });
+
+            modelBuilder.Entity("BookBee.Model.Tag", b =>
+                {
+                    b.Navigation("Imgs");
                 });
 
             modelBuilder.Entity("BookBee.Model.UserAccount", b =>

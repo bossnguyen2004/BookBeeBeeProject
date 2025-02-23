@@ -1,6 +1,7 @@
 ﻿using BookBee.Persistences;
 using BookBee.Persistences.Repositories.AddressRepository;
 using BookBee.Persistences.Repositories.CartRepository;
+using BookBee.Persistences.Repositories.Image;
 using BookBee.Persistences.Repositories.UserRepository;
 using Microsoft.EntityFrameworkCore;
 
@@ -41,6 +42,7 @@ namespace BookBee.Extensions
             services.AddScoped<IUserAccountRepository, UserAccountRepository>();
             services.AddScoped<IAddressRepository, AddressRepository>();
             services.AddScoped<ICartRepository, CartRepository>();
+            services.AddScoped<IImageRepository, ImageRepository>();
         }
 
     }

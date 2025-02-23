@@ -13,7 +13,8 @@ html, body {
     width: 100%;
     place-items: center;
     background-image: url('');
-    background-image: url('images/sach1.jpg');
+/*    background-image: url('images/sach1.jpg');*/
+    background-image: url('../assets/images/sach1.jpg');
 }
 
 
