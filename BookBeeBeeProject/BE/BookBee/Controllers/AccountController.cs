@@ -18,9 +18,9 @@ namespace BookBee.Controllers
             _authService = authService;
         }
         [HttpPost("Login")]
-        public ActionResult Login(LoginDTO loginDTO)
+        public async Task<IActionResult> Login(LoginDTO loginDTO)
         {
-            var res = _authService.Login(loginDTO.Username, loginDTO.Password);
+            var res =await _authService.Login(loginDTO.Username, loginDTO.Password);
             return StatusCode(res.Code, res);
         }
         [HttpPost("Register")]
@@ -32,9 +32,9 @@ namespace BookBee.Controllers
 
         [HttpPost("ChangePassword")]
         [Authorize]
-        public ActionResult ChangePassword(ChangePasswordDTO changePasswordDTO)
+        public async Task<IActionResult> ChangePassword(ChangePasswordDTO changePasswordDTO)
         {
-            var res = _authService.ChangePassword(changePasswordDTO);
+            var res =await _authService.ChangePassword(changePasswordDTO);
             return StatusCode(res.Code, res);
         }
 
@@ -46,9 +46,9 @@ namespace BookBee.Controllers
         }
 
         [HttpPost("ResetPassword")]
-        public ActionResult ResetPassword(ResetPasswordDTO resetPasswordDTO)
+        public async Task<IActionResult> ResetPassword(ResetPasswordDTO resetPasswordDTO)
         {
-            var res = _authService.ResetPassword(resetPasswordDTO);
+            var res =await _authService.ResetPassword(resetPasswordDTO);
             return StatusCode(res.Code, res);
         }
     }

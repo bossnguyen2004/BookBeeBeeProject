@@ -11,7 +11,7 @@ namespace BookBee.Model
         [Required]
         public string? PaymentName { get; set; }
         public string? Description { get; set; }
-        public int Status { get; set; }
+        public int? Status { get; set; }
         public DateTime Create { get; set; } = DateTime.Now;
         public DateTime Update { get; set; } = DateTime.Now;
         public bool IsDeleted { get; set; } = false;

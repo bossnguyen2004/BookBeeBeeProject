@@ -1,8 +1,10 @@
 ﻿using AutoMapper;
 using BookBee.DTO.Account;
+using BookBee.DTO.Employee;
 using BookBee.DTO.Response;
 using BookBee.DTO.User;
 using BookBee.Model;
+using BookBee.Persistences;
 using BookBee.Persistences.Repositories.AddressRepository;
 using BookBee.Persistences.Repositories.CartRepository;
 using BookBee.Persistences.Repositories.UserRepository;
@@ -10,6 +12,8 @@ using BookBee.Services.CacheService;
 using BookBee.Services.MailService;
 using BookBee.Services.TokenService;
 using BookBee.Utilities;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
 using System.Security.Cryptography;
 
 namespace BookBee.Services.AuthService
@@ -22,10 +26,10 @@ namespace BookBee.Services.AuthService
         private readonly ITokenService _tokenService;
         private readonly ICacheService _cacheService;
         private readonly IMailService _mailService;
-        private readonly UserAccessor _userAccessor;
         private readonly IAddressRepository _addressRepository;
-
-        private const string ForgotPasswordEmailTemplate = $$"""
+		private readonly DataContext _dataContext;
+		private readonly UserAccessor _userAccessors;
+		private const string ForgotPasswordEmailTemplate = $$"""
                                                  <!DOCTYPE html>
                                                  <html lang="vi">
                                                  <head>
@@ -220,45 +224,25 @@ namespace BookBee.Services.AuthService
 
         public AuthService(IUserAccountRepository userRepository,
            ICartRepository cartRepository, IMapper mapper,
-           ITokenService tokenService,
-           ICacheService cacheService,
-           UserAccessor userAccessor,
-           IMailService mailService, IAddressRepository addressRepository)
+           ITokenService tokenService, UserAccessor userAccessors,
+
+		   ICacheService cacheService,
+		  DataContext dataContext,
+
+		   IMailService mailService, IAddressRepository addressRepository)
         {
             _userRepository = userRepository;
             _cartRepository = cartRepository;
             _mapper = mapper;
             _tokenService = tokenService;
             _cacheService = cacheService;
-            _userAccessor = userAccessor;
             _mailService = mailService;
-            _addressRepository = addressRepository;
-        }
-        public ResponseDTO Login(string username, string password)
+			_userAccessors=userAccessors;
+			_addressRepository = addressRepository; _dataContext = dataContext;
+		}
+        public async Task<ResponseDTO> Login(string username, string password)
         {
-            //var user = _userRepository.GetUserByUsername(username);
-
-            //if (user is { IsDeleted: false })
-            //{
-            //    if (PasswordHelper.VerifyPasswordHash(password, user.PasswordHash, user.PasswordSalt))
-            //    {
-            //        var token = _tokenService.GenerateToken(user);
-            //        var data = _mapper.Map<UserAccountDTO>(user);
-            //        data.Token = token;
-            //        return new ResponseDTO()
-            //        {
-            //            Message = "Login thành công",
-            //            Data = data
-            //        };
-            //    }
-            //}
-            //return new ResponseDTO()
-            //{
-            //    Code = 401,
-            //    Message = "Tài khoản hoặc mật khẩu không chính xác"
-            //}; var user = _userRepository.GetUserByUsername(username);
-
-            var user = _userRepository.GetUserByUsername(username);
+            var user =await _userRepository.GetUserByUsername(username);
             if (user == null || user.IsDeleted)
             {
                 return new ResponseDTO()
@@ -277,7 +261,7 @@ namespace BookBee.Services.AuthService
                 };
             }
 
-            var token = _tokenService.GenerateToken(user);
+            var token =  _tokenService.GenerateToken(user);
 
             var data = _mapper.Map<UserAccountDTO>(user);
             if (data == null)
@@ -300,115 +284,115 @@ namespace BookBee.Services.AuthService
 
         public async Task<ResponseDTO> Register(RegisterUserDTO registerUserDTO)
         {
-            var user = _userRepository.GetUserByUsername(registerUserDTO.Username);
-            if (user != null)
-                return new ResponseDTO()
-                {
-                    Code = 400,
-                    Message = "Username đã đăng ký"
-                };
+			var user = await _userRepository.GetUserByUsername(registerUserDTO.Username);
+			if (user != null)
+				return new ResponseDTO()
+				{
+					Code = 400,
+					Message = "Username đã đăng ký"
+				};
 
-            var email = _userRepository.GetUserByEmail(registerUserDTO.Email);
-            if (email != null)
-                return new ResponseDTO()
-                {
-                    Code = 400,
-                    Message = "Email đã đăng ký"
-                };
+			var email = _userRepository.GetUserByEmail(registerUserDTO.Email);
+			if (email != null)
+				return new ResponseDTO()
+				{
+					Code = 400,
+					Message = "Email đã đăng ký"
+				};
 
-            if (registerUserDTO.Password != registerUserDTO.CfPassword)
-                return new ResponseDTO()
-                {
-                    Code = 400,
-                    Message = "Password không trùng khớp"
-                };
+			if (registerUserDTO.Password != registerUserDTO.CfPassword)
+				return new ResponseDTO()
+				{
+					Code = 400,
+					Message = "Password không trùng khớp"
+				};
 
-            user = _mapper.Map<UserAccount>(registerUserDTO);
-            user.RoleId = 2;
+			user = _mapper.Map<UserAccount>(registerUserDTO);
+			user.RoleId = 2;
 
-            PasswordHelper.CreatePasswordHash(registerUserDTO.Password, out var passwordHash, out var passwordSalt);
-            user.PasswordHash = passwordHash;
-            user.PasswordSalt = passwordSalt;
+			PasswordHelper.CreatePasswordHash(registerUserDTO.Password, out var passwordHash, out var passwordSalt);
+			user.PasswordHash = passwordHash;
+			user.PasswordSalt = passwordSalt;
 
-            _userRepository.CreateUser(user);
-            if (!_userRepository.IsSaveChanges())
-            {
-                return new ResponseDTO()
-                {
-                    Code = 400,
-                    Message = "Tạo thất bại"
-                };
-            }
+			_userRepository.CreateUserAccount(user);
+			if (await _userRepository.IsSaveChanges())
+			{
+				return new ResponseDTO()
+				{
+					Code = 400,
+					Message = "Tạo thất bại"
+				};
+			}
 
-            var address = new Address
-            {
-                UserAccountId = user.Id,
-                Name = string.Empty,
-                Phone = string.Empty,
-                Street = string.Empty,
-                City = string.Empty,
-                State = "Mua hàng tại quầy",
-                Create = DateTime.Now,
-                Update = DateTime.Now,
-                IsDeleted = true
-            };
+			var address = new Address
+			{
+				UserAccountId = user.Id,
+				Name = string.Empty,
+				Phone = string.Empty,
+				Street = string.Empty,
+				City = string.Empty,
+				State = "Mua hàng tại quầy",
+				Create = DateTime.Now,
+				Update = DateTime.Now,
+				IsDeleted = true
+			};
 
-            _addressRepository.CreateAddress(address);
+			_addressRepository.CreateAddress(address);
 
-            await _mailService.SendEmailAsync(user.Email, "Chào mừng tới BookBee", RegistrationSuccessEmailTemplate);
+			await _mailService.SendEmailAsync(user.Email, "Chào mừng tới BookBee", RegistrationSuccessEmailTemplate);
 
-            return new ResponseDTO()
-            {
-                Message = "Đăng ký tài khoản thành công"
-            };
-        }
+			return new ResponseDTO()
+			{
+				Message = "Đăng ký tài khoản thành công"
+			};
+		}
 
 
-        public ResponseDTO ChangePassword(ChangePasswordDTO changePasswordDTO)
+        public async Task<ResponseDTO> ChangePassword(ChangePasswordDTO changePasswordDTO)
         {
-            var userId = _userAccessor.GetCurrentUserId();
-            if (userId != null)
-            {
-                var user = _userRepository.GetUserById((int)userId);
-                if (user == null)
-                {
-                    return new ResponseDTO()
-                    {
-                        Code = 400,
-                        Message = "User không tồn tại"
-                    };
-                }
-                if (!PasswordHelper.VerifyPasswordHash(changePasswordDTO.OldPassword, user.PasswordHash, user.PasswordSalt))
-                    return new ResponseDTO()
-                    {
-                        Code = 400,
-                        Message = "Mật khẩu cũ không đúng"
-                    };
-                if (changePasswordDTO.NewPassword != changePasswordDTO.CfPassword)
-                    return new ResponseDTO()
-                    {
-                        Code = 400,
-                        Message = "Mật khẩu không trùng khớp",
-                    };
-                PasswordHelper.CreatePasswordHash(changePasswordDTO.NewPassword, out var passwordHash, out var passwordSalt);
-                user.PasswordHash = passwordHash;
-                user.PasswordSalt = passwordSalt;
-                _userRepository.UpdateUser(user);
-                if (_userRepository.IsSaveChanges())
-                {
-                    return new ResponseDTO()
-                    {
-                        Code = 200,
-                        Message = "Thay đổi mật khẩu thành công"
-                    };
-                }
-            }
-            return new ResponseDTO()
-            {
-                Code = 400,
-                Message = "Thay đổi mật khẩu thất bại",
-            };
-        }
+			var userId = _userAccessors.GetCurrentUserId();
+			if (userId != null)
+			{
+				var user =await _userRepository.GetUserAccountById((int)userId);
+				if (user == null)
+				{
+					return new ResponseDTO()
+					{
+						Code = 400,
+						Message = "User không tồn tại"
+					};
+				}
+				if (!PasswordHelper.VerifyPasswordHash(changePasswordDTO.OldPassword, user.PasswordHash, user.PasswordSalt))
+					return new ResponseDTO()
+					{
+						Code = 400,
+						Message = "Mật khẩu cũ không đúng"
+					};
+				if (changePasswordDTO.NewPassword != changePasswordDTO.CfPassword)
+					return new ResponseDTO()
+					{
+						Code = 400,
+						Message = "Mật khẩu không trùng khớp",
+					};
+				PasswordHelper.CreatePasswordHash(changePasswordDTO.NewPassword, out var passwordHash, out var passwordSalt);
+				user.PasswordHash = passwordHash;
+				user.PasswordSalt = passwordSalt;
+				_userRepository.UpdateUserAccount(user.Id, user);
+				if (await _userRepository.IsSaveChanges())
+				{
+					return new ResponseDTO()
+					{
+						Code = 200,
+						Message = "Thay đổi mật khẩu thành công"
+					};
+				}
+			}
+			return new ResponseDTO()
+			{
+				Code = 400,
+				Message = "Thay đổi mật khẩu thất bại",
+			};
+		}
 
         public async Task<ResponseDTO> ForgotPassword(string email)
         {
@@ -435,7 +419,7 @@ namespace BookBee.Services.AuthService
             };
         }
 
-        public ResponseDTO ResetPassword(ResetPasswordDTO resetPasswordDTO)
+        public async Task<ResponseDTO> ResetPassword(ResetPasswordDTO resetPasswordDTO)
         {
             if (!_cacheService.Exists(resetPasswordDTO.Token))
             {
@@ -447,7 +431,7 @@ namespace BookBee.Services.AuthService
             }
 
             var userId = _cacheService.Get<int>(resetPasswordDTO.Token);
-            var user = _userRepository.GetUserById(userId);
+            var user = await _userRepository.GetUserAccountById(userId);
             if (user == null)
             {
                 return new ResponseDTO()
@@ -469,9 +453,9 @@ namespace BookBee.Services.AuthService
             PasswordHelper.CreatePasswordHash(resetPasswordDTO.NewPassword, out var passwordHash, out var passwordSalt);
             user.PasswordHash = passwordHash;
             user.PasswordSalt = passwordSalt;
-            _userRepository.UpdateUser(user);
+           await _userRepository.UpdateUserAccount(user.Id,user);
 
-            if (_userRepository.IsSaveChanges())
+            if (await _userRepository.IsSaveChanges())
             {
                 _cacheService.Remove(resetPasswordDTO.Token);
                 return new ResponseDTO()
@@ -501,5 +485,9 @@ namespace BookBee.Services.AuthService
                 .Replace("=", ""); // Removing padding characters
         }
 
-    }
+
+
+		
+		
+	}
 }

@@ -28,7 +28,7 @@ namespace BookBee.Model
         public DateTime Update { get; set; } = DateTime.Now;
         public bool IsVerified { get; set; } = false;
         [Required]
-        public int RoleId { get; set; }
+        public int? RoleId { get; set; }
         public virtual Role Role { get; set; }
         [Required]
         public int CartId { get; set; }

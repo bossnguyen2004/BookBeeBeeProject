@@ -36,12 +36,10 @@ namespace BookBee.Persistences
                 const string defaultPassword = "1234@Abcd";
                 PasswordHelper.CreatePasswordHash(defaultPassword, out var passwordHash, out var passwordSalt);
 
-                // Lấy ID các role
                 var adminRole = await dbContext.Roles.FirstAsync(r => r.Name == "admin");
                 var userRole = await dbContext.Roles.FirstAsync(r => r.Name == "user");
                 var staffRole = await dbContext.Roles.FirstAsync(r => r.Name == "nhanvien");
 
-                // Tạo tài khoản với đầy đủ thông tin bắt buộc
                 var users = new List<UserAccount>
                 {
                    new()

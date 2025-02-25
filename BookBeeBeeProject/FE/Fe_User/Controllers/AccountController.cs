@@ -21,7 +21,7 @@ namespace Fe_User.Controllers
             var accessToken = HttpContext.Session.GetString("AccessToken");
             var accessRole = HttpContext.Session.GetString("Result");
 
-            if (string.IsNullOrEmpty(accessToken) || (accessRole != "admin" && accessRole != "nhanvien"))
+            if (string.IsNullOrEmpty(accessToken) || (accessRole != "user"))
             {
                 return RedirectToAction("Login");
             }
@@ -42,6 +42,8 @@ namespace Fe_User.Controllers
 
             return View();
         }
+
+
 
         [HttpPost]
         public async Task<IActionResult> Login(LoginDTO loginDTO)
@@ -67,7 +69,7 @@ namespace Fe_User.Controllers
                 HttpContext.Session.SetString("Result", loginResponse.data.role.name);
 
                 // Kiểm tra quyền truy cập của người dùng
-                if (loginResponse.data.role.name == "admin" || loginResponse.data.role.name == "nhanvien")
+                if (loginResponse.data.role.name == "user")
                 {
                     return RedirectToAction("Index", "Home");
                 }
@@ -102,7 +104,46 @@ namespace Fe_User.Controllers
         {
             HttpContext.Session.Clear();
             HttpContext.SignOutAsync();
-            return RedirectToAction("Login", "Account");
+            return RedirectToAction("Index", "Home");
         }
+
+
+		[HttpGet]
+		public IActionResult Register()
+		{
+			var accessToken = HttpContext.Session.GetString("AccessToken");
+			if (!string.IsNullOrEmpty(accessToken))
+			{
+				return RedirectToAction("Index", "Home");
+			}
+
+			return View();
+		}
+        [HttpPost]
+        public async Task<IActionResult> Register(RegisterDTO registerDTO)
+        {
+            if (!ModelState.IsValid)
+            {
+                return View(registerDTO);
+            }
+
+            var client = _httpClientFactory.CreateClient("BackendApi");
+            var jsonContent = JsonConvert.SerializeObject(registerDTO);
+            var content = new StringContent(jsonContent, Encoding.UTF8, "application/json");
+            var response = await client.PostAsync("api/account/register", content);
+
+            if (response.IsSuccessStatusCode)
+            {
+                return RedirectToAction("Login");
+            }
+            else
+            {
+                var errorResponse = await response.Content.ReadAsStringAsync();
+                ModelState.AddModelError(string.Empty, $"Đăng ký thất bại: {errorResponse}");
+                return View(registerDTO);
+            }
+        }
+
+
     }
 }

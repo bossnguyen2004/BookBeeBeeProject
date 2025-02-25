@@ -7,10 +7,16 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Content Remove="Views\Account\Register.cshtml" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <_ContentIncludedByDefault Remove="Views\Account\Register.cshtml" />
     <_ContentIncludedByDefault Remove="wwwroot\css\DangKy.css" />
   </ItemGroup>
 
   <ItemGroup>
+    <None Include="Views\Account\Register.cshtml" />
     <None Include="wwwroot\assets\js\categories_custom.js" />
     <None Include="wwwroot\assets\js\contact_custom.js" />
     <None Include="wwwroot\assets\js\custom.js" />
@@ -58,6 +64,10 @@
   <ItemGroup>
     <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="6.0.27" />
     <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <UpToDateCheckInput Remove="Views\Account\Register.cshtml" />
   </ItemGroup>
 
 </Project>
