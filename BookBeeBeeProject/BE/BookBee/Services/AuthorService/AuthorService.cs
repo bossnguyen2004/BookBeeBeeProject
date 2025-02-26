@@ -1,8 +1,10 @@
 ﻿using AutoMapper;
 using BookBee.DTO.Author;
+using BookBee.DTO.Publisher;
 using BookBee.DTO.Response;
 using BookBee.Model;
 using BookBee.Persistences.Repositories.AuthorRepository;
+using System.Net;
 using System.Xml.Linq;
 
 namespace BookBee.Services.AuthorService
@@ -31,7 +33,8 @@ namespace BookBee.Services.AuthorService
 			var author = await _authorRepository.GetAuthorById(id);
 			if (author == null)
 				return new ResponseDTO { Code = 400, Message = "Author không tồn tại" };
-
+			if (author.IsDeleted)
+				return new ResponseDTO { Code = 400, Message = "Author đã bị xóa trước đó" };
 			author.IsDeleted = true;
 			await _authorRepository.UpdateAuthor(id,author);
 			bool isSaved = await _authorRepository.IsSaveChanges();
@@ -41,9 +44,12 @@ namespace BookBee.Services.AuthorService
 		public async Task<ResponseDTO> GetAuthorById(int id)
 		{
 			var author = await _authorRepository.GetAuthorById(id);
-			return author == null
-				? new ResponseDTO { Code = 400, Message = "Author không tồn tại" }
-				: new ResponseDTO { Data = _mapper.Map<AuthorDTO>(author) };
+
+			return author == null || author.IsDeleted
+			? new ResponseDTO { Code = 400, Message = "Author  không tồn tại hoặc đã bị xóa" }
+			: new ResponseDTO { Code = 200, Message = "Lấy Author  thành công", Data = _mapper.Map<AuthorDTO>(author) };
+
+
 		}
 
 		public async Task<ResponseDTO> GetAuthors(int? page = 1, int? pageSize = 10, string? key = "", string? sortBy = "ID")

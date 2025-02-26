@@ -1,14 +1,18 @@
-﻿namespace BookBee.Persistences.Repositories.AddressRepository
+﻿using BookBee.DTO.Response;
+using BookBee.Model;
+
+namespace BookBee.Persistences.Repositories.AddressRepository
 {
     public interface IAddressRepository
     {
-        List<Model.Address> GetAddresses(int? page = 1, int? pageSize = 10, string? key = "", string? sortBy = "ID");
-        List<Model.Address> GetAddressByUser(int userId);
-        Model.Address GetAddressById(int? id = 0);
-        void UpdateAddress(Model.Address address);
-        void DeleteAddress(Model.Address address);
-        void CreateAddress(Model.Address address);
-        int GetAddressCount();
-        bool IsSaveChanges();
-    }
+		Task<List<Model.Address>> GetAddresses(int? page = 1, int? pageSize = 10, string? key = "", string? sortBy = "ID");
+        Task<List<Model.Address>> GetAddressByUser(int userId);
+        Task< Model.Address> GetAddressById(int id);
+        Task<ResponseDTO> UpdateAddress(int id, Model.Address address);
+        Task<ResponseDTO> DeleteAddress(int id);
+		Task<ResponseDTO> CreateAddress(Model.Address address);
+       Task<int> GetAddressCount();
+		Task<bool> IsSaveChanges();
+		int Total { get; }
+	}
 }

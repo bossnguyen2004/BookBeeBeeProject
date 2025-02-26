@@ -9,5 +9,6 @@
         public string State { get; set; }
         public string Phone { get; set; }
         public bool IsDeleted { get; set; }
-    }
+		public int UserAccountId { get; set; }
+	}
 }

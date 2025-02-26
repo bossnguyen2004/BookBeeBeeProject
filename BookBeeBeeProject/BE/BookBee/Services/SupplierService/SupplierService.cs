@@ -1,5 +1,6 @@
 ﻿using AutoMapper;
 using BookBee.DTO.Author;
+using BookBee.DTO.OrderVoucher;
 using BookBee.DTO.Response;
 using BookBee.DTO.Supplier;
 using BookBee.Model;
@@ -32,7 +33,8 @@ namespace BookBee.Services.SupplierService
 			var supplier = await _supplierRepository.GetSupplierById(id);
 			if (supplier == null)
 				return new ResponseDTO { Code = 400, Message = "Supplier không tồn tại" };
-
+			if (supplier.IsDeleted)
+				return new ResponseDTO { Code = 400, Message = "Supplier Mại đã bị xóa trước đó" };
 			supplier.IsDeleted = true;
 			await _supplierRepository.UpdateSupplier(id, supplier);
 			bool isSaved = await _supplierRepository.IsSaveChanges();
@@ -52,9 +54,11 @@ namespace BookBee.Services.SupplierService
 		public async Task<ResponseDTO> GetSuppliersById(int id)
 		{
 			var supplier = await _supplierRepository.GetSupplierById(id);
-			return supplier == null
-				? new ResponseDTO { Code = 400, Message = "Supplier không tồn tại" }
-				: new ResponseDTO { Data = _mapper.Map<SupplierDTO>(supplier) };
+
+			return supplier == null || supplier.IsDeleted
+			? new ResponseDTO { Code = 400, Message = "Supplier  không tồn tại hoặc đã bị xóa" }
+			: new ResponseDTO { Code = 200, Message = "Lấy Supplier  thành công", Data = _mapper.Map<SupplierDTO>(supplier) };
+
 		}
 
 		public async Task<ResponseDTO> UpdateSuppliers(int id, SupplierDTO supplierDTO)

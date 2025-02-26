@@ -1,6 +1,7 @@
 ﻿using AutoMapper;
 using BookBee.DTO.Author;
 using BookBee.DTO.Response;
+using BookBee.DTO.Supplier;
 using BookBee.DTO.Tag;
 using BookBee.Model;
 using BookBee.Persistences;
@@ -32,6 +33,8 @@ namespace BookBee.Services.CategoryService
             var tag = await _tagRepository.GetTagById(id);
             if (tag == null)
 				return new ResponseDTO { Code = 400, Message = "Tag không tồn tại" };
+			if (tag.IsDeleted)
+				return new ResponseDTO { Code = 400, Message = "Tag đã bị xóa trước đó" };
 			tag.IsDeleted = true;
 			await _tagRepository.UpdateTag(id,tag);
 
@@ -52,9 +55,11 @@ namespace BookBee.Services.CategoryService
 		public async Task<ResponseDTO> GetCategorysById(int id)
         {
             var tag = await _tagRepository.GetTagById(id);
-			return tag == null
-				 ? new ResponseDTO { Code = 400, Message = "Tag không tồn tại" }
-				 : new ResponseDTO { Data = _mapper.Map<TagDTO>(tag) };
+
+			return tag == null || tag.IsDeleted
+			? new ResponseDTO { Code = 400, Message = "Tag  không tồn tại hoặc đã bị xóa" }
+			: new ResponseDTO { Code = 200, Message = "Lấy Tag  thành công", Data = _mapper.Map<TagDTO>(tag) };
+
 		}
 
 		public async Task<ResponseDTO> UpdateCategorys(int id, TagDTO tagDTO)

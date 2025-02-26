@@ -4,6 +4,7 @@ using BookBee.Persistences.Repositories.AuthorRepository;
 using BookBee.Persistences.Repositories.CartRepository;
 using BookBee.Persistences.Repositories.CategoryRepository;
 using BookBee.Persistences.Repositories.Image;
+using BookBee.Persistences.Repositories.OrderVoucherRepository;
 using BookBee.Persistences.Repositories.PaymentMethodRepository;
 using BookBee.Persistences.Repositories.PublisherRepository;
 using BookBee.Persistences.Repositories.SupplierRepository;
@@ -55,6 +56,8 @@ namespace BookBee.Extensions
 			services.AddScoped<ITagRepository, TagRepository>();
 			services.AddScoped<IVoucherRepository, VoucherRepository>();
 			services.AddScoped<IPaymentMethodRepository, PaymentMethodRepository>();
+			services.AddScoped<IOrderVoucherRepository, OrderVoucherRepository>();
+
 		}
 
     }

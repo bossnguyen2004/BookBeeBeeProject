@@ -1,4 +1,5 @@
-﻿using BookBee.Model;
+﻿using BookBee.DTO.Response;
+using BookBee.Model;
 using Microsoft.EntityFrameworkCore;
 
 namespace BookBee.Persistences.Repositories.CartRepository
@@ -11,46 +12,65 @@ namespace BookBee.Persistences.Repositories.CartRepository
             _dataContext = dataContext;
         }
 
-        public void CreateCart(Cart cart)
-        {
-            _dataContext.Carts.Add(cart);
-        }
 
-        public Cart GetCartById(int id)
+        public async Task<ResponseDTO> CreateCart(Cart cart)
         {
-            return _dataContext.Carts.FirstOrDefault(t => t.Id == id);
-        }
-        public Cart GetCartByUser(int userId)
+			try
+			{
+				await _dataContext.Carts.AddAsync(cart);
+				return new ResponseDTO { IsSuccess = true, Code = 200, Message = "Success" };
+			}
+			catch (Exception)
+			{
+				return new ResponseDTO { Code = 500, Message = "Thêm thất bại" };
+			}
+		}
+
+        public async Task<Cart> GetCartById(int id)
         {
-            var user = _dataContext.UserAccounts.Include(c => c.Cart).FirstOrDefault(c => c.Id == userId);
+			return await _dataContext.Carts.FirstOrDefaultAsync(a => a.Id == id);
+		}
+        public async Task<Cart> GetCartByUser(int userId)
+        {
+            var user =await _dataContext.UserAccounts.Include(c => c.Cart).FirstOrDefaultAsync(c => c.Id == userId);
 
             if (user == null) return null;
 
-            var cart = _dataContext.Carts.Include(c => c.CartDetails).ThenInclude(c => c.Book).FirstOrDefault(c => c.Id == user.Cart.Id);
+            var cart =await _dataContext.Carts.Include(c => c.CartDetails).ThenInclude(c => c.Book).FirstOrDefaultAsync(c => c.Id == user.Cart.Id);
             return cart;
         }
 
-        public List<Cart> GetCarts()
+        public async Task<ResponseDTO> ClearCartBook(List<int> ids)
         {
-            throw new NotImplementedException();
-        }
 
-        public void ClearCartBook(List<int> ids)
-        {
-            var itemsToDelete = _dataContext.CartDetails.Where(c => ids.Contains(c.BookId)).ToList();
-            _dataContext.CartDetails.RemoveRange(itemsToDelete);
-            _dataContext.SaveChanges();
-        }
+			try
+			{
+				var itemsToDelete = await _dataContext.CartDetails.Where(c => ids.Contains(c.BookId)).ToListAsync();
+				_dataContext.CartDetails.RemoveRange(itemsToDelete);
+				await _dataContext.SaveChangesAsync();
+				return new ResponseDTO { Code = 200, Message = "Cập nhật thành công" };
+			}
+			catch (Exception ex)
+			{
 
-        public bool IsSaveChanges()
-        {
-            return _dataContext.SaveChanges() > 0;
-        }
+				return new ResponseDTO{Code = 500,Message = "Lỗi khi xóa sách khỏi giỏ hàng: " + ex.Message};
+			}
+           
+		}
 
-        public void UpdateCart(Cart cart)
+        public async Task<bool> IsSaveChanges()
         {
-            cart.Update = DateTime.Now;
-            _dataContext.Carts.Update(cart);
-        }
+			return await _dataContext.SaveChangesAsync() > 0;
+		}
+
+        public async Task<ResponseDTO> UpdateCart(int id, Cart cart)
+        {
+			var existingCart = await _dataContext.Carts.FindAsync(id);
+			if (existingCart == null) return new ResponseDTO { Code = 404, Message = "Không tìm thấy" };
+
+			existingCart.Status = cart.Status;
+			return new ResponseDTO { Code = 200, Message = "Cập nhật thành công" };
+
+		}
     }
 }

@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using BookBee.DTO.Author;
 using BookBee.DTO.PaymentMethod;
 using BookBee.DTO.Response;
 using BookBee.Model;
@@ -38,7 +39,8 @@ namespace BookBee.Services.PaymentMethodService
 			var payment = await _paymentMethodRepository.GetPaymentById(id);
 			if (payment == null)
 				return new ResponseDTO { Code = 400, Message = "Payment không tồn tại" };
-
+			if (payment.IsDeleted)
+				return new ResponseDTO { Code = 400, Message = "Payment  đã bị xóa trước đó" };
 			payment.IsDeleted = true;
 			await _paymentMethodRepository.UpdatePayment(id, payment);
 			bool isSaved = await _paymentMethodRepository.IsSaveChanges();
@@ -58,9 +60,10 @@ namespace BookBee.Services.PaymentMethodService
 		public async Task<ResponseDTO> GetPaymentMethodById(int id)
 		{
 			var payment = await _paymentMethodRepository.GetPaymentById(id);
-			return payment == null
-				 ? new ResponseDTO { Code = 400, Message = "Payment không tồn tại" }
-				 : new ResponseDTO { Data = _mapper.Map<PaymentMethodDTO>(payment) };
+			return payment == null || payment.IsDeleted
+			? new ResponseDTO { Code = 400, Message = "Payment  không tồn tại hoặc đã bị xóa" }
+			: new ResponseDTO { Code = 200, Message = "Lấy Payment  thành công", Data = _mapper.Map<PaymentMethodDTO>(payment) };
+
 		}
 
 		public async Task<ResponseDTO> UpdatePaymentMethod(int id, PaymentMethodDTO paymentMethodDTO)

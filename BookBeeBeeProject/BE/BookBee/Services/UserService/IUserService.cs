@@ -10,7 +10,6 @@ namespace BookBee.Services.UserService
 		Task<ResponseDTO> GetPersonalInfo();
 		Task<ResponseDTO> GetUserByUsername(string username);
 		Task<ResponseDTO> UpdateUser(int id, UserAccountDTO userAccountDTO);
-		//Task<ResponseDTO> SelfUpdateUser(UserAccountDTO userAccountDTO);
 		Task<ResponseDTO> DeleteUser(int id);
 		Task<ResponseDTO> RestoreUser(int id);
 		Task<ResponseDTO> CreateUser(UserAccountDTO userAccountDTO);

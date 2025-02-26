@@ -1,9 +1,11 @@
 ﻿using AutoMapper;
+using BookBee.DTO.Address;
 using BookBee.DTO.Author;
 using BookBee.DTO.Response;
 using BookBee.DTO.Voucher;
 using BookBee.Model;
 using BookBee.Persistences.Repositories.VoucherRepository;
+using System.Net;
 
 namespace BookBee.Services.VoucherService
 {
@@ -52,6 +54,8 @@ namespace BookBee.Services.VoucherService
             var voucher = await _voucherRepository.GetVoucherById(id);
             if (voucher == null)
 				return new ResponseDTO { Code = 400, Message = "Khuyến Mại không tồn tại" };
+			if (voucher.IsDeleted)
+				return new ResponseDTO { Code = 400, Message = "Khuyến Mại đã bị xóa trước đó" };
 
 			voucher.IsDeleted = true;
 			await _voucherRepository.UpdateVoucher(id,voucher);
@@ -61,10 +65,10 @@ namespace BookBee.Services.VoucherService
 
 		public async Task<ResponseDTO> GetVoucher(int? page = 1, int? pageSize = 10, string? key = "", string? sortBy = "ID")
         {
-            var publishers =  _voucherRepository.GetVouchers(page, pageSize, key, sortBy);
+            var vouchers =  _voucherRepository.GetVouchers(page, pageSize, key, sortBy);
             return new ResponseDTO()
             {
-                Data = _mapper.Map<List<VoucherDTO>>(publishers),
+                Data = _mapper.Map<List<VoucherDTO>>(vouchers),
                 Total = _voucherRepository.Total
             };
         }
@@ -72,9 +76,11 @@ namespace BookBee.Services.VoucherService
         public async Task<ResponseDTO> GetVoucherById(int id)
         {
             var voucher = await _voucherRepository.GetVoucherById(id);
-			return voucher == null
-				 ? new ResponseDTO { Code = 400, Message = "Khuyến Mại không tồn tại" }
-				 : new ResponseDTO { Data = _mapper.Map<VoucherDTO>(voucher) };
+
+			return voucher == null || voucher.IsDeleted
+		    ? new ResponseDTO { Code = 400, Message = "Khuyến Mại không tồn tại hoặc đã bị xóa" }
+		    : new ResponseDTO { Code = 200, Message = "Lấy Khuyến Mại thành công", Data = _mapper.Map<VoucherDTO>(voucher) };
+
 		}
 
 		public async Task<ResponseDTO> UpdateVoucher(int id, VoucherDTO voucherDto)

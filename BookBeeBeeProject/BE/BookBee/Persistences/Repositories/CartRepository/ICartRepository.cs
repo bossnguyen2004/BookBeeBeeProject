@@ -1,15 +1,15 @@
-﻿using BookBee.Model;
+﻿using BookBee.DTO.Response;
+using BookBee.Model;
 
 namespace BookBee.Persistences.Repositories.CartRepository
 {
     public interface ICartRepository
     {
-        List<Cart> GetCarts();
-        void UpdateCart(Cart cart);
-        void CreateCart(Cart cart);
-        Cart GetCartById(int id);
-        void ClearCartBook(List<int> ids);
-        Cart GetCartByUser(int userId);
-        bool IsSaveChanges();
+        Task<ResponseDTO> UpdateCart(int id,Cart cart);
+		Task<ResponseDTO> CreateCart(Cart cart);
+		Task<Cart> GetCartById(int id);
+		Task<ResponseDTO> ClearCartBook(List<int> ids);
+		Task<Cart> GetCartByUser(int userId);
+		Task<bool> IsSaveChanges();
     }
 }

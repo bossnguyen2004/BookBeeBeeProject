@@ -124,17 +124,7 @@ namespace BookBee.Services.UserService
 				: new ResponseDTO { Code = 400, Message = "Khôi phục thất bại" };
 		}
 
-		//public async Task<ResponseDTO> SelfUpdateUser(UserAccountDTO userAccountDTO)
-		//{
-		//	var userId = await _userAccountRepository.GetCurrentUserId();
-		//	userAccountDTO.RoleId = null;
-		//	if (userId != null) return UpdateUser(userAccountDTO);
-		//	return new ResponseDTO()
-		//	{
-		//		Code = 400,
-		//		Message = "User không tồn tại"
-		//	};
-		//}
+
 
 		public async Task<ResponseDTO> UpdateUser(int id, UserAccountDTO userAccountDTO)
 		{

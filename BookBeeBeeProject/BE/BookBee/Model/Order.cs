@@ -20,10 +20,10 @@ namespace BookBee.Model
         public double TotalAmount { get; set; }
         public int PaymentStatus { get; set; }
         public int DeliveryStatus { get; set; }
-        public string? CancellationReason { get; set; }
+		public int? Status { get; set; }
+		public string? CancellationReason { get; set; }
 
-
-        [Required]
+		[Required]
         public int UserAccountId { get; set; }
         public virtual UserAccount UserAccount { get; set; }
         [Required]
