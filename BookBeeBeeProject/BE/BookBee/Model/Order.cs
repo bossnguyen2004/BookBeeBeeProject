@@ -24,13 +24,13 @@ namespace BookBee.Model
 		public string? CancellationReason { get; set; }
 
 		[Required]
-        public int UserAccountId { get; set; }
+        public int? UserAccountId { get; set; }
         public virtual UserAccount UserAccount { get; set; }
         [Required]
-        public int EmployeeId { get; set; }
+        public int? EmployeeId { get; set; }
         public virtual Employee Employee { get; set; }
         [Required]
-        public int AddressId { get; set; }
+        public int? AddressId { get; set; }
         public virtual Address Address { get; set; }
         [Required]
         public int? OrderVoucherId { get; set; }

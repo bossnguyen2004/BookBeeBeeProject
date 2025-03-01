@@ -63,9 +63,10 @@ namespace BookBee.Services.VoucherService
 			return new ResponseDTO { Code = isSaved ? 200 : 400, Message = isSaved ? "Xóa thành công" : "Xóa thất bại" };
 		}
 
-		public async Task<ResponseDTO> GetVoucher(int? page = 1, int? pageSize = 10, string? key = "", string? sortBy = "ID")
-        {
-            var vouchers =  _voucherRepository.GetVouchers(page, pageSize, key, sortBy);
+		public async Task<ResponseDTO> GetVoucher(int? page = 1, int? pageSize = 10, string? key = "", string? sortBy = "ID", int? status = null)
+		{
+			if (status != null && status != 0 && status != 1) { return new ResponseDTO { Code = 400, Message = "Trạng thái không hợp lệ. Chỉ chấp nhận 0 (Dừng) hoặc 1 (Hoạt động)." }; }
+			var vouchers = _voucherRepository.GetVouchers(page, pageSize, key, sortBy,status);
             return new ResponseDTO()
             {
                 Data = _mapper.Map<List<VoucherDTO>>(vouchers),

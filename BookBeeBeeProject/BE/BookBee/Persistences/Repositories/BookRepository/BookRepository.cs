@@ -16,18 +16,17 @@ namespace BookStack.Persistence.Repositories.BookRepository
             _dataContext = dataContext;
         }
 
-		public async Task<List<Book>> GetBooks(int? page = 1, int? pageSize = 10, string? key = "", string? sortBy = "ID", int? tagId = 0, int? voucherId = 0, int? imgId = 0, bool includeDeleted = false, int? publisherId = null, int? authorId = null, int? supplierId = null)
+		public async Task<List<Book>> GetBooks(int? page = 1, int? pageSize = 10, string? key = "", string? sortBy = "ID", int? tagId = 0, int? voucherId = 0,  bool includeDeleted = false, int? publisherId = null, int? authorId = null, int? supplierId = null)
 		{
 			var query = _dataContext.Books.Include(a => a.Author).Include(p => p.Publisher)
 				.Include(s => s.Supplier).Include(t => t.Tags).Include(v => v.Vouchers)
-				.Include(i => i.Imgs).Include(o => o.OrderDetails).ThenInclude(od => od.Order)
+				.Include(o => o.OrderDetails).ThenInclude(od => od.Order)
 				.AsSplitQuery().AsQueryable();
 
 			if (tagId > 0){query = query.Where(b => b.Tags.Any(t => t.Id == tagId));}
 
 			if (voucherId > 0){ query = query.Where(b => b.Vouchers.Any(v => v.Id == voucherId));}
 
-			if (imgId > 0){query = query.Where(b => b.Imgs.Any(i => i.Id == imgId));}
 
 			if (!string.IsNullOrEmpty(key)){query = query.Where(b => b.Title.ToLower().Contains(key.ToLower()));}
 
@@ -72,7 +71,6 @@ namespace BookStack.Persistence.Repositories.BookRepository
 		         .Include(s => s.Supplier)
 		         .Include(t => t.Tags)
 		         .Include(v => v.Vouchers)
-		         .Include(i => i.Imgs)
 		         .Include(o => o.OrderDetails)
 		         	.ThenInclude(od => od.Order)
 		         .AsSplitQuery()
@@ -93,6 +91,7 @@ namespace BookStack.Persistence.Repositories.BookRepository
 			existingBook.Price = book.Price;
 			existingBook.MaxOrder = book.MaxOrder;
 			existingBook.Format = book.Format;
+			existingBook.Image = book.Image;
 			existingBook.PageSize = book.PageSize;
 			existingBook.Update = DateTime.Now; 
 			existingBook.IsDeleted = book.IsDeleted;
@@ -102,7 +101,6 @@ namespace BookStack.Persistence.Repositories.BookRepository
 
 			if (book.Tags != null && book.Tags.Count > 0) { existingBook.Tags = book.Tags;}
 			if (book.Vouchers != null && book.Vouchers.Count > 0) { existingBook.Vouchers = book.Vouchers;}
-			if (book.Imgs != null && book.Imgs.Count > 0){existingBook.Imgs = book.Imgs;}
 
 			return new ResponseDTO { Code = 200, Message = "Cập nhật thành công" };
 		}
@@ -145,13 +143,13 @@ namespace BookStack.Persistence.Repositories.BookRepository
 	       	   .ThenInclude(od => od.Order)
 	           .Where(b => b.OrderDetails.Any(od => od.Order.Status == 4 && !od.Order.IsDeleted) && !b.IsDeleted)
 	           .Select(b => new
-	           {
-	       	    Book = b,
-	       	    TotalQuantity = b.OrderDetails
-	       		.Where(od => od.Order.Status == 4 && !od.Order.IsDeleted)
-	       		.Sum(od => od.Quantity)
-	           })
-	          .OrderByDescending(b => b.TotalQuantity)
+	                  {
+	       	           Book = b,
+	       	           TotalQuantity = b.OrderDetails
+	       	        	.Where(od => od.Order.Status == 4 && !od.Order.IsDeleted)
+	       	        	.Sum(od => od.Quantity)
+	                  })
+	            .OrderByDescending(b => b.TotalQuantity)
 	          .Take(topCount)
 	          .Select(b => b.Book)
 	          .ToListAsync();
@@ -167,6 +165,21 @@ namespace BookStack.Persistence.Repositories.BookRepository
 		public async Task<int> GetBookCount()
 		{
 			return await _dataContext.Books.CountAsync(t => !t.IsDeleted);
+		}
+
+		public async Task<List<Book>> GetBookByIds(List<int> ids)
+		{
+			return await _dataContext.Books
+		       .Where(b => ids.Contains(b.Id)) // Truy vấn tất cả sách theo danh sách ID
+		       .Include(a => a.Author)
+		       .Include(p => p.Publisher)
+		       .Include(s => s.Supplier)
+		       .Include(t => t.Tags)
+		       .Include(v => v.Vouchers)
+		       .Include(o => o.OrderDetails)
+		       	.ThenInclude(od => od.Order)
+		       .AsSplitQuery()
+		       .ToListAsync(); // Trả về danh sách sách
 		}
 	}
 }

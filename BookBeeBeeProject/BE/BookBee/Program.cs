@@ -87,12 +87,7 @@ services.AddServices(builder.Configuration);
 services.AddAutoMapper(typeof(MapperProfile).Assembly);
 services.AddFluentValidationAutoValidation();
 
-//services.AddCors(o =>
-//    o.AddPolicy("CorsPolicy", builder =>
-//        builder.WithOrigins("http://localhost:7273")
-//            .WithOrigins("http://localhost:7222")
-//            .AllowAnyHeader()
-//            .AllowAnyMethod()));
+
 
 services.AddCors(options =>
 {
@@ -117,7 +112,7 @@ if (app.Environment.IsDevelopment())
 app.UseCors("CorsPolicy");
 
 app.UseHttpsRedirection();
-
+app.UseStaticFiles();
 app.UseAuthentication();
 app.UseAuthorization();
 

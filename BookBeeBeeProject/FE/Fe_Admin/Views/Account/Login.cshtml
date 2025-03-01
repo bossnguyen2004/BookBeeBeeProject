@@ -8,7 +8,7 @@
 
 
 <link rel="stylesheet" href="~/css1/style.css">
-
+ 
 <div class="content">
     <div class="container">
         <div class="row">
@@ -33,6 +33,14 @@
                                 @Html.PasswordFor(m => m.Password, new { @class = "form-control", required = "required" })
                                 @Html.ValidationMessageFor(m => m.Password)
                             </div>
+
+                            <div class="form-check mb-4">
+                                <label class="form-check-label">
+                                    @Html.CheckBoxFor(m => m.RememberMe, new { @class = "form-check-input" }) Ghi nhớ đăng nhập
+                                </label>
+                            </div>
+
+
                             <input type="submit" value="Đăng Nhập" class="btn btn-block btn-primary">
                         }
                     </div>
@@ -44,3 +52,80 @@
         </div>
     </div>
 </div>
+
+@section scripts {
+<script>
+  // document.addEventListener("DOMContentLoaded", function () {
+  //       function showToast(type, message) {
+  //           if (!message || message === "null") return;
+
+  //           const notifications = document.querySelector(".notifications");
+  //           const toast = document.createElement("div");
+  //           toast.classList.add("toast", type);
+  //           toast.innerHTML = `${message} <span class="close-btn">&times;</span>`;
+
+  //           notifications.appendChild(toast);
+
+  //           toast.querySelector(".close-btn").addEventListener("click", () => {
+  //               toast.style.animation = "fadeOut 0.6s ease forwards";
+  //               setTimeout(() => toast.remove(), 500);
+  //           });
+
+  //           setTimeout(() => {
+  //               toast.style.animation = "fadeOut 0.6s ease forwards";
+  //               setTimeout(() => toast.remove(), 500);
+  //           }, 3000);
+  //       }
+
+  //       var successMessage = "@TempData["Success"]";
+  //       var errorMessage = "@TempData["Error"]";
+
+  //       if (successMessage && successMessage !== "null") {
+  //           showToast("success", successMessage);
+            
+  //           // Gửi request để xóa TempData ngay sau khi hiển thị
+  //           fetch('/Account/ClearTempData', { method: 'POST' });
+  //       }
+
+  //       if (errorMessage && errorMessage !== "null") {
+  //           showToast("error", errorMessage);
+  //       }
+  //   });
+       document.addEventListener("DOMContentLoaded", function () {
+    function showToast(type, message) {
+        if (!message || message === "null") return;
+
+        const notifications = document.querySelector(".notifications");
+        const toast = document.createElement("div");
+        toast.classList.add("toast", type);
+        toast.innerHTML = `${message} <span class="close-btn">&times;</span>`;
+
+        notifications.appendChild(toast);
+
+        toast.querySelector(".close-btn").addEventListener("click", () => {
+            toast.style.animation = "fadeOut 0.6s ease forwards";
+            setTimeout(() => toast.remove(), 500);
+        });
+
+        setTimeout(() => {
+            toast.style.animation = "fadeOut 0.6s ease forwards";
+            setTimeout(() => toast.remove(), 500);
+        }, 3000);
+    }
+
+    var successMessage = '@TempData["Success"]';
+    var errorMessage = '@TempData["Error"]';
+
+    if (successMessage && successMessage !== "null") {
+        showToast("success", successMessage);
+
+        // Gửi request xóa TempData ngay sau khi hiển thị
+        fetch('/Account/ClearTempData', { method: 'POST' });
+    }
+
+    if (errorMessage && errorMessage !== "null") {
+        showToast("error", errorMessage);
+    }
+});
+</script>
+}

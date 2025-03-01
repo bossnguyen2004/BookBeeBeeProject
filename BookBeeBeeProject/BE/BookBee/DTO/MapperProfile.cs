@@ -2,8 +2,9 @@
 using BookBee.DTO.Account;
 using BookBee.DTO.Address;
 using BookBee.DTO.Author;
+using BookBee.DTO.Book;
 using BookBee.DTO.Employee;
-using BookBee.DTO.Image;
+using BookBee.DTO.OrderVoucher;
 using BookBee.DTO.PaymentMethod;
 using BookBee.DTO.Publisher;
 using BookBee.DTO.Role;
@@ -12,6 +13,7 @@ using BookBee.DTO.Tag;
 using BookBee.DTO.User;
 using BookBee.DTO.Voucher;
 using BookBee.Model;
+using BookStack.DTO.Cart;
 using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace BookBee.DTO
@@ -24,14 +26,16 @@ namespace BookBee.DTO
             CreateMap<RegisterUserDTO, Model.UserAccount>().ReverseMap();
             CreateMap<RoleDTO, Model.Role>().ReverseMap();
             CreateMap<AddressDTO, Model.Address>().ReverseMap();
-            CreateMap<ImageDTO, Model.Image>().ReverseMap();
 			CreateMap<AuthorDTO, Model.Author>().ReverseMap();
 			CreateMap<PublisherDTO, Model.Publisher>().ReverseMap();
 			CreateMap<SupplierDTO, Model.Supplier>().ReverseMap();
 			CreateMap<TagDTO, Model.Tag>().ReverseMap();
 			CreateMap<VoucherDTO, Model.Voucher>().ReverseMap();
 			CreateMap<PaymentMethodDTO, Model.PaymentMethod>().ReverseMap();
-			CreateMap<EmployeeDTO, Model.Employee>().ReverseMap();
+            CreateMap<EmployeeDTO, Model.Employee>().ReverseMap();
+            CreateMap<OrderVoucherDTO, Model.OrderVoucher>().ReverseMap();
+			CreateMap<BookDTO, Model.Book>().ReverseMap();
+			CreateMap<CartDTO, Model.Cart>().ReverseMap();
 		}
     }
 }

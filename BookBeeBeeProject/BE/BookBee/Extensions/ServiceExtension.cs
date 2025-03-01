@@ -7,11 +7,15 @@ using BookBee.Services.MailService;
 using BookBee.Services.OrderVoucherService;
 using BookBee.Services.PaymentMethodService;
 using BookBee.Services.PublisherService;
+using BookBee.Services.StatisticalService;
 using BookBee.Services.SupplierService;
 using BookBee.Services.TokenService;
 using BookBee.Services.UserService;
+using BookBee.Services.VNPayService;
 using BookBee.Services.VoucherService;
 using BookBee.Utilities;
+using BookStack.Services.BookService;
+using BookStack.Services.CartService;
 using Microsoft.AspNetCore.Cors.Infrastructure;
 
 namespace BookBee.Extensions
@@ -27,14 +31,14 @@ namespace BookBee.Extensions
             services.AddScoped<ITokenService, TokenService>();
             services.AddScoped<IAddressService, AddressService>();
             services.AddScoped<IAuthorService, AuthorService>();
-            //    services.AddScoped<IBookService, BookService>();
-            //    services.AddScoped<ICartService, CartService>();
-            //    services.AddScoped<IOrderService, OrderService>();
+            services.AddScoped<IBookService, BookService>();
+            services.AddScoped<ICartService, CartService>();
+            //services.AddScoped<IOrderService, OrderService>();
             services.AddScoped<IPublisherService, PublisherService>();
-            //    services.AddScoped<IStatisticalService, StatisticalService>();
+            services.AddScoped<IStatisticalService, StatisticalService>();
             services.AddScoped<ITagService, TagService>();
             services.AddScoped<IUserService, UserService>();
-            //    services.AddScoped<IVNPayService, VNPayService>();
+            services.AddScoped<IVNPayService, VNPayService>();
             services.AddScoped<IPaymentMethodService, PaymentMethodService>();
             services.AddScoped<ISupplierService, SupplierService>();
             services.AddScoped<IVoucherService, VoucherService>();

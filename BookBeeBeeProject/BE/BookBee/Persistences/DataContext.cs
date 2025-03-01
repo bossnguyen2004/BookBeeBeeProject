@@ -7,7 +7,6 @@ namespace BookBee.Persistences
     {
         public DataContext(){}
         public DataContext(DbContextOptions<DataContext> options) : base(options) { }
-        public DbSet<Image> Images { get; set; }
         public DbSet<Role> Roles { get; set; }
         public DbSet<Author> Authors { get; set; }
         public DbSet<Publisher> Publishers { get; set; }

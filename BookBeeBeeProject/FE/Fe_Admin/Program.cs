@@ -40,6 +40,25 @@ namespace Fe_Admin
 
             app.UseRouting();
 
+
+            app.Use(async (context, next) =>
+            {
+                if (context.Session.GetString("AccessToken") == null &&
+                    context.Request.Cookies.TryGetValue("AccessToken", out var token))
+                {
+                    // ? L?y token t? Cookie v? l?u v?o Session
+                    context.Session.SetString("AccessToken", token);
+                    context.Session.SetString("UserRole", context.Request.Cookies["UserRole"]);
+                }
+
+                await next();
+            });
+
+
+
+
+
+
             app.UseAuthorization();
 
             app.MapControllerRoute(

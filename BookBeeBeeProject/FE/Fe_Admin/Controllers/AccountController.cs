@@ -49,6 +49,7 @@ namespace Fe_Admin.Controllers
 
             if (!ModelState.IsValid)
             {
+                TempData["Error"] = "Vui lòng nhập đầy đủ thông tin!";
                 return View(loginDTO);
             }
 
@@ -62,27 +63,47 @@ namespace Fe_Admin.Controllers
                 var responseData = await response.Content.ReadAsStringAsync();
                 var loginResponse = JsonConvert.DeserializeObject<LoginResponse>(responseData);
 
-                // Lưu trữ token và role vào session
                 HttpContext.Session.SetString("AccessToken", loginResponse.data.token);
                 HttpContext.Session.SetString("Result", loginResponse.data.role.name);
+                string token = loginResponse.data.token;
+                string role = loginResponse.data.role.name;
+                if (loginDTO.RememberMe)
+                {
+                    var cookieOptions = new CookieOptions
+                    {
+                        HttpOnly = true,
+                        Secure = true,
+                        Expires = DateTime.UtcNow.AddDays(30)
+                    };
+                    Response.Cookies.Append("AccessToken", token, cookieOptions);
+                    Response.Cookies.Append("UserRole", role, cookieOptions);
+                }
+                else
+                {
+                    HttpContext.Session.SetString("AccessToken", token);
+                    HttpContext.Session.SetString("UserRole", role);
+                }
 
-                // Kiểm tra quyền truy cập của người dùng
                 if (loginResponse.data.role.name == "admin" || loginResponse.data.role.name == "nhanvien")
                 {
+                    TempData["Success"] = "Đăng nhập thành công!";
+                    TempData.Keep("Success");
                     return RedirectToAction("Index", "Home");
                 }
                 else
                 {
-                    ModelState.AddModelError(string.Empty, "Bạn không có quyền truy cập!");
+                    TempData["Error"] = "Bạn không có quyền truy cập!";
                     return View(loginDTO);
                 }
             }
             else
             {
-                var errorResponse = await response.Content.ReadAsStringAsync();
-                ModelState.AddModelError(string.Empty, $"Đăng nhập thất bại: {errorResponse}");
+                TempData["Error"] = "Sai tài khoản hoặc mật khẩu!";
                 return View(loginDTO);
             }
+
+
+
         }
 
         [HttpPost]
@@ -100,9 +121,20 @@ namespace Fe_Admin.Controllers
         [ValidateAntiForgeryToken]
         public IActionResult Logout()
         {
+
+            Response.Cookies.Delete("AccessToken");
+            Response.Cookies.Delete("UserRole");
             HttpContext.Session.Clear();
-            HttpContext.SignOutAsync();
             return RedirectToAction("Login", "Account");
+        }
+
+
+        [HttpPost]
+        public IActionResult ClearTempData()
+        {
+            TempData.Remove("Success");
+            TempData.Remove("Error");
+            return Ok();
         }
     }
 }

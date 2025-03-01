@@ -17,13 +17,13 @@ namespace BookBee.DTO.Book
         public string? ImageUrl { get; set; }
         public string? Format { get; set; }
         public string? PageSize { get; set; }
-        public bool IsDeleted { get; set; }
-        public int? PublisherId { get; set; }
+		public bool IsDeleted { get; set; }
+        public int PublisherId { get; set; }
         public List<int> TagIds { get; set; } 
-        public List<int> VoucherIds { get; set; }
-		public List<int> ImageIds { get; set; }
-		public int? AuthorId { get; set; }
-		public int? SupplierId { get; set; }
+        public List<int>? VoucherIds { get; set; }
+		public int AuthorId { get; set; }
+		public int SupplierId { get; set; }
+		public int Status { get; set; }
 
 	}
 }

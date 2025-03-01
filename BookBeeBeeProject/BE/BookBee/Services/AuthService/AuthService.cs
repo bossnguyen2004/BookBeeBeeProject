@@ -243,21 +243,28 @@ namespace BookBee.Services.AuthService
         public async Task<ResponseDTO> Login(string username, string password)
         {
             var user =await _userRepository.GetUserByUsername(username);
-            if (user == null || user.IsDeleted)
+            if (user == null)
             {
                 return new ResponseDTO()
                 {
                     Code = 401,
-                    Message = "Tài khoản hoặc mật khẩu không chính xác"
+                    Message = "UserName không tồn tại"
                 };
             }
-
+            if (user.IsDeleted)
+            {
+                return new ResponseDTO()
+                {
+                    Code = 403,
+                    Message = "Tài khoản đã bị vô hiệu hóa"
+                };
+            }
             if (!PasswordHelper.VerifyPasswordHash(password, user.PasswordHash, user.PasswordSalt))
             {
                 return new ResponseDTO()
                 {
                     Code = 401,
-                    Message = "Tài khoản hoặc mật khẩu không chính xác"
+                    Message = "Mật khẩu không chính xác"
                 };
             }
 
@@ -485,9 +492,6 @@ namespace BookBee.Services.AuthService
                 .Replace("=", ""); // Removing padding characters
         }
 
-
-
-		
-		
-	}
+      
+    }
 }

@@ -3,13 +3,14 @@ using BookBee.Persistences.Repositories.AddressRepository;
 using BookBee.Persistences.Repositories.AuthorRepository;
 using BookBee.Persistences.Repositories.CartRepository;
 using BookBee.Persistences.Repositories.CategoryRepository;
-using BookBee.Persistences.Repositories.Image;
 using BookBee.Persistences.Repositories.OrderVoucherRepository;
 using BookBee.Persistences.Repositories.PaymentMethodRepository;
 using BookBee.Persistences.Repositories.PublisherRepository;
 using BookBee.Persistences.Repositories.SupplierRepository;
 using BookBee.Persistences.Repositories.UserRepository;
 using BookBee.Persistences.Repositories.VoucherRepository;
+using BookStack.Persistence.Repositories.BookRepository;
+using BookStack.Persistence.Repositories.OrderRepository;
 using Microsoft.EntityFrameworkCore;
 
 namespace BookBee.Extensions
@@ -49,7 +50,6 @@ namespace BookBee.Extensions
             services.AddScoped<IUserAccountRepository, UserAccountRepository>();
             services.AddScoped<IAddressRepository, AddressRepository>();
             services.AddScoped<ICartRepository, CartRepository>();
-            services.AddScoped<IImageRepository, ImageRepository>();
 			services.AddScoped<IAuthorRepository, AuthorRepository>();
 			services.AddScoped<IPublisherRepository, PublisherRepository>();
 			services.AddScoped<ISupplierRepository, SupplierRepository>();
@@ -57,7 +57,8 @@ namespace BookBee.Extensions
 			services.AddScoped<IVoucherRepository, VoucherRepository>();
 			services.AddScoped<IPaymentMethodRepository, PaymentMethodRepository>();
 			services.AddScoped<IOrderVoucherRepository, OrderVoucherRepository>();
-
+			services.AddScoped<IBookRepository, BookRepository>();
+			services.AddScoped<IOrderRepository, OrderRepository>();
 		}
 
     }

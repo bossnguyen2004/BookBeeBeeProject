@@ -51,5 +51,8 @@ namespace BookBee.Controllers
             var res =await _authService.ResetPassword(resetPasswordDTO);
             return StatusCode(res.Code, res);
         }
+
+
+       
     }
 }

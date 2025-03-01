@@ -12,6 +12,6 @@ namespace BookBee.Services.AuthService
         Task<ResponseDTO> ForgotPassword(string email);
 		Task<ResponseDTO> ResetPassword(ResetPasswordDTO resetPasswordDTO);
 
-
-	}
+       
+    }
 }

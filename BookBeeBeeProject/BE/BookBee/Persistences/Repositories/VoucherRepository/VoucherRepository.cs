@@ -62,7 +62,7 @@ namespace BookBee.Persistences.Repositories.VoucherRepository
 			return await _dataContext.Vouchers.FirstOrDefaultAsync(a => a.Id == id);
 		}
 
-		public List<Voucher> GetVouchers(int? page = 1, int? pageSize = 10, string? key = "", string? sortBy = "ID")
+		public List<Voucher> GetVouchers(int? page = 1, int? pageSize = 10, string? key = "", string? sortBy = "ID", int? status = null)
 		{
 			var query = _dataContext.Vouchers.Where(v => !v.IsDeleted).AsQueryable();
 
