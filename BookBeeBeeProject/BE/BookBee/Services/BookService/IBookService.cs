@@ -19,6 +19,11 @@ namespace BookStack.Services.BookService
 		Task<ResponseDTO> CreateBook(BookDTO bookDTO);
 
 		Task<ResponseDTO> BookStatus(int id, int status);
-	}
+
+        Task<ResponseDTO> GetInactiveBooks(int? page = 1, int? pageSize = 10, string? key = "", string? sortBy = "ID", int? tagId = 0, int? voucherId = 0,
+          bool includeDeleted = false, int? publisherId = null, int? authorId = null, int? supplierId = null);
+
+
+    }
 }
 

@@ -121,6 +121,10 @@ namespace BookBee.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<string>("Image")
+                        .HasMaxLength(255)
+                        .HasColumnType("nvarchar(255)");
+
                     b.Property<bool>("IsDeleted")
                         .HasColumnType("bit");
 
@@ -146,6 +150,9 @@ namespace BookBee.Migrations
 
                     b.Property<int?>("PublisherId")
                         .IsRequired()
+                        .HasColumnType("int");
+
+                    b.Property<int>("Status")
                         .HasColumnType("int");
 
                     b.Property<int?>("SupplierId")
@@ -294,44 +301,6 @@ namespace BookBee.Migrations
                     b.ToTable("Employees");
                 });
 
-            modelBuilder.Entity("BookBee.Model.Image", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"), 1L, 1);
-
-                    b.Property<int>("BookId")
-                        .HasColumnType("int");
-
-                    b.Property<DateTime>("Create")
-                        .HasColumnType("datetime2");
-
-                    b.Property<bool>("IsDeleted")
-                        .HasColumnType("bit");
-
-                    b.Property<string>("MaAnh")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<int>("TagId")
-                        .HasColumnType("int");
-
-                    b.Property<string>("URL")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<DateTime>("Update")
-                        .HasColumnType("datetime2");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("BookId");
-
-                    b.HasIndex("TagId");
-
-                    b.ToTable("Images");
-                });
-
             modelBuilder.Entity("BookBee.Model.Order", b =>
                 {
                     b.Property<int>("Id")
@@ -340,7 +309,8 @@ namespace BookBee.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"), 1L, 1);
 
-                    b.Property<int>("AddressId")
+                    b.Property<int?>("AddressId")
+                        .IsRequired()
                         .HasColumnType("int");
 
                     b.Property<string>("CancellationReason")
@@ -364,7 +334,8 @@ namespace BookBee.Migrations
                     b.Property<double>("DiscountAmount")
                         .HasColumnType("float");
 
-                    b.Property<int>("EmployeeId")
+                    b.Property<int?>("EmployeeId")
+                        .IsRequired()
                         .HasColumnType("int");
 
                     b.Property<int?>("EmployeeId1")
@@ -413,7 +384,8 @@ namespace BookBee.Migrations
                     b.Property<DateTime>("Update")
                         .HasColumnType("datetime2");
 
-                    b.Property<int>("UserAccountId")
+                    b.Property<int?>("UserAccountId")
+                        .IsRequired()
                         .HasColumnType("int");
 
                     b.HasKey("Id");
@@ -897,25 +869,6 @@ namespace BookBee.Migrations
                     b.Navigation("UserAccount");
                 });
 
-            modelBuilder.Entity("BookBee.Model.Image", b =>
-                {
-                    b.HasOne("BookBee.Model.Book", "Book")
-                        .WithMany("Imgs")
-                        .HasForeignKey("BookId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("BookBee.Model.Tag", "Tag")
-                        .WithMany("Imgs")
-                        .HasForeignKey("TagId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Book");
-
-                    b.Navigation("Tag");
-                });
-
             modelBuilder.Entity("BookBee.Model.Order", b =>
                 {
                     b.HasOne("BookBee.Model.Address", "Address")
@@ -1038,8 +991,6 @@ namespace BookBee.Migrations
                 {
                     b.Navigation("CartDetails");
 
-                    b.Navigation("Imgs");
-
                     b.Navigation("OrderDetails");
 
                     b.Navigation("Tags");
@@ -1068,11 +1019,6 @@ namespace BookBee.Migrations
             modelBuilder.Entity("BookBee.Model.PaymentMethod", b =>
                 {
                     b.Navigation("DetailedPayments");
-                });
-
-            modelBuilder.Entity("BookBee.Model.Tag", b =>
-                {
-                    b.Navigation("Imgs");
                 });
 
             modelBuilder.Entity("BookBee.Model.UserAccount", b =>

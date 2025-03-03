@@ -1,4 +1,5 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using Newtonsoft.Json;
+using System.ComponentModel.DataAnnotations;
 
 namespace BookBee.Model
 {
@@ -19,8 +20,8 @@ namespace BookBee.Model
         public int Count { get; set; } = 0;
         [Required]
         public double Price { get; set; } = 0;
-		[StringLength(255)]
-		public string? Image { get; set; }
+        [JsonProperty("imageUrl")]
+        public string? Image { get; set; }
 		public int MaxOrder { get; set; }
         [Required]
         public string? Format { get; set; }
@@ -29,7 +30,7 @@ namespace BookBee.Model
         public DateTime Create { get; set; } = DateTime.Now;
         public DateTime Update { get; set; } = DateTime.Now;
         public bool IsDeleted { get; set; } = false;
-		public int Status { get; set; } 
+		public int? Status { get; set; } 
 		[Required]
         public int? PublisherId { get; set; }
         public virtual Publisher Publisher { get; set; }

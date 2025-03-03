@@ -1,0 +1,510 @@
+﻿@model X.PagedList.IPagedList<Fe_Admin.Models.Author>
+@using X.PagedList.Mvc.Core
+@using Fe_Admin.Models
+@{
+    ViewData["Title"] = "Index";
+}
+<link href="https://cdn.jsdelivr.net/npm/boxicons/css/boxicons.min.css" rel="stylesheet">
+
+
+<div class="pagetitle">
+    <h1>Quản lý Tác Giả</h1>
+    <nav>
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a asp-area="admin" asp-controller="Home" asp-action="Index">Trang chủ</a></li>
+            <li class="breadcrumb-item active">Tác Giả</li>
+        </ol>
+    </nav>
+</div>
+@{
+    var httpContext = ViewContext.HttpContext;
+    var accessRole = httpContext.Session.GetString("Result");
+    var accessToken = httpContext.Session.GetString("AccessToken");
+}
+
+<section class="section dashboard">
+    <div class="row">
+        <div class="col-lg-8">
+            <div class="row">
+                <div class="col-12">
+                    <div class="card recent-sales overflow-auto" style="width:920px">
+                        <div id="tableInfo" class="card-body">
+                            @if (TempData["SuccessMessage"] != null)
+                            {
+                                <div id="successMessage" class="alert alert-success" role="alert">
+                                    @TempData["SuccessMessage"]
+                                </div>
+                            }
+                            <div class="row">
+                                <div class="col-6">
+
+                                    @using (Html.BeginForm("Index", "Author", FormMethod.Get, new { id = "searchForm" }))
+                                    {
+                                        <div class="input-group input-group-sm search-container" style="left:440px; width: 380px;height:50px">
+                                            @Html.TextBox("key", ViewBag.Searchtext as string,
+                                                     new { @class = "form-control", placeholder = "Tìm kiếm theo tên tác giả", id = "searchKey" })
+                                            <span class="input-group-append">
+                                                <button type="submit" class="btn btn-primary search-btn">
+                                                    <i class="fas fa-search"></i> Tìm kiếm
+                                                </button>
+                                                @if (!string.IsNullOrEmpty(accessToken) && accessRole == "admin")
+                                                {
+                                                    <button type="button" style="color:black" class="btn btn-light btn-flat"
+                                                            title="Thêm mới" id="addNewStaffBtn" data-bs-toggle="modal" data-bs-target="#addStaffModal" aria-label="Close">
+                                                        <i class="fas fa-plus"></i>
+                                                    </button>
+                                                }
+                                            </span>
+                                        </div>
+                                    }
+
+                                    <div id="noResultsMessage" style="color: red; display: none;">Không tìm thấy tác giả nào phù hợp với tên này!</div>
+                                </div>
+                            </div>
+                            <table id="tableBody" class="table table-hover datatable">
+                                <thead>
+                                    <tr>
+                                        <td style="font-weight: bold;">STT</td>
+                                        <td style="font-weight: bold;">Tên Tác Giả</td>
+
+                                        @if (!string.IsNullOrEmpty(accessToken) && accessRole == "admin")
+                                        {
+                                            <td style="font-weight: bold;">Action</td>
+                                        }
+
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @if (Model != null && Model.Any())
+                                    {
+                                        int currentPage = ViewBag.CurrentPage ?? 1;
+                                        int pageSize = 5;
+                                        int stt = (currentPage - 1) * pageSize + 1;
+
+                                        foreach (var item in Model)
+                                        {
+                                            <tr id="trow_@item.Id">
+                                                <td>@stt</td>
+                                                <td>@item.Name</td>
+                                                <td>
+                                                    @if (!string.IsNullOrEmpty(accessToken) && accessRole == "admin")
+                                                    {
+                                                        <a class="btn btn-info" onclick="editForm(@item.Id)" title="Cập nhật">
+                                                            <i class="bx bxs-edit-alt"></i>
+                                                        </a>
+
+                                                        <a class="btn btn-default delete-author" href="javascript:void(0);" data-id="@item.Id" title="Xóa">
+                                                            <i class="bx bxs-trash-alt"></i>
+                                                        </a>
+                                                    }
+
+                                                </td>
+                                            </tr>
+                                            stt++;
+                                        }
+                                    }
+                                    else
+                                    {
+                                        <tr>
+                                            <td style="font-weight: bold" colspan="5">Không có bản ghi nào!!!</td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+
+                            <div class="col-12">
+                                <nav aria-label="Page navigation" class="pagination-container">
+                                    @Html.PagedListPager(
+                                             Model,
+                                             page => Url.Action("Index", new { currentPage = page, pageSize = ViewBag.PageSize, key = ViewBag.Searchtext }),
+                                             new PagedListRenderOptions
+                                    {
+                                        DisplayLinkToPreviousPage = PagedListDisplayMode.Always,
+                                        DisplayLinkToNextPage = PagedListDisplayMode.Always,
+                                        DisplayLinkToIndividualPages = true,
+                                        LinkToPreviousPageFormat = "<button class='btn btn-outline-secondary'><i class='fas fa-arrow-left'></i></button>",
+                                        LinkToNextPageFormat = "<button class='btn btn-outline-secondary'><i class='fas fa-arrow-right'></i></button>",
+                                        LinkToIndividualPageFormat = "<button class='btn btn-outline-primary'>{0}</button>",
+                                        MaximumPageNumbersToDisplay = 5
+                                    })
+                                </nav>
+                            </div>
+
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+    </div>
+
+</section>
+
+
+@* thêm mới *@
+<div class="modal fade" id="addStaffModal" tabindex="-1" aria-labelledby="addStaffModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="addStaffModalLabel">Thêm Mới Tác Giả</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form id="addAuthorForm" action="@Url.Action("Create", "Author")" method="post">
+                    <div class="mb-3">
+                        <label for="Name" class="form-label">Tên Tác Giả</label>
+                        <input type="text" class="form-control" id="Name" name="Name" placeholder="Mời bạn nhập tên tác giả" required />
+                        <div id="NameError" class="invalid-feedback"></div>
+                    </div>
+
+
+                    <button type="submit" class="btn btn-primary">Lưu</button>
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Đóng</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+@* Cập Nhật *@
+<div id="editAuthorModal" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="editAuthorModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="editAuthorModalLabel">Chỉnh sửa tác giả</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form id="editAuthorForm" action="@Url.Action("Edit", "Author")" method="post">
+                    <div class="form-group">
+                        <label for="Name">Tên tác giả</label>
+                        <input type="text" class="form-control" id="NameInput" placeholder="Nhập tên tác giả">
+                    </div>
+                   
+                    <input type="hidden" id="authorId">
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Đóng</button>
+                <button type="button" class="btn btn-primary" onclick="updateAuthor()">Cập nhật</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+
+
+<link href="~/css/ThongBaoLoi.css" />
+<style>
+
+    .highlight {
+        background-color: #CCFFFF;
+        font-weight: bold;
+    }
+
+
+    .search-container {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        margin-top: 10px;
+    }
+
+    .search-btn, .add-btn {
+        border-radius: 20px;
+        padding: 8px 15px;
+        font-size: 14px;
+        font-weight: bold;
+        transition: all 0.3s ease;
+    }
+
+    .search-btn {
+        background-color: #007bff;
+        color: white;
+        border: none;
+    }
+
+        .search-btn:hover {
+            background-color: #0056b3;
+            color: #ffffff;
+        }
+
+    .add-btn {
+        background-color: #28a745;
+        color: white;
+        margin-left: 5px;
+        border: none;
+    }
+
+        .add-btn:hover {
+            background-color: #218838;
+            color: #ffffff;
+        }
+
+
+
+
+    .modal-dialog {
+        max-width: 400px;
+        margin: 1.75rem auto;
+    }
+
+
+    .modal-content {
+        border-radius: 12px;
+        padding: 20px;
+    }
+
+
+    .form-control {
+        border-radius: 8px;
+        padding: 8px 12px;
+        font-size: 13px;
+        margin-top: 5px;
+    }
+
+
+    .btn-primary {
+        background-color: #007bff;
+        border-color: #007bff;
+        border-radius: 5px;
+        padding: 8px 16px;
+        font-size: 14px;
+    }
+
+        .btn-primary:hover {
+            background-color: #0056b3;
+            border-color: #0056b3;
+        }
+
+    .btn-secondary {
+        border-radius: 5px;
+        background-color: #f0f0f0;
+        border: 1px solid #ccc;
+        padding: 8px 16px;
+        font-size: 14px;
+    }
+
+        .btn-secondary:hover {
+            background-color: #ddd;
+        }
+
+
+    .form-label {
+        font-weight: bold;
+        margin-bottom: 5px;
+        font-size: 14px;
+    }
+
+    .invalid-feedback {
+        font-size: 12px;
+        color: #e74c3c;
+    }
+
+    .mb-3 {
+        margin-bottom: 12px;
+    }
+
+</style>
+
+@section scripts {
+
+    <script>
+        $("#searchForm").submit(function (event) {
+            event.preventDefault();
+
+            var searchText = $("#searchKey").val();
+
+            $.ajax({
+                url: '@Url.Action("Index", "Author")',
+                type: 'GET',
+                data: { key: searchText },
+                headers: {
+                    "X-Requested-With": "XMLHttpRequest"
+                },
+                success: function (data) {
+                    if ($(data).find("table tbody tr").length > 0) {
+                        $("#tableBody tbody").html($(data).find("table tbody").html());
+                        $("#noResultsMessage").hide();
+
+                        $("#tableBody tbody tr").each(function () {
+                            var authorName = $(this).find("td:nth-child(2)").text().toLowerCase();
+                            if (authorName.indexOf(searchText.toLowerCase()) !== -1) {
+                                $(this).addClass("highlight");
+                            } else {
+                                $(this).removeClass("highlight");
+                            }
+                        });
+                    } else {
+                        $("#tableBody tbody").empty();
+                        $("#noResultsMessage").text("Không tìm thấy tác giả nào phù hợp với tên này!").show();
+                    }
+                },
+                error: function (xhr, status, error) {
+                    console.error("Đã xảy ra lỗi: " + error);
+                    $("#tableBody tbody").empty();
+                    $("#noResultsMessage").text("Đã xảy ra lỗi khi tìm kiếm.").show();
+                }
+            });
+        });
+
+        $(document).ready(function () {
+            var successMessage = $('#successMessage');
+            if (successMessage.length) {
+                setTimeout(function () {
+                    successMessage.fadeOut();
+                }, 3000);
+            }
+        });
+
+        ///  THÊM MỚI TÁC GIẢ /////
+        // thêm mới tác giả
+        $(document).ready(function () {
+            $("#addNewStaffBtn").click(function () {
+                $("#addStaffModal").modal('show');
+            });
+        });
+        document.addEventListener('DOMContentLoaded', function () {
+            const modal = new bootstrap.Modal(document.getElementById('addStaffModal'));
+
+            $('#addStaffModal').on('hidden.bs.modal', function () {
+                $('#addStaffForm')[0].reset();
+                $('#addStaffForm').find('.is-invalid').removeClass('is-invalid');
+                $('#addStaffForm').find('.invalid-feedback').text('');
+            });
+
+            const closeModalAndRedirectBtn = document.getElementById('closeModalAndRedirect');
+            closeModalAndRedirectBtn.addEventListener('click', function () {
+                modal.hide();
+                window.location.href = '@Url.Action("Index", "Author")';
+            });
+
+            const addNewStaffBtn = document.getElementById('addNewStaffBtn');
+            addNewStaffBtn.addEventListener('click', function () {
+                modal.show();
+            });
+        });
+
+
+
+        /// cẬP NHẬT TÁC GIẢ /////
+        // lấy id ra cập nhật
+        function editForm(authorId) {
+            if (!authorId) {
+                alert("ID tác giả không hợp lệ.");
+                return;
+            }
+
+            var url = `https://localhost:7287/api/Author/${authorId}`;
+
+            $.ajax({
+                url: url,
+                type: 'GET',
+                dataType: 'json',
+                success: function (response) {
+                    console.log("Response từ API:", response);
+                    if (response && response.data) {
+                        var author = response.data;
+                        console.log("Dữ liệu tác giả:", author);
+                        console.log("Tên tác giả:", author.name);
+
+                        if (typeof author.name === 'string') {
+                            $('#authorId').val(author.id || '');
+                            $('#NameInput').val(author.name || '');
+
+                            $('#editAuthorModal').modal('show');
+                        } else {
+                            alert("Tên tác giả không hợp lệ.");
+                        }
+                    } else {
+                        alert("Không tìm thấy thông tin tác giả.");
+                    }
+                },
+                error: function (xhr, status, error) {
+                    console.error("Lỗi khi gọi API:", status, error);
+                    alert("Lỗi khi tải thông tin tác giả.");
+                }
+            });
+        }
+        // luu lại khi cập nhật
+        function updateAuthor() {
+            var authorId = $('#authorId').val();
+            var name = $('#NameInput').val();
+
+            if (!name || !dateOfBirth) {
+                alert("Tên tác giả và năm sinh không được để trống.");
+                return;
+            }
+
+            var authorData = {
+                id: authorId,
+                name: name,
+                dateOfBirth: dateOfBirth,
+                deathYear: deathYear
+            };
+
+            $.ajax({
+                url: `https://localhost:7287/api/Author/${authorId}`,
+                type: 'PUT',
+                contentType: 'application/json',
+                data: JSON.stringify(authorData),
+                success: function (response) {
+                    if (response && response.code === 200) {
+                        alert("Cập nhật thành công!");
+                        $('#editAuthorModal').modal('hide');
+                        location.reload();
+                    } else {
+                        alert("Cập nhật không thành công. Lỗi: " + response.message);
+                    }
+                },
+                error: function (xhr, status, error) {
+                    console.error("Lỗi khi gọi API:", status, error);
+                    alert("Đã xảy ra lỗi khi cập nhật thông tin tác giả.");
+                }
+            });
+        }
+
+
+
+
+        /// XÓA TÁC GIẢ ////
+        // Xóa tác giả
+        $(document).ready(function () {
+            $('body').on('click', '.delete-author', function () {
+                var id = $(this).data("id");
+                console.log("ID tác giả: " + id);
+                if (confirm('Bạn có chắc chắn muốn xóa tác giả này?')) {
+                    $.ajax({
+                        url: '/Author/Delete',
+                        type: 'POST',
+                        data: {
+                            id: id,
+                            __RequestVerificationToken: $('input[name="__RequestVerificationToken"]').val()
+                        },
+                        success: function (response) {
+                            console.log(response);
+                            if (response.success) {
+                                alert("Xóa tác giả thành công!");
+                                $('#trow_' + id).remove();
+                            } else {
+                                alert(response.message || "Không thể xóa tác giả.");
+                            }
+                        },
+                        error: function (xhr) {
+                            console.error("Đã xảy ra lỗi: " + xhr.responseText);
+                            alert("Không thể xóa tác giả. Vui lòng thử lại.");
+                        }
+                    });
+                }
+            });
+        });
+
+
+
+
+
+    </script>
+}

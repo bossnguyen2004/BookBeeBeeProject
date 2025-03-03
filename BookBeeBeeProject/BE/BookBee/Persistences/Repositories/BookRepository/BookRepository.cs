@@ -16,7 +16,7 @@ namespace BookStack.Persistence.Repositories.BookRepository
             _dataContext = dataContext;
         }
 
-		public async Task<List<Book>> GetBooks(int? page = 1, int? pageSize = 10, string? key = "", string? sortBy = "ID", int? tagId = 0, int? voucherId = 0,  bool includeDeleted = false, int? publisherId = null, int? authorId = null, int? supplierId = null)
+		public async Task<List<Book>> GetBooks(int? page = 1, int? pageSize = 10, string? key = "", string? sortBy = "ID", int? tagId = 0, int? voucherId = 0,  bool includeDeleted = false, int? publisherId = null, int? authorId = null, int? supplierId = null, int? status = null)
 		{
 			var query = _dataContext.Books.Include(a => a.Author).Include(p => p.Publisher)
 				.Include(s => s.Supplier).Include(t => t.Tags).Include(v => v.Vouchers)
@@ -35,8 +35,11 @@ namespace BookStack.Persistence.Repositories.BookRepository
 			if (authorId.HasValue){query = query.Where(b => b.AuthorId == authorId.Value);}
 
 			if (supplierId.HasValue){query = query.Where(b => b.SupplierId == supplierId.Value);}
-
-			if (!includeDeleted){query = query.Where(b => !b.IsDeleted);}
+            if (status.HasValue)
+                query = query.Where(b => b.Status == status.Value);
+            else
+                query = query.Where(b => b.Status == 1);
+            if (!includeDeleted){query = query.Where(b => !b.IsDeleted);}
 
 			switch (sortBy.ToUpper())
 			{
@@ -170,7 +173,7 @@ namespace BookStack.Persistence.Repositories.BookRepository
 		public async Task<List<Book>> GetBookByIds(List<int> ids)
 		{
 			return await _dataContext.Books
-		       .Where(b => ids.Contains(b.Id)) // Truy vấn tất cả sách theo danh sách ID
+		       .Where(b => ids.Contains(b.Id)) 
 		       .Include(a => a.Author)
 		       .Include(p => p.Publisher)
 		       .Include(s => s.Supplier)
@@ -179,7 +182,40 @@ namespace BookStack.Persistence.Repositories.BookRepository
 		       .Include(o => o.OrderDetails)
 		       	.ThenInclude(od => od.Order)
 		       .AsSplitQuery()
-		       .ToListAsync(); // Trả về danh sách sách
+		       .ToListAsync(); 
 		}
-	}
+
+        public async Task<List<Book>> GetInactiveBooks(int? page = 1, int? pageSize = 10, string? key = "", string? sortBy = "ID", int? tagId = 0, int? voucherId = 0, bool includeDeleted = false, int? publisherId = null, int? authorId = null, int? supplierId = null)
+        {
+            var query = _dataContext.Books.Include(a => a.Author).Include(p => p.Publisher)
+                .Include(s => s.Supplier).Include(t => t.Tags).Include(v => v.Vouchers)
+                .Include(o => o.OrderDetails).ThenInclude(od => od.Order)
+                .AsSplitQuery().AsQueryable();
+
+            if (tagId > 0) query = query.Where(b => b.Tags.Any(t => t.Id == tagId));
+            if (voucherId > 0) query = query.Where(b => b.Vouchers.Any(v => v.Id == voucherId));
+            if (!string.IsNullOrEmpty(key)) query = query.Where(b => b.Title.ToLower().Contains(key.ToLower()));
+            if (publisherId.HasValue) query = query.Where(b => b.PublisherId == publisherId.Value);
+            if (authorId.HasValue) query = query.Where(b => b.AuthorId == authorId.Value);
+            if (supplierId.HasValue) query = query.Where(b => b.SupplierId == supplierId.Value);
+
+            query = query.Where(b => b.Status == 0);
+
+            if (!includeDeleted) query = query.Where(b => !b.IsDeleted);
+
+            switch (sortBy.ToUpper())
+            {
+                case "TITLE": query = query.OrderBy(b => b.Title); break;
+                case "PRICE": query = query.OrderBy(b => b.Price); break;
+                case "PRICE_DEC": query = query.OrderByDescending(b => b.Price); break;
+                case "PUBLISHDATE": query = query.OrderBy(b => b.PublishDate); break;
+                case "ID":
+                default: query = query.OrderBy(b => b.Id); break;
+            }
+
+            Total = query.Count();
+            return query.Skip((page.Value - 1) * pageSize.Value).Take(pageSize.Value).ToList();
+        }
+
+    }
 }

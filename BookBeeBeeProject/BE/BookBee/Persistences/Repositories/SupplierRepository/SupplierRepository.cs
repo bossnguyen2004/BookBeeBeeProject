@@ -44,7 +44,7 @@ namespace BookBee.Persistences.Repositories.SupplierRepository
 			}
 		}
 
-		public List<Supplier> GetSupplier(int? page = 1, int? pageSize = 10, string? key = "", string? sortBy = "ID")
+		public  List<Supplier> GetSupplier(int? page = 1, int? pageSize = 10, string? key = "", string? sortBy = "ID")
 		{
 			var query = _dataContext.Suppliers.Where(a => !a.IsDeleted).AsQueryable();
 
@@ -61,11 +61,11 @@ namespace BookBee.Persistences.Repositories.SupplierRepository
 					query = query.OrderBy(u => u.IsDeleted).ThenBy(u => u.Id);
 					break;
 			}
-			Total = query.Count();
-			if (page == null || pageSize == null || sortBy == null) { return query.ToList(); }
-			else
-				return query.Skip((page.Value - 1) * pageSize.Value).Take(pageSize.Value).ToList();
-		}
+            Total = query.Count();
+            if (page == null || pageSize == null || sortBy == null) { return query.ToList(); }
+            else
+                return query.Skip((page.Value - 1) * pageSize.Value).Take(pageSize.Value).ToList();
+        }
 
 		public async Task<Supplier> GetSupplierById(int id)
 		{

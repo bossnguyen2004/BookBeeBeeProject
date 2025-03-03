@@ -34,8 +34,9 @@ namespace BookBee.DTO
 			CreateMap<PaymentMethodDTO, Model.PaymentMethod>().ReverseMap();
             CreateMap<EmployeeDTO, Model.Employee>().ReverseMap();
             CreateMap<OrderVoucherDTO, Model.OrderVoucher>().ReverseMap();
-			CreateMap<BookDTO, Model.Book>().ReverseMap();
-			CreateMap<CartDTO, Model.Cart>().ReverseMap();
+            CreateMap<BookDTO, Model.Book>().ForMember(dest => dest.Image, opt => opt.MapFrom(src => src.ImageUrl)).ReverseMap();
+             //.ForMember(dest => dest.ImageUrl, opt => opt.MapFrom(src => src.Image));
+            CreateMap<CartDTO, Model.Cart>().ReverseMap();
 		}
     }
 }

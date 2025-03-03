@@ -1,0 +1,616 @@
+﻿@using Fe_Admin.DTO.Book
+@using Fe_Admin.DTO.Author;
+@using Fe_Admin.DTO.Publisher;
+@using Fe_Admin.DTO.Supplier;
+@using Fe_Admin.DTO.Tag;
+@using Fe_Admin.DTO.Voucher;
+@model BookDTO
+@{
+    ViewBag.Title = "Thêm Sản Phẩm";
+}
+<nav>
+    <ol class="breadcrumb">
+        <li class="breadcrumb-item"><a href="@Url.Action("Index", "Book")">Quản lý Sản Phẩm</a></li>
+        <li class="breadcrumb-item"><a href="">Thêm Sản Phẩm</a></li>
+    </ol>
+</nav>
+
+<div id="example">
+    <div class="row w-100">
+        <div class="col-lg-8">
+        </div>
+        <div class="col-lg-4 text-right">
+        </div>
+    </div>
+    <br>
+    <div class="container mt-4">
+        <div class="row justify-content-center">
+            <div class="card shadow-lg p-4 rounded">
+                <div class="card-body">
+                    <h3 class="text-center mb-4">Thêm Sách Mới</h3>
+                    <form id="form-create" method="post" enctype="multipart/form-data">
+                        <div class="mb-3">
+                            <label for="bookTitle" class="form-label">Tên Sách</label>
+                            <input type="text" id="bookTitle" class="form-control" asp-for="Title" placeholder="Nhập Tên Sách">
+                        </div>
+
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label for="authorSelect" class="form-label">Tác Giả</label>
+                                <select class="form-select" id="authorSelect" asp-for="AuthorId">
+                                    <option value="">Chọn Tác Giả</option>
+                                    @if (ViewBag.Authors != null && ViewBag.Authors.Count > 0)
+                                    {
+                                        @foreach (var t in (List<AuthorDTO>)ViewBag.Authors)
+                                        {
+                                            <option value="@t.Id">@t.Name</option>
+                                        }
+                                    }
+                                    else
+                                    {
+                                        <option disabled>Không có tác giả nào</option>
+                                    }
+                                </select>
+                                <div id="authorError" class="text-danger" style="display: none;">Vui lòng chọn tác giả.</div>
+                            </div>
+
+                            <div class="col-md-6">
+                                <label for="publisherSelect" class="form-label">Nhà Xuất Bản</label>
+                                <select class="form-select" id="publisherSelect" asp-for="PublisherId">
+                                    <option value="">Chọn Nhà Xuất Bản</option>
+                                    @if (ViewBag.Publishers != null && ViewBag.Publishers.Count > 0)
+                                    {
+                                        @foreach (var t in (List<PublisherDTO>)ViewBag.Publishers)
+                                        {
+                                            <option value="@t.Id">@t.Name</option>
+                                        }
+                                    }
+                                    else
+                                    {
+                                        <option disabled>Không có nhà sản xuất nào</option>
+                                    }
+                                </select>
+                                <div id="publisherError" class="text-danger" style="display: none;">Vui lòng chọn nhà xuất bản.</div>
+                            </div>
+                        </div>
+
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label for="tagSelect" class="form-label">Thể Loại</label>
+                                <select class="form-select" id="tagSelect" asp-for="TagIds">
+                                    <option value="">Chọn Thể Loại</option>
+                                    @if (ViewBag.Tags != null && ViewBag.Tags.Count > 0)
+                                    {
+                                        @foreach (var tag in (List<TagDTO>)ViewBag.Tags)
+                                        {
+                                            <option value="@tag.Id">@tag.Name</option>
+                                        }
+                                    }
+                                    else
+                                    {
+                                        <option disabled>Không có thể loại nào</option>
+                                    }
+                                </select>
+                                <div id="tagsError" class="text-danger" style="display: none;">Vui lòng chọn ít nhất một thể loại.</div>
+                            </div>
+
+                            <div class="col-md-6">
+                                <label for="voucherSelect" class="form-label">Voucher</label>
+                                <select class="form-select" id="voucherSelect" asp-for="VoucherIds">
+                                    <option value="">Chọn Khuyến Mại</option>
+                                    @if (ViewBag.Vouchers != null)
+                                    {
+                                        @foreach (var voucher in (List<VoucherDTO>)ViewBag.Vouchers)
+                                        {
+                                            <option value="@voucher.Id">@voucher.VoucherCode</option>
+                                        }
+                                    }
+                                    else
+                                    {
+                                        <option disabled>Không có voucher nào</option>
+                                    }
+                                </select>
+                                <div id="vouchersError" class="text-danger" style="display: none;">Vui lòng chọn ít nhất một voucher.</div>
+                            </div>
+                        </div>
+
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label for="languageSelect" class="form-label">Ngôn Ngữ</label>
+                                <select class="form-select" id="languageSelect" asp-for="Language">
+                                    <option value="">Chọn Ngôn Ngữ</option>
+                                    <option value="Tiếng Việt">Tiếng Việt</option>
+                                    <option value="English">English</option>
+                                    <option value="French">French</option>
+                                    <option value="Tiếng Trung">Tiếng Trung</option>
+                                    <option value="Tiếng Nhật">Tiếng Nhật</option>
+                                    <option value="Tiếng Hàn">Tiếng Hàn</option>
+                                </select>
+                                <div id="languageError" class="text-danger" style="display: none;">Vui lòng chọn ngôn ngữ.</div>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="publishDate" class="form-label">Ngày Xuất Bản</label>
+                                <input type="date" class="form-control" id="publishDate" asp-for="PublishDate">
+                            </div>
+                        </div>
+
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label for="count" class="form-label">Số lượng</label>
+                                <input type="number" class="form-control" id="count" asp-for="Count">
+                            </div>
+                            <div class="col-md-6">
+                                <label for="numberOfPages" class="form-label">Số trang</label>
+                                <input type="number" class="form-control" id="numberOfPages" asp-for="NumberOfPages">
+                            </div>
+                        </div>
+
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label for="priceInput" class="form-label">Giá Bán</label>
+                                <input type="number" class="form-control" id="priceInput" asp-for="Price">
+                            </div>
+                            <div class="col-md-6">
+                                <label for="imageUpload" class="form-label">Hình Ảnh</label>
+                                <input type="file" name="imageFile" class="form-control" accept="image/*" onchange="previewImages(this)" />
+                                <div id="imagePreview"></div>
+                            </div>
+                        </div>
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label for="format" class="form-label">Định Dạng</label>
+                                <input type="text" class="form-control" id="format" asp-for="Format">
+                            </div>
+                            <div class="col-md-6">
+                                <label for="pageSize" class="form-label">Kích Thước Trang</label>
+                                <input type="text" class="form-control" id="pageSize" asp-for="PageSize">
+                            </div>
+                        </div>
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label for="supplierSelect" class="form-label">Nhà Cung Cấp</label>
+                                <select class="form-select" id="supplierSelect" asp-for="SupplierId">
+                                    <option value="">Chọn Nhà Cung Cấp</option>
+                                    @if (ViewBag.Supplier != null && ViewBag.Supplier.Count > 0)
+                                    {
+                                        @foreach (var t in (List<SupplierDTO>)ViewBag.Supplier)
+                                        {
+                                            <option value="@t.Id">@t.Name</option>
+                                        }
+                                    }
+                                    else
+                                    {
+                                        <option disabled>Không có nhà cung cấp nào</option>
+                                    }
+                                </select>
+                                <div id="authorError" class="text-danger" style="display: none;">Vui lòng chọn tác giả.</div>
+                            </div>
+
+                            <div class="col-md-6">
+                                <label for="Status" class="form-label">Trạng Thái</label>
+                                <select class="form-control" id="Status" name="Status">
+                                    <option value="1">Hoạt động</option>
+                                    <option value="0">Ngừng hoạt động</option>
+                                </select>
+                                <div id="StatusError" class="invalid-feedback"></div>
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="description" class="form-label">Mô Tả</label>
+                            <textarea class="form-control" id="description" asp-for="Description" rows="4"></textarea>
+                        </div>
+                        <div class="text-center">
+                            <button type="submit" class="btn btn-primary px-4">Lưu</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script>
+        var editor = $("#description").kendoEditor({
+            stylesheets: [
+                "../content/shared/styles/editor.css",
+            ],
+            tools: [
+                "bold",
+                "italic",
+                "underline",
+                "undo",
+                "redo",
+                "justifyLeft",
+                "justifyCenter",
+                "justifyRight",
+                "insertUnorderedList",
+                "createLink",
+                "unlink",
+                "insertImage",
+                "tableWizard",
+                "tableProperties",
+                "tableCellProperties",
+                "createTable",
+                "addRowAbove",
+                "addRowBelow",
+                "addColumnLeft",
+                "addColumnRight",
+                "deleteRow",
+                "deleteColumn",
+                "mergeCellsHorizontally",
+                "mergeCellsVertically",
+                "splitCellHorizontally",
+                "splitCellVertically",
+                "tableAlignLeft",
+                "tableAlignCenter",
+                "tableAlignRight",
+                "fontSize",
+                "foreColor",
+                "backColor",
+            ]
+        });
+    </script>
+</div>
+
+
+<style>
+
+    .container {
+        max-width: 800px;
+        margin: auto;
+    }
+
+    .card {
+        border-radius: 16px;
+        box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+        background: #fff;
+        transition: transform 0.3s ease-in-out;
+    }
+
+        .card:hover {
+            transform: scale(1.02);
+        }
+
+    h3 {
+        font-size: 28px;
+        font-weight: 700;
+        text-transform: uppercase;
+        text-align: center;
+        background: linear-gradient(to right, #007bff, #0056b3);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        letter-spacing: 1px;
+        margin-bottom: 20px;
+    }
+
+    .form-label {
+        font-weight: 600;
+        color: #333;
+    }
+
+    .form-control,
+    .form-select {
+        border-radius: 8px;
+        border: 1px solid #ddd;
+        padding: 10px;
+        transition: all 0.3s ease-in-out;
+    }
+
+        .form-control:focus,
+        .form-select:focus {
+            border-color: #007bff;
+            box-shadow: 0 0 8px rgba(0, 123, 255, 0.3);
+        }
+
+    .btn-primary {
+        background: linear-gradient(135deg, #007bff, #0056b3);
+        border: none;
+        padding: 10px 20px;
+        font-size: 16px;
+        font-weight: 600;
+        border-radius: 8px;
+        transition: all 0.3s ease-in-out;
+    }
+
+        .btn-primary:hover {
+            background: linear-gradient(135deg, #0056b3, #003f7f);
+            transform: translateY(-2px);
+        }
+
+    #imagePreview img {
+        max-width: 100px;
+        margin-top: 10px;
+        border-radius: 8px;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    }
+</style>
+
+
+
+
+
+@section scripts {
+    <link href="https://kendo.cdn.telerik.com/2021.3.914/styles/kendo.common.min.css" rel="stylesheet" />
+    <link href="https://kendo.cdn.telerik.com/2021.3.914/styles/kendo.default.min.css" rel="stylesheet" />
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://kendo.cdn.telerik.com/2021.3.914/js/kendo.all.min.js"></script>
+    <script>
+
+
+    </script>
+
+
+    <script>
+        function previewImages(input) {
+            var imageContainer = document.createElement('div');
+            imageContainer.className = 'imagePreviewContainer';
+
+            var previewContainer = document.getElementById('imagePreview');
+            previewContainer.appendChild(imageContainer);
+
+            if (input.files && input.files[0]) {
+                var reader = new FileReader();
+                reader.onload = function (e) {
+                    var image = document.createElement('img');
+                    image.src = e.target.result;
+                    image.style.width = '200px';
+                    image.style.marginRight = '20px';
+                    imageContainer.appendChild(image);
+
+                    image.onclick = function () {
+                        input.click(); 
+                    };
+
+                    var removeIcon = document.createElement('span');
+                    removeIcon.className = 'removeIcon';
+                    removeIcon.innerHTML = '&times;';
+                    removeIcon.onclick = function () {
+                        previewContainer.removeChild(imageContainer); 
+                        input.value = ''; 
+                    };
+                    imageContainer.appendChild(removeIcon);
+                };
+                reader.readAsDataURL(input.files[0]);
+            }
+        }
+    </script>
+
+    <script>
+        function addImageInput() {
+            var container = document.getElementById('imageInputsContainer');
+            var inputCount = container.getElementsByTagName('input').length;
+
+            if (inputCount < 6) { // Giới hạn số lượng input ảnh là 6
+                var newInput = document.createElement('input');
+                newInput.type = 'file';
+                newInput.name = 'formFiles';
+                newInput.className = 'form-control';
+                newInput.accept = 'image/*';  // Chỉ cho phép chọn các tệp ảnh
+                newInput.multiple = false;  // Chỉ cho phép chọn một tệp ảnh mỗi lần
+                newInput.onchange = function () {
+                    previewImages(this); // Gọi hàm xem trước ảnh khi chọn ảnh
+                    this.disabled = false; // Vô hiệu hóa input sau khi đã chọn ảnh
+                };
+
+                container.appendChild(newInput);
+            }
+        }
+    </script>
+
+
+    <style>
+        .imagePreviewContainer {
+            display: inline-block;
+            margin-right: 20px;
+            position: relative; /* Để căn chỉnh vị trí của biểu tượng "X" */
+        }
+
+        .removeIcon {
+            position: absolute;
+            top: 5px;
+            right: 5px;
+            cursor: pointer;
+            font-size: 20px;
+            color: red;
+        }
+    </style>
+
+
+}
+
+
+<script>
+
+    function updateHiddenFieldValue(checkboxId, hiddenFieldId) {
+        var checkbox = document.getElementById(checkboxId);
+        var hiddenField = document.getElementById(hiddenFieldId);
+
+        if (checkbox.checked) {
+            hiddenField.value = "true"; // Nếu checkbox được chọn, thiết lập giá trị của trường ẩn là "true"
+            console.log(hiddenField.value);
+        } else {
+            hiddenField.value = "false"; // Nếu checkbox không được chọn, thiết lập giá trị của trường ẩn là "false"
+            console.log(hiddenField.value);
+
+        }
+    }
+    $(document).ready(function () {
+        $("#form-create").submit(function (event) {
+            var isValid = true;
+
+            // Chỉ kiểm tra select nếu nó KHÔNG phải là voucherSelect
+            $(this).find("select").not("#voucherSelect").each(function () {
+                var selectedValue = $(this).val();
+                if (!selectedValue) {
+                    $(this).addClass('is-invalid');
+                    isValid = false;
+                } else {
+                    $(this).removeClass('is-invalid');
+                }
+            });
+
+            // Kiểm tra input bình thường
+            $(this).find("input").each(function () {
+                var inputValue = $(this).val();
+                if (!inputValue) {
+                    $(this).addClass('is-invalid');
+                    $('#' + this.id + 'Error').removeClass('d-none');
+                    isValid = false;
+                } else {
+                    $(this).removeClass('is-invalid');
+                    $('#' + this.id + 'Error').addClass('d-none');
+                }
+            });
+
+            if (!isValid) {
+                return false;
+            }
+
+            var formData = new FormData(this);
+            saveForm(formData);
+        });
+    });
+
+  
+    function saveForm(formData) {
+        debugger
+        event.preventDefault();
+
+        Swal.fire({
+            title: 'Confirm Title',
+            text: 'Bạn có chắc chắn muốn thêm ?',
+            icon: 'question',
+            showCancelButton: true,
+            confirmButtonText: 'Có',
+            cancelButtonText: 'Không'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                performRequest(formData);
+            } else {
+
+            }
+        });
+    }
+
+
+    $("input, select").on('input', function () {
+        var inputValue = $(this).val();
+        if (inputValue) {
+            $(this).removeClass('is-invalid');
+            $('#' + this.id + 'Error').hide(); 
+        }
+    });
+
+
+    $("#form-create").submit(function (event) {
+        var isValid = true; debugger
+        $(this).find("select").each(function () {
+            var selectedValue = $(this).val();
+            if (!selectedValue) {
+                $(this).addClass('is-invalid');
+                isValid = false;
+            } else {
+                $(this).removeClass('is-invalid');
+            }
+        });
+
+        $(this).find("input").each(function () {
+            debugger
+            var inputValue = $(this).val();
+            if (!inputValue) {
+                $(this).addClass('is-invalid');
+                isValid = false;
+            } else {
+                $(this).removeClass('is-invalid');
+            }
+        });
+
+        if (!isValid) {
+            event.preventDefault();
+            return false;
+        }
+    });
+
+
+    $("input, select").on('input', function () {
+        var inputValue = $(this).val();
+        if (inputValue) {
+            $(this).removeClass('is-invalid');
+            $('#' + this.id + 'Error').hide();
+        }
+    });
+
+    function showNotification(message, type) {
+        toastr.options = {
+            "closeButton": true,
+            "debug": false,
+            "newestOnTop": true,
+            "progressBar": true,
+            "positionClass": "toast-top-right",
+            "preventDuplicates": true,
+            "onclick": null,
+            "showDuration": "300",
+            "hideDuration": "1000",
+            "timeOut": "2500",
+            "extendedTimeOut": "1000",
+            "showEasing": "swing",
+            "hideEasing": "linear",
+            "showMethod": "fadeIn",
+            "hideMethod": "fadeOut"
+        };
+
+        if (type === "success") {
+            toastr.success(message);
+        } else {
+            toastr.error(message);
+        }
+    }
+
+    function saveForm(formData) {
+        event.preventDefault();
+        console.log(formData);
+
+        // Xác nhận từ người dùng
+        Swal.fire({
+            title: 'Confirm Title',
+            text: 'Bạn có chắc chắn muốn thêm ?',
+            icon: 'question',
+            showCancelButton: true,
+            confirmButtonText: 'Có',
+            cancelButtonText: 'Không'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                performRequest(formData);
+            }
+        });
+    }
+
+    function performRequest(formData) {
+        $.ajax({
+            url: '/Book/Add',
+            type: 'POST',
+            data: formData,
+            contentType: false,
+            processData: false,
+            success: function (results) {
+                if (results.code === 200) {
+                    showNotification(results.message, "success");
+                    setTimeout(function () {
+                        window.location.href = '/Book/Index'; 
+                    }, 3000); 
+                } else {
+                    showNotification(results.message, "error");
+                }
+            },
+            error: function () {
+                showNotification("Lỗi hệ thống", "error");
+            }
+        });
+    }
+
+
+
+</script>
+
+
+
+

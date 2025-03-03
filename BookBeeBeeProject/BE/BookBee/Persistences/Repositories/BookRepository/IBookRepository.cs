@@ -9,7 +9,7 @@ namespace BookStack.Persistence.Repositories.BookRepository
 
 		Task<List<Book>> GetBooks(int? page = 1, int? pageSize = 10, string? key = "", string? sortBy = "ID",
 						  int? tagId = 0, int? voucherId = 0, bool includeDeleted = false,
-						  int? publisherId = null, int? authorId = null, int? supplierId = null);
+						  int? publisherId = null, int? authorId = null, int? supplierId = null,int? status=null);
 
 		Task<List<Book>> GetCart(List<int> bookIds);
 		Task<Book> GetBookById(int id);
@@ -20,5 +20,13 @@ namespace BookStack.Persistence.Repositories.BookRepository
 		Task<List<Book>> GetTopOrderedBooks(int topCount = 10);
 		Task<bool>  IsSaveChanges();
 		Task<int> GetBookCount();
-	}
+
+
+
+
+        Task<List<Book>> GetInactiveBooks(int? page = 1, int? pageSize = 10, string? key = "", string? sortBy = "ID",
+                          int? tagId = 0, int? voucherId = 0, bool includeDeleted = false,
+                          int? publisherId = null, int? authorId = null, int? supplierId = null);
+
+    }
 }

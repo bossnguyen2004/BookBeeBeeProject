@@ -46,7 +46,7 @@ namespace BookBee.Services.SupplierService
 			var supplier = _supplierRepository.GetSupplier(page, pageSize, key, sortBy);
 			return new ResponseDTO()
 			{
-				Data = _mapper.Map<List<AuthorDTO>>(supplier),
+				Data = _mapper.Map<List<SupplierDTO>>(supplier),
 				Total = _supplierRepository.Total
 			};
 		}

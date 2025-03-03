@@ -13,7 +13,7 @@ namespace BookBee.Persistences.Repositories.CategoryRepository
 			_dataContext = dataContext;
 		}
 
-		public async Task<List<Tag>> GetAllTags(int? page = 1, int? pageSize = 10, string? key = "", string? sortBy = "ID")
+		public List<Tag> GetAllTags(int? page = 1, int? pageSize = 10, string? key = "", string? sortBy = "ID")
 		{
 			var query = _dataContext.Tags.Where(t => !t.IsDeleted).AsQueryable();
 

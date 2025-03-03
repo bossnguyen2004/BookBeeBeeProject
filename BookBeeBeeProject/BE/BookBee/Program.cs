@@ -77,9 +77,8 @@ builder.Services.AddAuthentication(options =>
         };
     });
 
-// Add authorization
 builder.Services.AddAuthorization();
-
+builder.Services.AddHttpContextAccessor();
 services.AddUtilities(builder.Configuration);
 services.AddRepositories(builder.Configuration);
 services.AddServices(builder.Configuration);
@@ -88,34 +87,34 @@ services.AddAutoMapper(typeof(MapperProfile).Assembly);
 services.AddFluentValidationAutoValidation();
 
 
-
-services.AddCors(options =>
+builder.Services.AddCors(options =>
 {
-    options.AddPolicy("CorsPolicy", builder =>
-        builder.WithOrigins("http://localhost:7273", "http://localhost:7222")
-            .AllowAnyHeader()
-            .AllowAnyMethod());
+    options.AddPolicy("AllowSpecificOrigin",
+        policy =>
+        {
+            policy.WithOrigins("https://localhost:7273", "http://localhost:7222") 
+                  .AllowAnyMethod()
+                  .AllowAnyHeader()
+                  .AllowCredentials(); 
+        });
 });
-
 
 
 
 var app = builder.Build();
 
-// Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
     app.UseSwaggerUI();
 }
 
-app.UseCors("CorsPolicy");
+app.UseCors("AllowSpecificOrigin");
 
 app.UseHttpsRedirection();
 app.UseStaticFiles();
 app.UseAuthentication();
 app.UseAuthorization();
-
 app.MapControllers();
 
 await app.ApplyMigrations();

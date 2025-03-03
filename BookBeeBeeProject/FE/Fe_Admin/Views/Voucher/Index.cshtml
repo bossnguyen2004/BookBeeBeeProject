@@ -1,0 +1,586 @@
+﻿@model X.PagedList.IPagedList<Fe_Admin.Models.Voucher>
+@using X.PagedList.Mvc.Core
+@using Fe_Admin.Models
+@{
+    ViewData["Title"] = "Index";
+}
+<link href="https://cdn.jsdelivr.net/npm/boxicons/css/boxicons.min.css" rel="stylesheet">
+
+<div class="pagetitle">
+    <h1>Quản lý Khuyến Mại</h1>
+    <nav>
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a asp-area="admin" asp-controller="Home" asp-action="Index">Trang chủ</a></li>
+            <li class="breadcrumb-item active">Khuyến Mại</li>
+        </ol>
+    </nav>
+</div>
+@{
+    var httpContext = ViewContext.HttpContext;
+    var accessRole = httpContext.Session.GetString("Result");
+    var accessToken = httpContext.Session.GetString("AccessToken");
+}
+<section class="section dashboard">
+    <div class="row">
+        <div class="col-lg-8">
+            <div class="row">
+                <div class="col-12">
+                    <div class="card recent-sales overflow-auto" style="width:920px">
+                        <div id="tableInfo" class="card-body">
+                            @if (TempData["SuccessMessage"] != null)
+                            {
+                                <div id="successMessage" class="alert alert-success" role="alert">
+                                    @TempData["SuccessMessage"]
+                                </div>
+                            }
+                            <div class="row">
+                                <div class="col-6">
+
+                                    @using (Html.BeginForm("Index", "Voucher", FormMethod.Get, new { id = "searchForm" }))
+                                    {
+                                        <div class="input-group input-group-sm search-container" style="left:440px; width: 380px;height:50px">
+                                            @Html.TextBox("key", ViewBag.Searchtext as string,
+                                                     new { @class = "form-control", placeholder = "Tìm kiếm theo tên voucher", id = "searchKey" })
+                                            <span class="input-group-append">
+                                                <button type="submit" class="btn btn-primary search-btn">
+                                                    <i class="fas fa-search"></i> Tìm kiếm
+                                                </button>
+                                                @if (!string.IsNullOrEmpty(accessToken) && accessRole == "admin")
+                                                {
+                                                    <button type="button" style="color:black" class="btn btn-light btn-flat"
+                                                            title="Thêm mới" id="addNewStaffBtn" data-bs-toggle="modal" data-bs-target="#addStaffModal" aria-label="Close">
+                                                        <i class="fas fa-plus"></i>
+                                                    </button>
+                                                }
+                                            </span>
+                                        </div>
+                                    }
+
+                                    <div id="noResultsMessage" style="color: red; display: none;">Không tìm thấy voucher[ nào phù hợp với tên này!</div>
+                                </div>
+                            </div>
+                            <table id="tableBody" class="table table-hover datatable">
+                                <thead>
+                                    <tr>
+                                        <td style="font-weight: bold;">STT</td>
+                                        <td style="font-weight: bold;">Mã Voucher</td>
+                                        <td style="font-weight: bold;">Mô Tả</td>
+                                        <td style="font-weight: bold;">Ngày Bắt Đầu</td>
+                                        <td style="font-weight: bold;">Ngày Kết Thúc</td>
+                                        <td style="font-weight: bold;">Giá Trị Giảm Giá</td>
+                                        @if (!string.IsNullOrEmpty(accessToken) && accessRole == "admin")
+                                        {
+                                            <td style="font-weight: bold;">Trạng Thái</td>
+                                        }
+                                        @if (!string.IsNullOrEmpty(accessToken) && accessRole == "admin")
+                                        {
+                                            <td style="font-weight: bold;">Action</td>
+                                        }
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @if (Model != null && Model.Any())
+                                    {
+                                        int currentPage = ViewBag.CurrentPage ?? 1;
+                                        int pageSize = 10;
+                                        int stt = (currentPage - 1) * pageSize + 1;
+
+                                        foreach (var item in Model)
+                                        {
+                                            <tr id="trow_@item.Id">
+                                                <td>@stt</td>
+                                                <td>@item.VoucherCode</td>
+                                                <td>@item.VoucherName</td>
+                                                <td>@item.StartDate?.ToString("dd/MM/yyyy")</td>
+                                                <td>@item.EndDate?.ToString("dd/MM/yyyy")</td>
+                                                <td>@item.DiscountValue?.ToString("N0")%</td>
+                                                <td>
+                                                    <input type="checkbox" class="form-check-input"
+                                                           id="voucherStatus_@item.Id"
+                                                           data-voucher-id="@item.Id"
+                                                    @(item.Status == 1 ? "checked" : "")
+                                                           onchange="toggleVoucherStatus(@item.Id, this.checked)">
+                                                </td>
+
+                                                @if (!string.IsNullOrEmpty(accessToken) && accessRole == "admin")
+                                                {
+                                                    <td>
+                                                        <a class="btn btn-info" onclick="editForm(@item.Id)" title="Cập nhật">
+                                                            <i class="bx bxs-edit-alt"></i>
+                                                        </a>
+
+                                                        <a class="btn btn-default delete-author" href="javascript:void(0);" data-id="@item.Id" title="Xóa">
+                                                            <i class="bx bxs-trash-alt"></i>
+                                                        </a>
+                                                    </td>
+                                                }
+                                            </tr>
+                                            stt++;
+                                        }
+                                    }
+                                    else
+                                    {
+                                        <tr>
+                                            <td style="font-weight: bold" colspan="9">Không có bản ghi nào!!!</td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+
+                            <div class="col-12">
+                                <nav aria-label="Page navigation" class="pagination-container">
+                                    @Html.PagedListPager(
+                                             Model,
+                                             page => Url.Action("Index", new { currentPage = page, pageSize = ViewBag.PageSize, key = ViewBag.Searchtext }),
+                                             new PagedListRenderOptions
+                                    {
+                                        DisplayLinkToPreviousPage = PagedListDisplayMode.Always,
+                                        DisplayLinkToNextPage = PagedListDisplayMode.Always,
+                                        DisplayLinkToIndividualPages = true,
+                                        LinkToPreviousPageFormat = "<button class='btn btn-outline-secondary'><i class='fas fa-arrow-left'></i></button>",
+                                        LinkToNextPageFormat = "<button class='btn btn-outline-secondary'><i class='fas fa-arrow-right'></i></button>",
+                                        LinkToIndividualPageFormat = "<button class='btn btn-outline-primary'>{0}</button>",
+                                        MaximumPageNumbersToDisplay = 5
+                                    })
+                                </nav>
+                            </div>
+
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+    </div>
+
+</section>
+
+
+<div class="modal fade" id="addStaffModal" tabindex="-1" aria-labelledby="addStaffModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="addVoucherModalLabel">Thêm Mới Voucher</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form id="addVoucherForm" action="@Url.Action("Create", "Voucher")" method="post">
+                    <div class="mb-3">
+                        <label for="VoucherCode" class="form-label">Mã Voucher</label>
+                        <input type="text" class="form-control" id="VoucherCode" name="VoucherCode" placeholder="Nhập mã voucher" required />
+                        <div id="VoucherCodeError" class="invalid-feedback"></div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="VoucherName" class="form-label">Mô Tả</label>
+                        <input type="text" class="form-control" id="VoucherName" name="VoucherName" placeholder="Nhập tên voucher" required />
+                        <div id="VoucherNameError" class="invalid-feedback"></div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="StartDate" class="form-label">Ngày Bắt Đầu</label>
+                        <input type="date" class="form-control" id="StartDate" name="StartDate" required />
+                        <div id="StartDateError" class="invalid-feedback"></div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="EndDate" class="form-label">Ngày Kết Thúc</label>
+                        <input type="date" class="form-control" id="EndDate" name="EndDate" required />
+                        <div id="EndDateError" class="invalid-feedback"></div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="DiscountValue" class="form-label">Giá Trị Giảm Giá (%)</label>
+                        <input type="number" class="form-control" id="DiscountValue" name="DiscountValue"
+                               min="1" max="100" placeholder="Nhập giá trị từ 1 đến 100" required />
+                        <div id="DiscountValueError" class="invalid-feedback">Giá trị phải nằm trong khoảng 1 đến 100.</div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="Status" class="form-label">Trạng Thái</label>
+                        <select class="form-control" id="Status" name="Status">
+                            <option value="1">Hoạt động</option>
+                            <option value="0">Ngừng hoạt động</option>
+                        </select>
+                        <div id="StatusError" class="invalid-feedback"></div>
+                    </div>
+
+                    <button type="submit" class="btn btn-primary">Lưu</button>
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Đóng</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+
+<div id="editAuthorModal" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="editAuthorModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="editAuthorModalLabel">Chỉnh Sửa Khuyến Mại</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form id="editAuthorForm" action="@Url.Action("Edit", "Voucher")" method="post">
+                    <input type="hidden" id="voucherId" name="Id">
+
+                    <div class="form-group">
+                        <label for="VoucherCodeInput">Mã Voucher</label>
+                        <input type="text" class="form-control" id="VoucherCodeInput" name="VoucherCode" placeholder="Nhập mã voucher" required />
+                    </div>
+
+                    <div class="form-group">
+                        <label for="VoucherNameInput">Tên Voucher</label>
+                        <input type="text" class="form-control" id="VoucherNameInput" name="VoucherName" placeholder="Nhập tên voucher" required />
+                    </div>
+
+                    <div class="form-group">
+                        <label for="StartDateInput" class="form-label">Ngày Bắt Đầu</label>
+                        <input type="date" class="form-control" id="StartDateInput" name="StartDate" required />
+                    </div>
+
+                    <div class="form-group">
+                        <label for="EndDateInput" class="form-label">Ngày Kết Thúc</label>
+                        <input type="date" class="form-control" id="EndDateInput" name="EndDate" required />
+                    </div>
+
+                    <div class="form-group">
+                        <label for="DiscountValueInput" class="form-label">Giá Trị Giảm Giá (%)</label>
+                        <input type="number" class="form-control" id="DiscountValueInput" name="DiscountValue" min="1" max="100" placeholder="Nhập giá trị từ 1 đến 100" required />
+                        <div id="DiscountValueError" class="invalid-feedback">Giá trị phải nằm trong khoảng 1 đến 100 %.</div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="StatusInput" class="form-label">Trạng Thái</label>
+                        <select class="form-control" id="StatusInput" name="Status">
+                            <option value="1">Hoạt động</option>
+                            <option value="0">Ngừng hoạt động</option>
+                        </select>
+                        <div id="StatusError" class="invalid-feedback"></div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Đóng</button>
+                <button type="button" class="btn btn-primary" onclick="updateVoucher()">Cập nhật</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+<style>
+    .table {
+        width: 100%;
+        border-collapse: collapse;
+        font-size: 14px;
+        margin-bottom: 20px;
+    }
+
+
+        .table th, .table td {
+            text-align: center;
+            padding: 12px;
+            vertical-align: middle;
+        }
+
+
+        .table th {
+            background-color: #f8f9fa;
+            font-weight: bold;
+        }
+
+
+        .table .btn {
+            padding: 5px 10px;
+            font-size: 14px;
+            border-radius: 5px;
+            transition: background-color 0.3s ease;
+        }
+
+
+        .table .btn-info {
+            background-color: #17a2b8;
+            color: white;
+        }
+
+        .table .btn-danger {
+            background-color: #dc3545;
+            color: white;
+        }
+
+        .table .btn:hover {
+            opacity: 0.8;
+        }
+
+
+    .form-check-input {
+        width: 20px;
+        height: 20px;
+        margin: 0 auto;
+    }
+
+
+    .table tbody tr td {
+        text-align: center;
+        color: #6c757d;
+    }
+
+
+    .table td {
+        word-wrap: break-word;
+    }
+
+
+
+    .table td, .table td {
+        font-size: 12px;
+    }
+
+    .table .btn {
+        padding: 5px;
+    }
+
+    }
+</style>
+
+
+
+@section scripts {
+
+    <script>
+        $("#searchForm").submit(function (event) {
+            event.preventDefault();
+
+            var searchText = $("#searchKey").val();
+
+            $.ajax({
+                url: '@Url.Action("Index", "Voucher")',
+                type: 'GET',
+                data: { key: searchText },
+                headers: {
+                    "X-Requested-With": "XMLHttpRequest"
+                },
+                success: function (data) {
+                    if ($(data).find("table tbody tr").length > 0) {
+                        $("#tableBody tbody").html($(data).find("table tbody").html());
+                        $("#noResultsMessage").hide();
+
+                        $("#tableBody tbody tr").each(function () {
+                            var authorName = $(this).find("td:nth-child(2)").text().toLowerCase();
+                            if (authorName.indexOf(searchText.toLowerCase()) !== -1) {
+                                $(this).addClass("highlight");
+                            } else {
+                                $(this).removeClass("highlight");
+                            }
+                        });
+                    } else {
+                        $("#tableBody tbody").empty();
+                        $("#noResultsMessage").text("Không tìm thấy voucher nào phù hợp với tên này!").show();
+                    }
+                },
+                error: function (xhr, status, error) {
+                    console.error("Đã xảy ra lỗi: " + error);
+                    $("#tableBody tbody").empty();
+                    $("#noResultsMessage").text("Đã xảy ra lỗi khi tìm kiếm.").show();
+                }
+            });
+        });
+
+        $(document).ready(function () {
+            var successMessage = $('#successMessage');
+            if (successMessage.length) {
+                setTimeout(function () {
+                    successMessage.fadeOut();
+                }, 3000);
+            }
+        });
+
+        ///  THÊM MỚI TÁC GIẢ /////
+        // thêm mới tác giả
+        $(document).ready(function () {
+            $("#addNewStaffBtn").click(function () {
+                $("#addStaffModal").modal('show');
+            });
+        });
+        document.addEventListener('DOMContentLoaded', function () {
+            const modal = new bootstrap.Modal(document.getElementById('addStaffModal'));
+
+            $('#addStaffModal').on('hidden.bs.modal', function () {
+                $('#addStaffForm')[0].reset();
+                $('#addStaffForm').find('.is-invalid').removeClass('is-invalid');
+                $('#addStaffForm').find('.invalid-feedback').text('');
+            });
+
+            const closeModalAndRedirectBtn = document.getElementById('closeModalAndRedirect');
+            closeModalAndRedirectBtn.addEventListener('click', function () {
+                modal.hide();
+                window.location.href = '@Url.Action("Index", "Voucher")';
+            });
+
+            const addNewStaffBtn = document.getElementById('addNewStaffBtn');
+            addNewStaffBtn.addEventListener('click', function () {
+                modal.show();
+            });
+        });
+
+
+        function editForm(voucherId) {
+            if (!voucherId) {
+                alert("ID voucher không hợp lệ.");
+                return;
+            }
+
+            var url = `https://localhost:7287/api/Voucher/${voucherId}`;
+
+            $.ajax({
+                url: url,
+                type: 'GET',
+                dataType: 'json',
+                success: function (response) {
+                    console.log("Response từ API:", response);
+                    if (response && response.data) {
+                        var voucher = response.data;
+
+                        $('#voucherId').val(voucher.id || '');
+                        $('#VoucherCodeInput').val(voucher.voucherCode || '');
+                        $('#VoucherNameInput').val(voucher.voucherName || '');
+                        $('#StartDateInput').val(formatDate(voucher.startDate) || '');
+                        $('#EndDateInput').val(formatDate(voucher.endDate) || '');
+                        $('#DiscountValueInput').val(voucher.discountValue || '');
+                        $('#StatusInput').val(voucher.status ? '1' : '0');
+
+                        $('#editAuthorModal').modal('show');
+                    } else {
+                        alert("Không tìm thấy thông tin voucher.");
+                    }
+                },
+                error: function (xhr, status, error) {
+                    console.error("Lỗi khi gọi API:", status, error);
+                    alert("Lỗi khi tải thông tin voucher.");
+                }
+            });
+        }
+
+        function formatDate(dateStr) {
+            if (!dateStr) return '';
+            var date = new Date(dateStr);
+            return date.toISOString().split('T')[0];  // Định dạng YYYY-MM-DD
+        }
+
+        function updateVoucher() {
+            var formData = {
+                Id: $('#voucherId').val(),
+                VoucherCode: $('#VoucherCodeInput').val(),
+                VoucherName: $('#VoucherNameInput').val(),
+                StartDate: $('#StartDateInput').val(),
+                EndDate: $('#EndDateInput').val(),
+                DiscountValue: $('#DiscountValueInput').val(),
+                Status: $('#StatusInput').val()
+            };
+
+            $.ajax({
+                url: `https://localhost:7287/api/Voucher/${formData.Id}`,
+                type: 'PUT',
+                contentType: 'application/json',
+                data: JSON.stringify(formData),
+                success: function (response) {
+                    alert("Cập nhật thành công!");
+                    $('#editAuthorModal').modal('hide');
+                    location.reload();  // Load lại trang để cập nhật dữ liệu mới
+                },
+                error: function (xhr, status, error) {
+                    console.error("Lỗi khi cập nhật:", status, error);
+                    alert("Cập nhật thất bại, vui lòng thử lại.");
+                }
+            });
+        }
+
+
+        function formatDate(dateString) {
+            if (!dateString) return '';
+            var date = new Date(dateString);
+            var year = date.getFullYear();
+            var month = ('0' + (date.getMonth() + 1)).slice(-2);
+            var day = ('0' + date.getDate()).slice(-2);
+            return `${year}-${month}-${day}`;
+        }
+
+        $(document).ready(function () {
+            $('body').on('click', '.delete-author', function () {
+                var id = $(this).data("id");
+                console.log("ID voucher: " + id);
+                if (confirm('Bạn có chắc chắn muốn xóa voucher này?')) {
+                    $.ajax({
+                        url: '/Voucher/Delete',
+                        type: 'POST',
+                        data: {
+                            id: id,
+                            __RequestVerificationToken: $('input[name="__RequestVerificationToken"]').val()
+                        },
+                        success: function (response) {
+                            console.log(response);
+                            if (response.success) {
+                                alert("Xóa voucher thành công!");
+                                $('#trow_' + id).remove();
+                            } else {
+                                alert(response.message || "Không thể xóa voucher.");
+                            }
+                        },
+                        error: function (xhr) {
+                            console.error("Đã xảy ra lỗi: " + xhr.responseText);
+                            alert("Không thể xóa voucher. Vui lòng thử lại.");
+                        }
+                    });
+                }
+            });
+        });
+
+
+
+        function toggleVoucherStatus(voucherId, isChecked) {
+            let confirmMessage = isChecked
+                ? "Bạn có muốn kích hoạt voucher này không?"
+                : "Bạn có muốn ngừng hoạt động voucher này không?";
+
+            if (!confirm(confirmMessage)) {
+                // Người dùng chọn "Cancel", khôi phục trạng thái checkbox
+                document.getElementById(`voucherStatus_${voucherId}`).checked = !isChecked;
+                return;
+            }
+
+            // Gửi dữ liệu cập nhật trạng thái tới API
+            let apiUrl = `https://localhost:7287/api/Voucher/${voucherId}/status`;
+
+            $.ajax({
+                url: apiUrl,
+                type: 'PATCH',
+                contentType: 'application/json',
+                data: JSON.stringify({ Status: isChecked ? 1 : 0 }),
+                success: function (response) {
+                    if (response && response.code === 200) {
+                        alert(isChecked
+                            ? "Voucher đã được kích hoạt thành công!"
+                            : "Voucher đã được ngừng hoạt động.");
+                    } else {
+                        alert("Cập nhật trạng thái thất bại. Vui lòng thử lại!");
+                        document.getElementById(`voucherStatus_${voucherId}`).checked = !isChecked;
+                    }
+                },
+                error: function (xhr, status, error) {
+                    console.error("Lỗi khi cập nhật trạng thái voucher:", error);
+                    alert("Có lỗi xảy ra khi cập nhật trạng thái voucher.");
+                    document.getElementById(`voucherStatus_${voucherId}`).checked = !isChecked;
+                }
+            });
+        }
+
+
+
+    </script>
+}

@@ -1,0 +1,322 @@
+﻿@model X.PagedList.IPagedList<Fe_Admin.Models.Book>
+@using X.PagedList.Mvc.Core
+
+@{
+    ViewData["Title"] = "Sách Ngừng Bán";
+}
+<style>
+    #updateModal {
+        z-index: 9999;
+    }
+
+    .modal-dialog {
+        max-width: 90%;
+        width: auto;
+        max-height: 90%;
+        height: auto;
+    }
+
+    .modal-content {
+        overflow: hidden;
+    }
+
+    .modal-body {
+        max-height: 100vh;
+        overflow-y: auto;
+    }
+
+</style>
+
+
+<div class="pagetitle">
+
+    <nav>
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="@Url.Action("Index", "Book")">Quản lý Sản Phẩm</a></li>
+        </ol>
+    </nav>
+</div>
+<div class="row w-100">
+    <div class="col-lg-8">
+        <div class="d-md-flex">
+
+            <div class="m-b-10">
+                <a class="btn btn-kio" href="">
+                    <i class="fas fa-ban m-r-5 text-danger" style=""></i>
+                    <span>DS.Sản Phẩm Ngừng Bán</span>
+                </a>
+            </div>
+            <div class="m-b-10 m-l-10">
+                <a class="btn btn-kio" href="@Url.Action("Create", "Book")">
+                    <i class="fas fa-plus-circle m-r-5 text-primary"></i>
+                    <span>Thêm Sản Phẩm</span>
+                </a>
+            </div>
+
+        </div>
+    </div>
+    <div class="col-lg-4 text-right">
+    </div>
+</div>
+<div id="modalContent" style="display: block;">
+</div>
+
+<div id="alertMessage" class="alert" role="alert" style="display: none;"></div>
+
+@{
+    var httpContext = ViewContext.HttpContext;
+    var accessRole = httpContext.Session.GetString("Result");
+    var accessToken = httpContext.Session.GetString("AccessToken");
+}
+
+
+<section class="section dashboard">
+    <div class="row">
+        <div class="col-lg-8">
+            <div class="row">
+                <div class="col-12">
+                    <div class="card recent-sales overflow-auto" style="width: 920px;">
+                        <div id="tableInfo" class="card-body">
+                            @if (TempData["SuccessMessage"] != null)
+                            {
+                                <div id="successMessage" class="alert alert-success" role="alert">
+                                    @TempData["SuccessMessage"]
+                                </div>
+                            }
+                            <div class="row">
+                                <div class="col-6">
+                                    @using (Html.BeginForm("Index", "Book", FormMethod.Get, new { id = "searchForm" }))
+                                    {
+                                        <div class="input-group input-group-sm search-container" style="width: 380px; height:50px; left: 440px;">
+                                            @Html.TextBox("key", ViewBag.Searchtext as string, new { @class = "form-control", placeholder = "Tìm kiếm theo tên sách", id = "searchKey" })
+                                            <span class="input-group-append">
+                                                <button type="submit" class="btn btn-primary search-btn">
+                                                    <i class="fas fa-search"></i> Tìm kiếm
+                                                </button>
+                                            </span>
+                                        </div>
+                                    }
+
+                                    <div id="noResultsMessage" style="color: red; display: none;">Không tìm thấy sách nào phù hợp với tên này!</div>
+                                </div>
+                            </div>
+
+                            <table id="tableBody" class="table table-hover datatable">
+                                <thead>
+                                    <tr>
+                                        <td style="font-weight: bold;">STT</td>
+                                        <td style="font-weight: bold;">Tên Sách</td>
+                                        <td style="font-weight: bold;">Mô Tả</td>
+                                        <td style="font-weight: bold;">Số Lượng</td>
+                                        <td style="font-weight: bold;">Giá Bán</td>
+                                        @if (!string.IsNullOrEmpty(accessToken) && accessRole == "admin")
+                                        {
+                                            <td style="font-weight: bold;">Khôi Phục</td>
+                                        }
+
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @if (Model != null && Model.Any())
+                                    {
+                                        int currentPage = ViewBag.CurrentPage ?? 1;
+                                        int pageSize = ViewBag.PageSize ?? 10;
+                                        int stt = (currentPage - 1) * pageSize + 1;
+
+                                        foreach (var item in Model)
+                                        {
+                                            <form method="post" id="deleteForm" style="display: none;">
+                                                @Html.AntiForgeryToken()
+                                            </form>
+                                            <tr id="trow_@item.Id">
+                                                <td>@stt</td>
+                                                <td>@item.Title</td>
+                                                <td>@item.Description</td>
+                                                <td>@item.Count</td>
+                                                <td>@(item.Price.ToString("N0") + " VND")</td>
+                                                <td>
+                                                    <input type="checkbox" class="form-check-input"
+                                                           id="bookStatus_@item.Id"
+                                                           data-book-id="@item.Id"
+                                                    @(item.Status == 1 ? "checked=\"checked\"" : "")
+                                                           onchange="toggleBookStatus(@item.Id, this.checked)">
+                                                </td>
+
+                                            </tr>
+                                            stt++;
+                                        }
+                                    }
+                                    else
+                                    {
+                                        <tr>
+                                            <td colspan="6" class="text-center">Không có sách nào ngừng hoạt động</td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+
+
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<div class="pagination-container">
+    @Html.PagedListPager(Model, page => Url.Action("Inactive", new { currentPage = page }))
+</div>
+<style>
+    .table {
+        width: 100%;
+        border-collapse: collapse;
+        font-size: 14px;
+        margin-bottom: 20px;
+    }
+
+
+        .table th, .table td {
+            text-align: center;
+            padding: 12px;
+            vertical-align: middle;
+        }
+
+
+        .table th {
+            background-color: #f8f9fa;
+            font-weight: bold;
+        }
+
+
+        .table .btn {
+            padding: 5px 10px;
+            font-size: 14px;
+            border-radius: 5px;
+            transition: background-color 0.3s ease;
+        }
+
+
+        .table .btn-info {
+            background-color: #17a2b8;
+            color: white;
+        }
+
+        .table .btn-danger {
+            background-color: #dc3545;
+            color: white;
+        }
+
+        .table .btn:hover {
+            opacity: 0.8;
+        }
+
+
+    .form-check-input {
+        width: 20px;
+        height: 20px;
+        margin: 0 auto;
+    }
+
+
+    .table tbody tr td {
+        text-align: center;
+        color: #6c757d;
+    }
+
+
+    .table td {
+        word-wrap: break-word;
+    }
+
+
+
+    .table td, .table td {
+        font-size: 12px;
+    }
+
+    .table .btn {
+        padding: 5px;
+    }
+
+    }
+</style>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/lazysizes/5.3.2/lazysizes.min.js"></script>
+
+@section scripts {
+
+    <script>
+        $("#searchForm").submit(function (event) {
+            event.preventDefault();
+
+            var searchText = $("#searchKey").val();
+
+            $.ajax({
+                url: '@Url.Action("Index", "Book")',
+                type: 'GET',
+                data: { key: searchText },
+                headers: {
+                    "X-Requested-With": "XMLHttpRequest"
+                },
+                success: function (data) {
+                    if ($(data).find("table tbody tr").length > 0) {
+                        $("#tableBody tbody").html($(data).find("table tbody").html());
+                        $("#noResultsMessage").hide();
+
+                        $("#tableBody tbody tr").each(function () {
+                            var authorName = $(this).find("td:nth-child(2)").text().toLowerCase();
+                            if (authorName.indexOf(searchText.toLowerCase()) !== -1) {
+                                $(this).addClass("highlight");
+                            } else {
+                                $(this).removeClass("highlight");
+                            }
+                        });
+                    } else {
+                        $("#tableBody tbody").empty();
+                        $("#noResultsMessage").text("Không tìm thấy sách nào phù hợp với tên này!").show();
+                    }
+                },
+                error: function (xhr, status, error) {
+                    console.error("Đã xảy ra lỗi: " + error);
+                    $("#tableBody tbody").empty();
+                    $("#noResultsMessage").text("Đã xảy ra lỗi khi tìm kiếm.").show();
+                }
+            });
+        });
+
+
+        function toggleBookStatus(bookId, isChecked) {
+            let confirmMessage = isChecked
+                ? "Bạn có muốn kích hoạt sách này không?"
+                : "Bạn có muốn ngừng hoạt động sách này không?";
+
+            if (!confirm(confirmMessage)) {
+                document.getElementById(`bookStatus_${bookId}`).checked = !isChecked;
+                return;
+            }
+
+            let apiUrl = `https://localhost:7287/api/Book/${bookId}/status`;
+
+            $.ajax({
+                url: apiUrl,
+                type: 'PATCH',
+                contentType: 'application/json',
+                data: JSON.stringify({ status: isChecked ? 1 : 0 }),
+                success: function (response) {
+                    alert(response.message);
+
+                    if (isChecked) {
+                        window.location.href = "@Url.Action("Index", "Book")";
+                    } 
+                },
+                error: function (xhr) {
+                    console.error("Lỗi cập nhật trạng thái:", xhr.responseText);
+                    alert("Có lỗi xảy ra! " + xhr.responseText);
+                    document.getElementById(`bookStatus_${bookId}`).checked = !isChecked;
+                }
+            });
+        }
+
+    </script>
+}

@@ -87,8 +87,8 @@ namespace Fe_Admin.Controllers
                 if (loginResponse.data.role.name == "admin" || loginResponse.data.role.name == "nhanvien")
                 {
                     TempData["Success"] = "Đăng nhập thành công!";
-                    TempData.Keep("Success");
                     return RedirectToAction("Index", "Home");
+            
                 }
                 else
                 {
@@ -132,8 +132,7 @@ namespace Fe_Admin.Controllers
         [HttpPost]
         public IActionResult ClearTempData()
         {
-            TempData.Remove("Success");
-            TempData.Remove("Error");
+            TempData.Clear();
             return Ok();
         }
     }
