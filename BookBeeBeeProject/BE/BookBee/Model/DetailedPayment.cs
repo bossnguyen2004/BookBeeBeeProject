@@ -6,10 +6,10 @@ namespace BookBee.Model
     {
         [Key]
         public int Id { get; set; }
-        [Required]
-        public int OrderId { get; set; }
-        [Required]
-        public int PaymentId { get; set; }
+
+        public int? OrderId { get; set; }
+
+        public int? PaymentId { get; set; }
         [Required]
         public double? Price { get; set; }
         public int Status { get; set; }

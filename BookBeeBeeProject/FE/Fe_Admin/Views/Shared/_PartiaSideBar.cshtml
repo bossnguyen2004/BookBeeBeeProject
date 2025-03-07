@@ -1,16 +1,17 @@
 @{
     var httpContext = ViewContext.HttpContext;
-    var accessRole = httpContext.Session.GetString("Result");
+    // var accessRole = httpContext.Session.GetString("Result");
+var accessRole = httpContext.Session.GetString("UserRole");
     var accessToken = httpContext.Session.GetString("AccessToken");
 }
 
 
-@if (!string.IsNullOrEmpty(accessToken) && accessRole == "admin" || !string.IsNullOrEmpty(accessToken) && accessRole == "nhanvien")
+@if (!string.IsNullOrEmpty(accessToken) && (accessRole == "admin" || accessRole == "nhanvien"))
 {
     <ul class="sidebar-nav" id="sidebar-nav">
 
         <li class="nav-item">
-            <a class="nav-link " href="/BanHangTaiQuay/DanhSachHoaDonCho">
+            <a class="nav-link " href="@Url.Action("DanhSachHoaDonCho", "TaiQuay")">
                 <i class="bi bi-grid"></i>
                 <span>Bán Hàng Tại Quầy</span>
             </a>
@@ -88,7 +89,7 @@
             </a>
             <ul id="charts-navs" class="nav-content collapse " data-bs-parent="#sidebar-nav">
                 <li>
-                    <a href="/SanPhamChiTiet">
+                    <a href="@Url.Action("Index", "OrderVoucher")">
                         <i class="bi bi-circle"></i><span>Voucher Cửa Hàng </span>
                     </a>
                 </li>
@@ -136,12 +137,6 @@
                 </li>
 
             </ul>
-        </li>
-
-        <li class="nav-item">
-            <a class="nav-link collapsed" href="@Url.Action("Index", "ShippingMode")">
-                <i class="bi bi-menu-button-wide"></i><span>Quản Lý Đơn Vị Vận Chuyển</span>
-            </a>
         </li>
     </ul>
 }

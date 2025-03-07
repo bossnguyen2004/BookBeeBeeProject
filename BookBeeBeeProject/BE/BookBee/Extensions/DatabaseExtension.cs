@@ -1,12 +1,17 @@
 ﻿using BookBee.Persistences;
 using BookBee.Persistences.Repositories.AddressRepository;
 using BookBee.Persistences.Repositories.AuthorRepository;
+using BookBee.Persistences.Repositories.CartDetailsRepository;
 using BookBee.Persistences.Repositories.CartRepository;
 using BookBee.Persistences.Repositories.CategoryRepository;
+using BookBee.Persistences.Repositories.DetailedPaymentRepository;
+using BookBee.Persistences.Repositories.EmployeeRepository;
+using BookBee.Persistences.Repositories.OrderDetailRepository;
 using BookBee.Persistences.Repositories.OrderVoucherRepository;
 using BookBee.Persistences.Repositories.PaymentMethodRepository;
 using BookBee.Persistences.Repositories.PublisherRepository;
 using BookBee.Persistences.Repositories.SupplierRepository;
+using BookBee.Persistences.Repositories.TaiQuayRepository;
 using BookBee.Persistences.Repositories.UserRepository;
 using BookBee.Persistences.Repositories.VoucherRepository;
 using BookStack.Persistence.Repositories.BookRepository;
@@ -59,7 +64,12 @@ namespace BookBee.Extensions
 			services.AddScoped<IOrderVoucherRepository, OrderVoucherRepository>();
 			services.AddScoped<IBookRepository, BookRepository>();
 			services.AddScoped<IOrderRepository, OrderRepository>();
-		}
+            services.AddScoped<IOrderDetailRepository, OrderDetailRepository>();
+            services.AddScoped<ITaiQuayRepository, TaiQuayRepository>();
+            services.AddScoped<IDetailedPaymentRepository, DetailedPaymentRepository>();
+            services.AddScoped<ICartDetailsRepository, CartDetailsRepository>();
+            services.AddScoped<IEmployeeRepository, EmployeeRepository>();
+        }
 
     }
 }

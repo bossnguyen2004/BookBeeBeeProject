@@ -66,8 +66,8 @@
 
 @{
     var httpContext = ViewContext.HttpContext;
-    var accessRole = httpContext.Session.GetString("Result");
     var accessToken = httpContext.Session.GetString("AccessToken");
+    var accessRole = httpContext.Session.GetString("UserRole");
 }
 
 <section class="section dashboard">
@@ -110,12 +110,14 @@
                                         <td style="font-weight: bold;">Mô Tả</td>
                                         <td style="font-weight: bold;">Số Lượng</td>
                                         <td style="font-weight: bold;">Giá Bán</td>
-                                         @if (!string.IsNullOrEmpty(accessToken) && accessRole == "admin")
+                                        <td style="font-weight: bold;">Giá Sale</td>
+
+                                        @if (!string.IsNullOrEmpty(accessToken) && (accessRole == "admin"))
                                         {
                                             <td style="font-weight: bold;">Trạng Thái</td>
                                         }
-                                    
-                                        @if (!string.IsNullOrEmpty(accessToken) && accessRole == "admin")
+
+                                        @if (!string.IsNullOrEmpty(accessToken) && (accessRole == "admin"))
                                         {
                                             <td style="font-weight: bold;">Action</td>
                                         }
@@ -145,14 +147,27 @@
                                                 <td>@item.Description</td>
                                                 <td>@item.Count</td>
                                                 <td>@(item.Price.ToString("N0") + " VND")</td>
-                                                 <td>
+                                                <td>
+                                                    @if (item.GiaThucTe == item.Price)
+                                                    {
+                                                        <span style="color: red; font-weight: bold;">0 VND</span>
+                                                    }
+                                                    else if (item.GiaThucTe > 0)
+                                                    {
+                                                        <span style="color: red; font-weight: bold;">
+                                                            @item.GiaThucTe.ToString("N0") VND
+                                                        </span>
+                                                    }
+                                                </td>
+
+                                                <td>
                                                     <input type="checkbox" class="form-check-input"
                                                            id="bookStatus_@item.Id"
                                                            data-book-id="@item.Id"
                                                     @(item.Status == 1 ? "checked=\"checked\"" : "")
                                                            onchange="toggleBookStatus(@item.Id, this.checked)">
                                                 </td>
-                                                @if (!string.IsNullOrEmpty(accessToken) && accessRole == "admin")
+                                                @if (!string.IsNullOrEmpty(accessToken) && (accessRole == "admin"))
                                                 {
                                                    <td>
                                                        <a class="btn btn-info" onclick="editForm(@item.Id)" title="Cập nhật">

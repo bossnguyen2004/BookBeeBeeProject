@@ -3,6 +3,7 @@ using BookBee.DTO.Book;
 using BookBee.DTO.Response;
 using BookBee.DTO.Voucher;
 using BookBee.Model;
+using BookBee.Persistences;
 using BookBee.Persistences.Repositories.AuthorRepository;
 using BookBee.Persistences.Repositories.CategoryRepository;
 using BookBee.Persistences.Repositories.PublisherRepository;
@@ -39,48 +40,66 @@ namespace BookStack.Services.BookService
 		public async Task<ResponseDTO> CreateBook(BookDTO bookDTO)
 		{
 			var author = await _authorRepository.GetAuthorById(bookDTO.AuthorId);
-			if (author == null) return new ResponseDTO(){Code = 400,Message = "Author không tồn tại"};
+			if (author == null) return new ResponseDTO() { Code = 400, Message = "Author không tồn tại" };
 			var publisher = await _publisherRepository.GetPublisherById(bookDTO.PublisherId);
-			if (publisher == null) return new ResponseDTO(){Code = 400,Message = "Publisher không tồn tại"};
+			if (publisher == null) return new ResponseDTO() { Code = 400, Message = "Publisher không tồn tại" };
 			var supplier = await _supplierRepository.GetSupplierById(bookDTO.SupplierId);
 			if (supplier == null) return new ResponseDTO() { Code = 400, Message = "Supplier không tồn tại" };
 			if (string.IsNullOrEmpty(bookDTO.ImageUrl))
 				return new ResponseDTO { Code = 400, Message = "Vui lòng upload ảnh trước" };
-            var book = _mapper.Map<Book>(bookDTO);
-            book.Image = bookDTO.ImageUrl;
-            foreach (var tagId in bookDTO.TagIds)
+			var book = _mapper.Map<Book>(bookDTO);
+			book.Image = bookDTO.ImageUrl;
+			foreach (var tagId in bookDTO.TagIds)
 			{
-				Tag tag =await _tagRepository.GetTagById(tagId);
-				if (tag != null)book.Tags.Add(tag);
+				Tag tag = await _tagRepository.GetTagById(tagId);
+				if (tag != null) book.Tags.Add(tag);
 			}
-			if (book.Tags.Count == 0) return new ResponseDTO(){Code = 400,Message = "Tag không được để trống"};
+			if (book.Tags.Count == 0) return new ResponseDTO() { Code = 400, Message = "Tag không được để trống" };
 
-
+			double discountedPrice = bookDTO.Price;
 			if (bookDTO.VoucherIds != null && bookDTO.VoucherIds.Any())
 			{
 				foreach (var voucherId in bookDTO.VoucherIds)
 				{
 					var voucher = await _voucherRepository.GetVoucherById(voucherId);
-					if (voucher != null) book.Vouchers.Add(voucher);
+
+
+					if (voucher != null && voucher.Status == 1
+						&& voucher.StartDate <= DateTime.Now && voucher.EndDate >= DateTime.Now)
+					{
+						book.VoucherDetails.Add(new VoucherDetail
+						{
+							BookId = book.Id,
+							VoucherId = voucher.Id
+						});
+
+						discountedPrice = CalculateDiscountedPrice(discountedPrice, voucher);
+					}
 				}
 			}
 
 			var books = new Book
 			{
+				CodeBook = bookDTO.CodeBook,
+				GiaNhap = bookDTO.GiaNhap,
 				Title = bookDTO.Title,
-				Description =bookDTO.Description,
+				Description = bookDTO.Description,
 				NumberOfPages = bookDTO.NumberOfPages,
 				PublishDate = bookDTO.PublishDate,
-				Language =bookDTO.Language,
+				Language = bookDTO.Language,
 				Count = bookDTO.Count,
 				Price = bookDTO.Price,
-				Format =bookDTO.Format ,
-				PageSize =bookDTO.PageSize,
+				Format = bookDTO.Format,
+				PageSize = bookDTO.PageSize,
 				IsDeleted = false,
 				PublisherId = bookDTO.PublisherId,
 				AuthorId = bookDTO.AuthorId,
 				SupplierId = bookDTO.SupplierId,
 				Status = bookDTO.Status,
+				SoldQuantity = bookDTO.SoldQuantity ?? 0,
+				StockQuantity = bookDTO.StockQuantity ?? 0,
+				GiaThucTe = discountedPrice
+
 			};
 
 
@@ -145,6 +164,18 @@ namespace BookStack.Services.BookService
                     Message = "Trạng thái không hợp lệ. Chỉ chấp nhận 0 (Dừng) hoặc 1 (Hoạt động)."
                 };
             }
+            if (voucherId.HasValue && voucherId != 0)
+            {
+                bool isVoucherActive = await IsVoucherActive(voucherId.Value);
+                if (!isVoucherActive)
+                {
+                    return new ResponseDTO
+                    {
+                        Code = 400,
+                        Message = "Voucher không hợp lệ hoặc đã bị vô hiệu hóa."
+                    };
+                }
+            }
             var books =await _bookRepository.GetBooks(page, pageSize, key, sortBy, tagId, voucherId, includeDeleted, publisherId, authorId,status);
 
 			return new ResponseDTO(){Data = _mapper.Map<List<BookDTO>>(books),Total = _voucherRepository.Total};
@@ -194,8 +225,8 @@ namespace BookStack.Services.BookService
 			var book = await _bookRepository.GetBookById(id);
 			if (book == null) return new ResponseDTO { Code = 400, Message = "Book không tồn tại" };
 
-
-			book.Title = BookDTO.Title;
+			book.CodeBook = BookDTO.CodeBook;
+            book.Title = BookDTO.Title;
 			book.Description = BookDTO.Description;
 			book.NumberOfPages = BookDTO.NumberOfPages;
 			book.PublishDate = BookDTO.PublishDate;
@@ -209,8 +240,14 @@ namespace BookStack.Services.BookService
 			book.AuthorId = BookDTO.AuthorId;
 			book.SupplierId = BookDTO.SupplierId;
 			book.Status = BookDTO.Status;
+            book.GiaNhap = BookDTO.GiaNhap;
+            book.GiaThucTe = BookDTO.GiaThucTe??0;
+            if (book.StockQuantity.HasValue)
+                book.StockQuantity = BookDTO.StockQuantity;
 
-			book.Tags = new List<Tag>();
+            if (book.SoldQuantity.HasValue)
+                book.SoldQuantity = BookDTO.SoldQuantity;
+            book.Tags = new List<Tag>();
 			foreach (var tagId in BookDTO.TagIds)
 			{
 				Tag tag =await _tagRepository.GetTagById(tagId);
@@ -267,6 +304,25 @@ namespace BookStack.Services.BookService
 			};
 		}
 
-		
+        private double CalculateDiscountedPrice(double price, Voucher voucher)
+        {
+            if (voucher == null || voucher.DiscountValue == null)
+            {
+                return price;
+            }
+
+            double discountPercentage = (double)voucher.DiscountValue / 100;
+
+            return price * (1 - discountPercentage);
+        }
+
+        public async Task<bool> IsVoucherActive(int voucherId)
+        {
+            if (voucherId == 0 || voucherId == null)
+                return false; 
+
+            var voucher = await _voucherRepository.GetVoucherById(voucherId);
+            return voucher != null && voucher.Status == 1;
+        }
     }
 }

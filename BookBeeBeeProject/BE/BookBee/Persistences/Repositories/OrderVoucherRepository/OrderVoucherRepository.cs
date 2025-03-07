@@ -1,6 +1,7 @@
 ﻿using BookBee.DTO.Response;
 using BookBee.Model;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Storage;
 
 namespace BookBee.Persistences.Repositories.OrderVoucherRepository
 {
@@ -13,8 +14,8 @@ namespace BookBee.Persistences.Repositories.OrderVoucherRepository
 		{
 			_dataContext = dataContext;
 		}
-
-		public async Task<ResponseDTO> CreateOrderVoucher(OrderVoucher ordervoucher)
+       
+        public async Task<ResponseDTO> CreateOrderVoucher(OrderVoucher ordervoucher)
 		{
 			try
 			{
@@ -104,5 +105,7 @@ namespace BookBee.Persistences.Repositories.OrderVoucherRepository
 
 			return new ResponseDTO { Code = 200, Message = "Cập nhật thành công" };
 		}
-	}
+
+       
+    }
 }

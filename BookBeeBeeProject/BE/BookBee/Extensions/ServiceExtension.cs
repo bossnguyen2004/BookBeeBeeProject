@@ -3,12 +3,15 @@ using BookBee.Services.AuthorService;
 using BookBee.Services.AuthService;
 using BookBee.Services.CacheService;
 using BookBee.Services.CategoryService;
+using BookBee.Services.EmployeeService;
 using BookBee.Services.MailService;
+using BookBee.Services.OrderService;
 using BookBee.Services.OrderVoucherService;
 using BookBee.Services.PaymentMethodService;
 using BookBee.Services.PublisherService;
 using BookBee.Services.StatisticalService;
 using BookBee.Services.SupplierService;
+using BookBee.Services.TaiQuayServices;
 using BookBee.Services.TokenService;
 using BookBee.Services.UserService;
 using BookBee.Services.VNPayService;
@@ -33,7 +36,7 @@ namespace BookBee.Extensions
             services.AddScoped<IAuthorService, AuthorService>();
             services.AddScoped<IBookService, BookService>();
             services.AddScoped<ICartService, CartService>();
-            //services.AddScoped<IOrderService, OrderService>();
+            services.AddScoped<IOrderService, OrderService>();
             services.AddScoped<IPublisherService, PublisherService>();
             services.AddScoped<IStatisticalService, StatisticalService>();
             services.AddScoped<ITagService, TagService>();
@@ -43,7 +46,13 @@ namespace BookBee.Extensions
             services.AddScoped<ISupplierService, SupplierService>();
             services.AddScoped<IVoucherService, VoucherService>();
 			services.AddScoped<IOrderVoucherService, OrderVoucherService>();
-		}
+            services.AddScoped<ITaiQuayServices, TaiQuayServices>();
+            services.AddScoped<IEmployeeService, EmployeeService>();
+
+
+
+
+        }
 
         public static void AddUtilities(this IServiceCollection services, IConfiguration configuration)
         {

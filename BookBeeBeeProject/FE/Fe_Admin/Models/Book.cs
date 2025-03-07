@@ -7,6 +7,7 @@ namespace Fe_Admin.Models
     {
         [Key]
         public int Id { get; set; }
+        public string? CodeBook { get; set; }
         [Required]
         public string? Title { get; set; }
         [Required]
@@ -20,6 +21,8 @@ namespace Fe_Admin.Models
         public int Count { get; set; } = 0;
         [Required]
         public double Price { get; set; } = 0;
+        public double GiaNhap { get; set; }
+        public double GiaThucTe { get; set; }
         [JsonProperty("imageUrl")]
         public string? Image { get; set; }
         public int MaxOrder { get; set; }
@@ -45,5 +48,9 @@ namespace Fe_Admin.Models
         public virtual List<Voucher> Vouchers { get; set; } = new List<Voucher>();
         public virtual List<OrderDetail> OrderDetails { get; set; } = new List<OrderDetail>();
         public virtual List<CartDetail> CartDetails { get; set; } = new List<CartDetail>();
+
+        public int? StockQuantity { get; set; } = 0;
+
+        public int? SoldQuantity { get; set; } = 0;
     }
 }

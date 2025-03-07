@@ -1,5 +1,6 @@
 ﻿using BookBee.DTO.Response;
 using BookBee.Model;
+using Microsoft.EntityFrameworkCore.Storage;
 
 namespace BookBee.Persistences.Repositories.OrderVoucherRepository
 {
@@ -13,5 +14,6 @@ namespace BookBee.Persistences.Repositories.OrderVoucherRepository
 		Task<int> GetOrderVoucherCount();
 		Task<bool> IsSaveChanges();
 		int Total { get; }
-	}
+        
+    }
 }

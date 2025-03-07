@@ -59,20 +59,23 @@
 <body>
     @{
         var httpContext = ViewContext.HttpContext;
-        var accessRole = httpContext.Session.GetString("Result");
+        // var accessRole = httpContext.Session.GetString("Result");
         var accessToken = httpContext.Session.GetString("AccessToken");
+        var accessRole = httpContext.Session.GetString("UserRole");
     }
+
+
 
     <header id="header" class="header fixed-top d-flex align-items-center">
         @await Html.PartialAsync("_Header")
     </header><!-- End Header -->
-    @if (!string.IsNullOrEmpty(accessToken) && accessRole == "admin" || !string.IsNullOrEmpty(accessToken) && accessRole == "nhanvien")
+    @if (!string.IsNullOrEmpty(accessToken) && (accessRole == "admin" || accessRole == "nhanvien"))
     {
         <aside id="sidebar" class="sidebar">
             @await Html.PartialAsync("_PartiaSideBar")
         </aside>
     }
-
+   
     <main id="main" class="main">
         @RenderBody()
     </main>

@@ -5,9 +5,9 @@
     var diaChi = httpContext.Session.GetString("DiaChi");
     var email = httpContext.Session.GetString("Email");
     var gioiTinh = httpContext.Session.GetString("GioiTinh");
-    var accessRole = httpContext.Session.GetString("Result");
+    // var accessRole = httpContext.Session.GetString("Result");
     var accessToken = httpContext.Session.GetString("AccessToken");
-
+    var accessRole = httpContext.Session.GetString("UserRole");
 }
 
 
@@ -17,7 +17,7 @@
         <img src="" alt="">
         <span class="d-none d-lg-block">BookStore</span>
     </a>
-    @if (!string.IsNullOrEmpty(accessToken) && accessRole == "admin" || !string.IsNullOrEmpty(accessToken) && accessRole == "nhanvien")
+    @if (!string.IsNullOrEmpty(accessToken) && (accessRole == "admin" || accessRole == "nhanvien"))
     {
         <i class="bi bi-list toggle-sidebar-btn"></i>
 

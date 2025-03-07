@@ -7,6 +7,8 @@ namespace BookBee.Model
     {
         [Key]
         public int Id { get; set; }
+
+        public string? CodeBook { get; set; }
         [Required]
         public string? Title { get; set; }
         [Required]
@@ -20,6 +22,10 @@ namespace BookBee.Model
         public int Count { get; set; } = 0;
         [Required]
         public double Price { get; set; } = 0;
+        [Required]
+        public double GiaNhap { get; set; } = 0;
+
+        public double? GiaThucTe { get; set; }
         [JsonProperty("imageUrl")]
         public string? Image { get; set; }
 		public int MaxOrder { get; set; }
@@ -45,5 +51,28 @@ namespace BookBee.Model
         public virtual List<Voucher> Vouchers { get; set; } = new List<Voucher>();
         public virtual List<OrderDetail> OrderDetails { get; set; } = new List<OrderDetail>();
         public virtual List<CartDetail> CartDetails { get; set; } = new List<CartDetail>();
+        public virtual List<VoucherDetail> VoucherDetails { get; set; } = new List<VoucherDetail>();
+
+        public int? StockQuantity { get; set; } = 0;
+
+        public int? SoldQuantity { get; set; } = 0; 
+
+        public void AddNewStock(int quantity)
+        {
+            Count += quantity;       
+            StockQuantity += quantity; 
+        }
+        public void SellBook(int quantity)
+        {
+            if (StockQuantity >= quantity)
+            {
+                StockQuantity -= quantity; 
+                SoldQuantity += quantity; 
+            }
+            else
+            {
+                throw new Exception("Không đủ sách trong kho!");
+            }
+        }
     }
 }

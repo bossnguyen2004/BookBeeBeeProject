@@ -11,14 +11,15 @@
     <nav>
         <ol class="breadcrumb">
             <li class="breadcrumb-item"><a asp-area="admin" asp-controller="Home" asp-action="Index">Trang chủ</a></li>
-            <li class="breadcrumb-item active">Khuyến Mại</li>
+            <li class="breadcrumb-item active">Khuyến Mại </li>
         </ol>
     </nav>
 </div>
 @{
     var httpContext = ViewContext.HttpContext;
-    var accessRole = httpContext.Session.GetString("Result");
+
     var accessToken = httpContext.Session.GetString("AccessToken");
+    var accessRole = httpContext.Session.GetString("UserRole");
 }
 <section class="section dashboard">
     <div class="row">
@@ -45,7 +46,7 @@
                                                 <button type="submit" class="btn btn-primary search-btn">
                                                     <i class="fas fa-search"></i> Tìm kiếm
                                                 </button>
-                                                @if (!string.IsNullOrEmpty(accessToken) && accessRole == "admin")
+                                                @if (!string.IsNullOrEmpty(accessToken) && (accessRole == "admin"))
                                                 {
                                                     <button type="button" style="color:black" class="btn btn-light btn-flat"
                                                             title="Thêm mới" id="addNewStaffBtn" data-bs-toggle="modal" data-bs-target="#addStaffModal" aria-label="Close">

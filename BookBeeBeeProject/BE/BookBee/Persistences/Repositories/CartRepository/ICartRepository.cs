@@ -8,7 +8,7 @@ namespace BookBee.Persistences.Repositories.CartRepository
         Task<ResponseDTO> UpdateCart(int id,Cart cart);
 		Task<ResponseDTO> CreateCart(Cart cart);
 		Task<Cart> GetCartById(int id);
-		Task<ResponseDTO> ClearCartBook(List<int> ids);
+		Task<ResponseDTO> ClearCartBook(int userId,List<int> ids);
 		Task<Cart> GetCartByUser(int userId);
 		Task<bool> IsSaveChanges();
     }

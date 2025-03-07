@@ -107,6 +107,9 @@ namespace BookBee.Migrations
                         .IsRequired()
                         .HasColumnType("int");
 
+                    b.Property<string>("CodeBook")
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<int>("Count")
                         .HasColumnType("int");
 
@@ -121,9 +124,14 @@ namespace BookBee.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<double>("GiaNhap")
+                        .HasColumnType("float");
+
+                    b.Property<double>("GiaThucTe")
+                        .HasColumnType("float");
+
                     b.Property<string>("Image")
-                        .HasMaxLength(255)
-                        .HasColumnType("nvarchar(255)");
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<bool>("IsDeleted")
                         .HasColumnType("bit");
@@ -152,7 +160,13 @@ namespace BookBee.Migrations
                         .IsRequired()
                         .HasColumnType("int");
 
-                    b.Property<int>("Status")
+                    b.Property<int?>("SoldQuantity")
+                        .HasColumnType("int");
+
+                    b.Property<int?>("Status")
+                        .HasColumnType("int");
+
+                    b.Property<int?>("StockQuantity")
                         .HasColumnType("int");
 
                     b.Property<int?>("SupplierId")
@@ -213,7 +227,16 @@ namespace BookBee.Migrations
                     b.Property<int>("CartId")
                         .HasColumnType("int");
 
+                    b.Property<double>("GiaNhap")
+                        .HasColumnType("float");
+
+                    b.Property<double>("Price")
+                        .HasColumnType("float");
+
                     b.Property<int>("Quantity")
+                        .HasColumnType("int");
+
+                    b.Property<int>("Status")
                         .HasColumnType("int");
 
                     b.HasKey("Id");
@@ -233,10 +256,10 @@ namespace BookBee.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"), 1L, 1);
 
-                    b.Property<int>("OrderId")
+                    b.Property<int?>("OrderId")
                         .HasColumnType("int");
 
-                    b.Property<int>("PaymentId")
+                    b.Property<int?>("PaymentId")
                         .HasColumnType("int");
 
                     b.Property<int?>("PaymentMethodId")
@@ -310,7 +333,9 @@ namespace BookBee.Migrations
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"), 1L, 1);
 
                     b.Property<int?>("AddressId")
-                        .IsRequired()
+                        .HasColumnType("int");
+
+                    b.Property<int?>("AddressId1")
                         .HasColumnType("int");
 
                     b.Property<string>("CancellationReason")
@@ -335,7 +360,6 @@ namespace BookBee.Migrations
                         .HasColumnType("float");
 
                     b.Property<int?>("EmployeeId")
-                        .IsRequired()
                         .HasColumnType("int");
 
                     b.Property<int?>("EmployeeId1")
@@ -347,8 +371,10 @@ namespace BookBee.Migrations
                     b.Property<string>("OrderCode")
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<int>("OrderType")
+                        .HasColumnType("int");
+
                     b.Property<int?>("OrderVoucherId")
-                        .IsRequired()
                         .HasColumnType("int");
 
                     b.Property<int?>("OrderVoucherId1")
@@ -385,12 +411,13 @@ namespace BookBee.Migrations
                         .HasColumnType("datetime2");
 
                     b.Property<int?>("UserAccountId")
-                        .IsRequired()
                         .HasColumnType("int");
 
                     b.HasKey("Id");
 
                     b.HasIndex("AddressId");
+
+                    b.HasIndex("AddressId1");
 
                     b.HasIndex("EmployeeId");
 
@@ -413,10 +440,10 @@ namespace BookBee.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"), 1L, 1);
 
-                    b.Property<int>("BookId")
+                    b.Property<int?>("BookId")
                         .HasColumnType("int");
 
-                    b.Property<int>("OrderId")
+                    b.Property<int?>("OrderId")
                         .HasColumnType("int");
 
                     b.Property<double>("Price")
@@ -637,7 +664,7 @@ namespace BookBee.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<int>("CartId")
+                    b.Property<int?>("CartId")
                         .HasColumnType("int");
 
                     b.Property<DateTime>("Create")
@@ -844,10 +871,8 @@ namespace BookBee.Migrations
             modelBuilder.Entity("BookBee.Model.DetailedPayment", b =>
                 {
                     b.HasOne("BookBee.Model.Order", "Order")
-                        .WithMany()
-                        .HasForeignKey("OrderId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .WithMany("DetailedPayments")
+                        .HasForeignKey("OrderId");
 
                     b.HasOne("BookBee.Model.PaymentMethod", "PaymentMethod")
                         .WithMany("DetailedPayments")
@@ -874,14 +899,16 @@ namespace BookBee.Migrations
                     b.HasOne("BookBee.Model.Address", "Address")
                         .WithMany()
                         .HasForeignKey("AddressId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .OnDelete(DeleteBehavior.Cascade);
+
+                    b.HasOne("BookBee.Model.Address", null)
+                        .WithMany("Orders")
+                        .HasForeignKey("AddressId1");
 
                     b.HasOne("BookBee.Model.Employee", "Employee")
                         .WithMany()
                         .HasForeignKey("EmployeeId")
-                        .OnDelete(DeleteBehavior.NoAction)
-                        .IsRequired();
+                        .OnDelete(DeleteBehavior.NoAction);
 
                     b.HasOne("BookBee.Model.Employee", null)
                         .WithMany("Orders")
@@ -890,8 +917,7 @@ namespace BookBee.Migrations
                     b.HasOne("BookBee.Model.OrderVoucher", "OrderVoucher")
                         .WithMany()
                         .HasForeignKey("OrderVoucherId")
-                        .OnDelete(DeleteBehavior.NoAction)
-                        .IsRequired();
+                        .OnDelete(DeleteBehavior.NoAction);
 
                     b.HasOne("BookBee.Model.OrderVoucher", null)
                         .WithMany("Orders")
@@ -900,8 +926,7 @@ namespace BookBee.Migrations
                     b.HasOne("BookBee.Model.UserAccount", "UserAccount")
                         .WithMany("Orders")
                         .HasForeignKey("UserAccountId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
+                        .OnDelete(DeleteBehavior.Restrict);
 
                     b.Navigation("Address");
 
@@ -916,15 +941,11 @@ namespace BookBee.Migrations
                 {
                     b.HasOne("BookBee.Model.Book", "Book")
                         .WithMany("OrderDetails")
-                        .HasForeignKey("BookId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .HasForeignKey("BookId");
 
                     b.HasOne("BookBee.Model.Order", "Order")
                         .WithMany("OrderDetails")
-                        .HasForeignKey("OrderId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .HasForeignKey("OrderId");
 
                     b.Navigation("Book");
 
@@ -942,9 +963,7 @@ namespace BookBee.Migrations
                 {
                     b.HasOne("BookBee.Model.Cart", "Cart")
                         .WithMany()
-                        .HasForeignKey("CartId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .HasForeignKey("CartId");
 
                     b.HasOne("BookBee.Model.Role", "Role")
                         .WithMany()
@@ -960,7 +979,7 @@ namespace BookBee.Migrations
             modelBuilder.Entity("BookBee.Model.VoucherDetail", b =>
                 {
                     b.HasOne("BookBee.Model.Book", "Books")
-                        .WithMany()
+                        .WithMany("VoucherDetails")
                         .HasForeignKey("BookId");
 
                     b.HasOne("BookBee.Model.Voucher", "Vouchers")
@@ -987,6 +1006,11 @@ namespace BookBee.Migrations
                         .IsRequired();
                 });
 
+            modelBuilder.Entity("BookBee.Model.Address", b =>
+                {
+                    b.Navigation("Orders");
+                });
+
             modelBuilder.Entity("BookBee.Model.Book", b =>
                 {
                     b.Navigation("CartDetails");
@@ -994,6 +1018,8 @@ namespace BookBee.Migrations
                     b.Navigation("OrderDetails");
 
                     b.Navigation("Tags");
+
+                    b.Navigation("VoucherDetails");
                 });
 
             modelBuilder.Entity("BookBee.Model.Cart", b =>
@@ -1008,6 +1034,8 @@ namespace BookBee.Migrations
 
             modelBuilder.Entity("BookBee.Model.Order", b =>
                 {
+                    b.Navigation("DetailedPayments");
+
                     b.Navigation("OrderDetails");
                 });
 

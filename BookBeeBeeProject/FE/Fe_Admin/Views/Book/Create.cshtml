@@ -96,13 +96,18 @@
 
                             <div class="col-md-6">
                                 <label for="voucherSelect" class="form-label">Voucher</label>
-                                <select class="form-select" id="voucherSelect" asp-for="VoucherIds">
+                                <select class="form-select" id="voucherSelect" asp-for="VoucherIds" data-val="false">
                                     <option value="">Chọn Khuyến Mại</option>
                                     @if (ViewBag.Vouchers != null)
                                     {
                                         @foreach (var voucher in (List<VoucherDTO>)ViewBag.Vouchers)
                                         {
-                                            <option value="@voucher.Id">@voucher.VoucherCode</option>
+                                            @if (voucher.Status == 1) 
+                                            {
+                                                <option value="@voucher.Id" data-discount="@voucher.DiscountValue">
+                                                    @voucher.VoucherCode (@voucher.DiscountValue %)
+                                                </option>
+                                            }
                                         }
                                     }
                                     else
@@ -147,8 +152,23 @@
 
                         <div class="row mb-3">
                             <div class="col-md-6">
+                                <label for="gianhapInput" class="form-label">Giá Nhập</label>
+                                <input type="number" class="form-control" id="gianhapInput" asp-for="GiaNhap">
+                            </div>
+
+
+                            <div class="col-md-6">
                                 <label for="priceInput" class="form-label">Giá Bán</label>
                                 <input type="number" class="form-control" id="priceInput" asp-for="Price">
+                            </div>
+
+
+                        </div>
+
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label for="giathucInput" class="form-label">Giá Sale</label>
+                                <input type="number" class="form-control" id="giathucInput" asp-for="GiaThucTe" readonly data-val="false">
                             </div>
                             <div class="col-md-6">
                                 <label for="imageUpload" class="form-label">Hình Ảnh</label>
@@ -156,6 +176,7 @@
                                 <div id="imagePreview"></div>
                             </div>
                         </div>
+
                         <div class="row mb-3">
                             <div class="col-md-6">
                                 <label for="format" class="form-label">Định Dạng</label>
@@ -339,6 +360,56 @@
     </script>
 
 
+
+
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script>
+        $(document).ready(function () {
+            function updateSalePrice() {
+                let price = parseFloat($("#priceInput").val());
+                let discount = parseFloat($("#voucherSelect option:selected").attr("data-discount"));
+
+                if (isNaN(price) || price <= 0) price = 0;
+                if (isNaN(discount) || discount <= 0) discount = 0;
+
+                let salePrice = (discount > 0) ? price - (price * discount / 100) : price;
+
+                $("#giathucInput").val(salePrice.toFixed(0));
+            }
+
+            $("#priceInput").on("input", updateSalePrice);
+            $("#voucherSelect").on("change", updateSalePrice);
+            updateSalePrice(); // Gọi hàm để cập nhật giá ban đầu
+        });
+    </script>
+
+
+@*     <script>
+        $(document).ready(function () {
+            function updateSalePrice() {
+                let price = parseFloat($("#priceInput").val());
+                let discount = parseFloat($("#voucherSelect option:selected").attr("data-discount"));
+
+
+                if (isNaN(price)) price = 0;
+                if (isNaN(discount)) discount = 0;
+
+                if (price > 0 && discount > 0) {
+                    let salePrice = price - (price * discount / 100);
+                    $("#giathucInput").val(salePrice.toFixed(0));
+                } else {
+                    $("#giathucInput").val(""); 
+                }
+            }
+
+            $("#priceInput").on("input", updateSalePrice);
+            $("#voucherSelect").on("change", updateSalePrice);
+            updateSalePrice();
+        });
+    </script> *@
+
+
+
     <script>
         function previewImages(input) {
             var imageContainer = document.createElement('div');
@@ -425,51 +496,46 @@
         var hiddenField = document.getElementById(hiddenFieldId);
 
         if (checkbox.checked) {
-            hiddenField.value = "true"; // Nếu checkbox được chọn, thiết lập giá trị của trường ẩn là "true"
+            hiddenField.value = "true"; 
             console.log(hiddenField.value);
         } else {
-            hiddenField.value = "false"; // Nếu checkbox không được chọn, thiết lập giá trị của trường ẩn là "false"
+            hiddenField.value = "false";
             console.log(hiddenField.value);
 
         }
     }
+
     $(document).ready(function () {
         $("#form-create").submit(function (event) {
+            event.preventDefault(); 
             var isValid = true;
 
-            // Chỉ kiểm tra select nếu nó KHÔNG phải là voucherSelect
+            $(this).find(".is-invalid").removeClass("is-invalid");
+            $(".text-danger").hide();
+
             $(this).find("select").not("#voucherSelect").each(function () {
-                var selectedValue = $(this).val();
-                if (!selectedValue) {
+                if (!$(this).val()) {
                     $(this).addClass('is-invalid');
                     isValid = false;
-                } else {
-                    $(this).removeClass('is-invalid');
                 }
             });
 
-            // Kiểm tra input bình thường
-            $(this).find("input").each(function () {
-                var inputValue = $(this).val();
-                if (!inputValue) {
+            $(this).find("input[required]").each(function () {
+                if (!$(this).val()) {
                     $(this).addClass('is-invalid');
-                    $('#' + this.id + 'Error').removeClass('d-none');
                     isValid = false;
-                } else {
-                    $(this).removeClass('is-invalid');
-                    $('#' + this.id + 'Error').addClass('d-none');
                 }
             });
 
-            if (!isValid) {
-                return false;
-            }
+            if (!isValid) return false;
 
             var formData = new FormData(this);
+            if (!$("#voucherSelect").val()) {
+                formData.delete("VoucherIds"); 
+            }
             saveForm(formData);
         });
     });
-
   
     function saveForm(formData) {
         debugger

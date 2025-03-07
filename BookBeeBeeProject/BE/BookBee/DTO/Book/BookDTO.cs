@@ -1,4 +1,5 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using BookBee.DTO.Voucher;
+using System.ComponentModel.DataAnnotations;
 using System.Text.Json.Serialization;
 
 namespace BookBee.DTO.Book
@@ -7,7 +8,6 @@ namespace BookBee.DTO.Book
     {
         public int Id { get; set; }
         public string Title { get; set; }
-        public int Sold { get; set; }
         public string Description { get; set; }
         public int NumberOfPages { get; set; }
         public DateTime PublishDate { get; set; }
@@ -24,6 +24,10 @@ namespace BookBee.DTO.Book
 		public int AuthorId { get; set; }
 		public int SupplierId { get; set; }
 		public int Status { get; set; }
-
-	}
+        public double GiaNhap { get; set; }
+        public int? SoldQuantity { get; set; } = 0;  
+        public int? StockQuantity { get; set; } = 0; 
+        public string? CodeBook { get; set; }
+        public double? GiaThucTe { get; set; }
+    }
 }

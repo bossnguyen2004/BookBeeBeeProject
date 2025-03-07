@@ -19,8 +19,9 @@ namespace BookBee.Model
         public DateTime Create { get; set; } = DateTime.Now;
         public DateTime Update { get; set; } = DateTime.Now;
         public bool IsDeleted { get; set; } = false;
-        [Required]
+
         public int UserAccountId { get; set; }
         public virtual UserAccount UserAccount { get; set; }
+        public virtual ICollection<Order>? Orders { get; set; } = new List<Order>();
     }
 }

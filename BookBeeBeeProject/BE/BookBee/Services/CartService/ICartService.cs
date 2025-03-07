@@ -1,4 +1,5 @@
 ﻿using BookBee.DTO.Response;
+using System.Threading.Tasks;
 
 namespace BookStack.Services.CartService
 {
@@ -8,5 +9,10 @@ namespace BookStack.Services.CartService
         Task<ResponseDTO> GetSelfCart();
         Task<ResponseDTO> AddToCart(int id,int  userId, int bookId, int count);
 		Task<ResponseDTO> SelfAddToCart(int id,int bookId, int count);
+        Task<ResponseDTO> IncreaseQuantity(int cartDetailId);
+        Task<ResponseDTO> DecreaseQuantity(int cartDetailId);
+        Task<ResponseDTO> UpdateQuantity(int cartDetailId, int quantity);
+        Task<ResponseDTO> DeleteCartDetail(int cartDetailId);
+
     }
 }

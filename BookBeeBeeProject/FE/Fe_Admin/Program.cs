@@ -1,3 +1,5 @@
+using Fe_Admin.DTO;
+
 namespace Fe_Admin
 {
     public class Program
@@ -17,8 +19,20 @@ namespace Fe_Admin
                 client.BaseAddress = new Uri(apiBaseUrl);
             });
 
+            builder.Services.AddDistributedMemoryCache();
+            builder.Services.AddSession(options =>
+            {
+                options.IdleTimeout = TimeSpan.FromMinutes(5);
+                options.Cookie.HttpOnly = true;
+                options.Cookie.IsEssential = true;
+            });
+            builder.Services.AddCors(options =>
+            {
+                options.AddPolicy("AllowAll",
+                    policy => policy.AllowAnyOrigin().AllowAnyMethod().AllowAnyHeader());
+            });
 
-            builder.Services.AddSession();
+
             builder.Services.AddRazorPages();
             builder.Services.AddServerSideBlazor();
             builder.Services.AddHttpClient();
@@ -34,7 +48,8 @@ namespace Fe_Admin
             app.UseHttpsRedirection();
             app.UseStaticFiles();
             app.UseRouting();
-
+            app.UseMiddleware<SessionInitializationMiddleware>();
+            
             app.UseCors("AllowAllOrigins");
             app.UseAuthorization();
 

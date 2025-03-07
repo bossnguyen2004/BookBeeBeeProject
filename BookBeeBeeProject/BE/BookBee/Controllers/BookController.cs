@@ -3,6 +3,7 @@
 using BookBee.DTO.Book;
 using BookBee.DTO.Response;
 using BookBee.DTO.Voucher;
+using BookBee.Services.VoucherService;
 using BookStack.Services.BookService;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -16,12 +17,12 @@ namespace BookBee.Controllers
     [AllowAnonymous]
     public class BookController : ControllerBase
     {
-        private readonly IBookService _bookService; 
-      
-        public BookController(IBookService bookService)
+        private readonly IBookService _bookService;
+        private readonly IVoucherService _voucherService;
+        public BookController(IBookService bookService, IVoucherService voucherService)
         {
-            _bookService = bookService; 
-
+            _bookService = bookService;
+            _voucherService = voucherService;
         }
         [HttpGet("{id}")]
         public async Task<IActionResult> GetBookById(int id)
@@ -127,7 +128,22 @@ namespace BookBee.Controllers
 
             // Cập nhật đường dẫn ảnh đầy đủ
             bookRequestDto.ImageUrl = $"{baseUrl}/images/{fileName}";
-
+            if (bookRequestDto.VoucherIds != null)
+            {
+                foreach (var voucherId in bookRequestDto.VoucherIds)
+                {
+                    int newStatus = 1;
+                    var isValid = await _voucherService.ChangeVoucherStatus(voucherId, newStatus);
+                    if (!isValid.IsSuccess)
+                    {
+                        return BadRequest(new ResponseDTO
+                        {
+                            Code = 400,
+                            Message = $"Voucher ID {voucherId} không hợp lệ"
+                        });
+                    }
+                }
+            }
             var res = await _bookService.CreateBook(bookRequestDto);
             return StatusCode(res.Code, res);
 

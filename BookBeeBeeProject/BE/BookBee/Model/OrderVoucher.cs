@@ -21,6 +21,6 @@ namespace BookBee.Model
 		public int? UsageLimit { get; set; } 
 		public int UsedCount { get; set; }
 
-		public virtual ICollection<Order>? Orders { get; set; }
+		public virtual ICollection<Order>? Orders { get; set; } = new List<Order>();
     }
 }

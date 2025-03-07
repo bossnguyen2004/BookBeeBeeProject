@@ -1,7 +1,10 @@
 ﻿using Fe_Admin.DTO.Account;
 using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json;
+using System.IdentityModel.Tokens.Jwt;
+using System.Security.Claims;
 using System.Text;
 
 namespace Fe_Admin.Controllers
@@ -47,6 +50,7 @@ namespace Fe_Admin.Controllers
         public async Task<IActionResult> Login(LoginDTO loginDTO)
         {
 
+           
             if (!ModelState.IsValid)
             {
                 TempData["Error"] = "Vui lòng nhập đầy đủ thông tin!";
@@ -63,10 +67,12 @@ namespace Fe_Admin.Controllers
                 var responseData = await response.Content.ReadAsStringAsync();
                 var loginResponse = JsonConvert.DeserializeObject<LoginResponse>(responseData);
 
+                // Set session variables
                 HttpContext.Session.SetString("AccessToken", loginResponse.data.token);
-                HttpContext.Session.SetString("Result", loginResponse.data.role.name);
+                HttpContext.Session.SetString("UserRole", loginResponse.data.role.name);
                 string token = loginResponse.data.token;
                 string role = loginResponse.data.role.name;
+
                 if (loginDTO.RememberMe)
                 {
                     var cookieOptions = new CookieOptions
@@ -78,17 +84,11 @@ namespace Fe_Admin.Controllers
                     Response.Cookies.Append("AccessToken", token, cookieOptions);
                     Response.Cookies.Append("UserRole", role, cookieOptions);
                 }
-                else
-                {
-                    HttpContext.Session.SetString("AccessToken", token);
-                    HttpContext.Session.SetString("UserRole", role);
-                }
 
-                if (loginResponse.data.role.name == "admin" || loginResponse.data.role.name == "nhanvien")
+                if (role == "admin" || role == "nhanvien")
                 {
                     TempData["Success"] = "Đăng nhập thành công!";
                     return RedirectToAction("Index", "Home");
-            
                 }
                 else
                 {
@@ -101,8 +101,6 @@ namespace Fe_Admin.Controllers
                 TempData["Error"] = "Sai tài khoản hoặc mật khẩu!";
                 return View(loginDTO);
             }
-
-
 
         }
 

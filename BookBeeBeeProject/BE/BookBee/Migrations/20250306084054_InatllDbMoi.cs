@@ -5,7 +5,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 
 namespace BookBee.Migrations
 {
-    public partial class intalldb : Migration
+    public partial class InatllDbMoi : Migration
     {
         protected override void Up(MigrationBuilder migrationBuilder)
         {
@@ -46,12 +46,18 @@ namespace BookBee.Migrations
                 {
                     Id = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
-                    VoucherCode = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    VoucherName = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    Discount = table.Column<int>(type: "int", nullable: false),
-                    StartDate = table.Column<DateTime>(type: "datetime2", nullable: true),
-                    EndDate = table.Column<DateTime>(type: "datetime2", nullable: true),
-                    Status = table.Column<int>(type: "int", nullable: true)
+                    VoucherCode = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    Discount = table.Column<double>(type: "float", nullable: true),
+                    DiscountType = table.Column<int>(type: "int", nullable: false),
+                    MinOrderAmount = table.Column<double>(type: "float", nullable: true),
+                    MaxDiscountAmount = table.Column<double>(type: "float", nullable: true),
+                    StartDate = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    EndDate = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    Status = table.Column<int>(type: "int", nullable: true),
+                    IsDeleted = table.Column<bool>(type: "bit", nullable: false),
+                    Description = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    UsageLimit = table.Column<int>(type: "int", nullable: true),
+                    UsedCount = table.Column<int>(type: "int", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -67,7 +73,7 @@ namespace BookBee.Migrations
                     CodePay = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     PaymentName = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     Description = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    Status = table.Column<int>(type: "int", nullable: false),
+                    Status = table.Column<int>(type: "int", nullable: true),
                     Create = table.Column<DateTime>(type: "datetime2", nullable: false),
                     Update = table.Column<DateTime>(type: "datetime2", nullable: false),
                     IsDeleted = table.Column<bool>(type: "bit", nullable: false)
@@ -166,7 +172,7 @@ namespace BookBee.Migrations
                     Update = table.Column<DateTime>(type: "datetime2", nullable: false),
                     IsVerified = table.Column<bool>(type: "bit", nullable: false),
                     RoleId = table.Column<int>(type: "int", nullable: false),
-                    CartId = table.Column<int>(type: "int", nullable: false)
+                    CartId = table.Column<int>(type: "int", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -175,8 +181,7 @@ namespace BookBee.Migrations
                         name: "FK_UserAccounts_Carts_CartId",
                         column: x => x.CartId,
                         principalTable: "Carts",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
+                        principalColumn: "Id");
                     table.ForeignKey(
                         name: "FK_UserAccounts_Roles_RoleId",
                         column: x => x.RoleId,
@@ -191,6 +196,7 @@ namespace BookBee.Migrations
                 {
                     Id = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
+                    CodeBook = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     Title = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     Description = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     NumberOfPages = table.Column<int>(type: "int", nullable: false),
@@ -198,15 +204,21 @@ namespace BookBee.Migrations
                     Language = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     Count = table.Column<int>(type: "int", nullable: false),
                     Price = table.Column<double>(type: "float", nullable: false),
+                    GiaNhap = table.Column<double>(type: "float", nullable: false),
+                    GiaThucTe = table.Column<double>(type: "float", nullable: false),
+                    Image = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     MaxOrder = table.Column<int>(type: "int", nullable: false),
                     Format = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     PageSize = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     Create = table.Column<DateTime>(type: "datetime2", nullable: false),
                     Update = table.Column<DateTime>(type: "datetime2", nullable: false),
                     IsDeleted = table.Column<bool>(type: "bit", nullable: false),
+                    Status = table.Column<int>(type: "int", nullable: true),
                     PublisherId = table.Column<int>(type: "int", nullable: false),
                     AuthorId = table.Column<int>(type: "int", nullable: false),
-                    SupplierId = table.Column<int>(type: "int", nullable: false)
+                    SupplierId = table.Column<int>(type: "int", nullable: false),
+                    StockQuantity = table.Column<int>(type: "int", nullable: true),
+                    SoldQuantity = table.Column<int>(type: "int", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -269,6 +281,8 @@ namespace BookBee.Migrations
                     BirthYear = table.Column<DateTime>(type: "datetime2", nullable: false),
                     Phone = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     Hometown = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    Status = table.Column<int>(type: "int", nullable: true),
+                    IsDeleted = table.Column<bool>(type: "bit", nullable: false),
                     UserAccountId = table.Column<int>(type: "int", nullable: false)
                 },
                 constraints: table =>
@@ -312,9 +326,12 @@ namespace BookBee.Migrations
                 {
                     Id = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
-                    Quantity = table.Column<int>(type: "int", nullable: false),
                     CartId = table.Column<int>(type: "int", nullable: false),
-                    BookId = table.Column<int>(type: "int", nullable: false)
+                    BookId = table.Column<int>(type: "int", nullable: false),
+                    Quantity = table.Column<int>(type: "int", nullable: false),
+                    Price = table.Column<double>(type: "float", nullable: false),
+                    GiaNhap = table.Column<double>(type: "float", nullable: false),
+                    Status = table.Column<int>(type: "int", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -331,29 +348,6 @@ namespace BookBee.Migrations
                         principalTable: "Carts",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
-                });
-
-            migrationBuilder.CreateTable(
-                name: "Images",
-                columns: table => new
-                {
-                    Id = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
-                    MaAnh = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    URL = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    Create = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    Update = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    IsDeleted = table.Column<bool>(type: "bit", nullable: false),
-                    BookId = table.Column<int>(type: "int", nullable: true)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_Images", x => x.Id);
-                    table.ForeignKey(
-                        name: "FK_Images_Books_BookId",
-                        column: x => x.BookId,
-                        principalTable: "Books",
-                        principalColumn: "Id");
                 });
 
             migrationBuilder.CreateTable(
@@ -423,7 +417,9 @@ namespace BookBee.Migrations
                     TotalAmount = table.Column<double>(type: "float", nullable: false),
                     PaymentStatus = table.Column<int>(type: "int", nullable: false),
                     DeliveryStatus = table.Column<int>(type: "int", nullable: false),
+                    Status = table.Column<int>(type: "int", nullable: true),
                     CancellationReason = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    OrderType = table.Column<int>(type: "int", nullable: false),
                     UserAccountId = table.Column<int>(type: "int", nullable: false),
                     EmployeeId = table.Column<int>(type: "int", nullable: false),
                     AddressId = table.Column<int>(type: "int", nullable: false),
@@ -477,8 +473,8 @@ namespace BookBee.Migrations
                 {
                     Id = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
-                    OrderId = table.Column<int>(type: "int", nullable: false),
-                    PaymentId = table.Column<int>(type: "int", nullable: false),
+                    OrderId = table.Column<int>(type: "int", nullable: true),
+                    PaymentId = table.Column<int>(type: "int", nullable: true),
                     Price = table.Column<double>(type: "float", nullable: false),
                     Status = table.Column<int>(type: "int", nullable: false),
                     PaymentMethodId = table.Column<int>(type: "int", nullable: true)
@@ -490,8 +486,7 @@ namespace BookBee.Migrations
                         name: "FK_DetailedPayments_Orders_OrderId",
                         column: x => x.OrderId,
                         principalTable: "Orders",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
+                        principalColumn: "Id");
                     table.ForeignKey(
                         name: "FK_DetailedPayments_PaymentMethods_PaymentMethodId",
                         column: x => x.PaymentMethodId,
@@ -507,8 +502,8 @@ namespace BookBee.Migrations
                         .Annotation("SqlServer:Identity", "1, 1"),
                     Quantity = table.Column<int>(type: "int", nullable: false),
                     Price = table.Column<double>(type: "float", nullable: false),
-                    OrderId = table.Column<int>(type: "int", nullable: false),
-                    BookId = table.Column<int>(type: "int", nullable: false)
+                    OrderId = table.Column<int>(type: "int", nullable: true),
+                    BookId = table.Column<int>(type: "int", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -517,14 +512,12 @@ namespace BookBee.Migrations
                         name: "FK_OrderDetails_Books_BookId",
                         column: x => x.BookId,
                         principalTable: "Books",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
+                        principalColumn: "Id");
                     table.ForeignKey(
                         name: "FK_OrderDetails_Orders_OrderId",
                         column: x => x.OrderId,
                         principalTable: "Orders",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
+                        principalColumn: "Id");
                 });
 
             migrationBuilder.CreateIndex(
@@ -577,11 +570,6 @@ namespace BookBee.Migrations
                 table: "Employees",
                 column: "UserAccountId",
                 unique: true);
-
-            migrationBuilder.CreateIndex(
-                name: "IX_Images_BookId",
-                table: "Images",
-                column: "BookId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_OrderDetails_BookId",
@@ -659,9 +647,6 @@ namespace BookBee.Migrations
 
             migrationBuilder.DropTable(
                 name: "DetailedPayments");
-
-            migrationBuilder.DropTable(
-                name: "Images");
 
             migrationBuilder.DropTable(
                 name: "OrderDetails");

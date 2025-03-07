@@ -3,6 +3,9 @@ using BookBee.Model;
 using BookBee.Persistences;
 using EllipticCurve.Utils;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Storage;
+using System.Drawing;
+using static BookBee.Model.TrangThai;
 
 namespace BookStack.Persistence.Repositories.OrderRepository
 {
@@ -14,6 +17,7 @@ namespace BookStack.Persistence.Repositories.OrderRepository
             _dataContext = dataContext;
         }
         public int Total { get; set; }
+
 
         public async Task<ResponseDTO> CreateOrder(Order order)
         {
@@ -55,9 +59,7 @@ namespace BookStack.Persistence.Repositories.OrderRepository
         }
 
 
-
-
-		public async Task<List<Order>> GetOrderByUser(int userId, int? page = 1, int? pageSize = 10, string? key = "", string? sortBy = "ID", string? status = "")
+		public async Task<List<Order>> GetOrderByUser(int userId, int? page = 1, int? pageSize = 10, string? key = "", string? sortBy = "ID", string? status = "", int? orderType = null)
         {
 			if (userId <= 0) return new List<Order>();
 			var query = _dataContext.Orders
@@ -75,7 +77,11 @@ namespace BookStack.Persistence.Repositories.OrderRepository
 			{
 				query = query.Where(o => o.Status == statusValue);
 			}
-			if (!string.IsNullOrEmpty(key))
+            if (orderType.HasValue)
+            {
+                query = query.Where(o => (int)o.OrderType == orderType.Value);
+            }
+            if (!string.IsNullOrEmpty(key))
 			{
 				if (int.TryParse(key, out int keyValue))
 				{
@@ -110,7 +116,7 @@ namespace BookStack.Persistence.Repositories.OrderRepository
 			return await  _dataContext.Orders.CountAsync(o => o.UserAccountId == userId && o.IsDeleted == false);
 		}
 
-		public async Task<List<Order>> GetOrders(int? page = 1, int? pageSize = 10, string? key = "", string? sortBy = "ID", string? status = "")
+		public async Task<List<Order>> GetOrders(int? page = 1, int? pageSize = 10, string? key = "", string? sortBy = "ID", string? status = "", int? orderType = null)
         {
             if (!_dataContext.Orders.Any()) return Enumerable.Empty<Order>().ToList();
 
@@ -123,9 +129,13 @@ namespace BookStack.Persistence.Repositories.OrderRepository
 			if (!string.IsNullOrEmpty(status) && int.TryParse(status, out int statusValue))
 			{
 				query = query.Where(o => o.Status == statusValue);
-			}
+            }
+            if (orderType.HasValue)
+            {
+                query = query.Where(o => (int)o.OrderType == orderType.Value);
+            }
 
-			if (!string.IsNullOrEmpty(key))
+            if (!string.IsNullOrEmpty(key))
             {
                 if (int.TryParse(key, out int id))
                 {
@@ -152,9 +162,6 @@ namespace BookStack.Persistence.Repositories.OrderRepository
 
 			return await  query.Skip((page.Value - 1) * pageSize.Value).Take(pageSize.Value).ToListAsync();
 		}
-
-
-
 
 		public async Task<bool> IsSaveChanges()
 		{
@@ -197,6 +204,215 @@ namespace BookStack.Persistence.Repositories.OrderRepository
 			return new ResponseDTO { Code = 200, Message = "Cập nhật thành công" };
 		}
 
-		
-	}
+        public async Task<ResponseDTO> CancelOrder(int id, string lydo)
+        {
+            try
+            {
+                var hoaDon = await _dataContext.Orders.FindAsync(id);
+                if (hoaDon == null)
+                {
+                    return new ResponseDTO { Code = 400, Message = "Không tìm thấy hóa đơn." };
+                }
+                if ((DeliveryStatus)hoaDon.DeliveryStatus == DeliveryStatus.DangGiaoHang)
+
+                {
+                    return new ResponseDTO { Code = 500, Message = "Không thể hủy đơn hàng khi đang giao hàng ." };
+                }
+                else if ((DeliveryStatus)hoaDon.DeliveryStatus == DeliveryStatus.DaGiaoHang)
+                {
+                    return new ResponseDTO { Code = 500, Message = "Không thể hủy đơn hàng khi đã giao hàng." };
+                }
+                else if ((DeliveryStatus)hoaDon.DeliveryStatus == DeliveryStatus.DaHuy)
+                {
+                    return new ResponseDTO { Code = 500, Message = "Không thể hủy đơn đã hủy." };
+                }
+
+                var chiTietHoaDon = await _dataContext.OrderDetails
+                    .Include(ct => ct.Book)
+                    .Where(ct => ct.OrderId == hoaDon.Id)
+                    .ToListAsync();
+                if (chiTietHoaDon != null && chiTietHoaDon.Any())
+                {
+                    foreach (var chiTiet in chiTietHoaDon)
+                    {
+                        var sanPhamChiTiet = chiTiet.Book;
+                        if (sanPhamChiTiet != null)
+                        {
+                            sanPhamChiTiet.Count += chiTiet.Quantity;
+                        }
+                    }
+                }
+                hoaDon.PaymentDate = DateTime.Now;
+                hoaDon.DeliveryStatus = (int)DeliveryStatus.DaHuy;
+                hoaDon.CancellationReason = lydo;
+
+                await _dataContext.SaveChangesAsync();
+
+                return new ResponseDTO { Code = 200, Message = "Hóa đơn đã được hủy thành công." };
+            }
+            catch (Exception ex)
+            {
+                return new ResponseDTO { Code = 500, Message = "Đã xảy ra lỗi khi hủy đơn hàng: " + ex.Message };
+            }
+        }
+
+        public async Task<ResponseDTO> UpdateNgayHoaDonOnline(int idHoaDon, DateTime? NgayThanhToan, DateTime? NgayNhan, DateTime? NgayShip)
+        {
+            try
+            {
+                var hoadon = await _dataContext.Orders.FindAsync(idHoaDon);
+                if (hoadon == null)
+                    return new ResponseDTO { IsSuccess = false, Code = 404, Message = "Không tìm thấy hóa đơn." };
+
+                if (hoadon.PaymentStatus == (int)PaymentStatus.Dathanhtoan) 
+                {
+
+                    hoadon.ReceivedDate = NgayNhan ?? hoadon.ReceivedDate;
+                    hoadon.ShippingDate = NgayShip ?? hoadon.ShippingDate;
+                }
+                else 
+                {
+                   
+                    hoadon.PaymentDate = NgayThanhToan ?? hoadon.PaymentDate;
+                    hoadon.ReceivedDate = NgayNhan ?? hoadon.ReceivedDate;
+                    hoadon.ShippingDate = NgayShip ?? hoadon.ShippingDate;
+                }
+
+                await _dataContext.SaveChangesAsync();
+                return new ResponseDTO { IsSuccess = true, Code = 200, Message = "Cập nhật ngày hóa đơn thành công." };
+            }
+            catch (Exception ex)
+            {
+                return new ResponseDTO { IsSuccess = false, Code = 500, Message = $"Lỗi khi cập nhật ngày hóa đơn: {ex.Message}" };
+            }
+        }
+
+        public async Task<ResponseDTO> UpdateThanhToan(int id, int TrangThaiThanhToan)
+        {
+            try
+            {
+                var hoaDon = await _dataContext.Orders.FindAsync(id);
+
+                if (hoaDon == null)
+                {
+                    return new ResponseDTO { IsSuccess = false, Code = 400, Message = "Hóa đơn không tồn tại" };
+                }
+
+                hoaDon.PaymentStatus = TrangThaiThanhToan;
+                _dataContext.Update(hoaDon);
+                await _dataContext.SaveChangesAsync();
+
+                return new ResponseDTO { IsSuccess = true, Code = 200, Message = "Cập nhật trạng thái thanh toán thành công" };
+            }
+            catch (Exception ex)
+            {
+                return new ResponseDTO { IsSuccess = false, Code = 500, Message = $"Lỗi: {ex.Message}" };
+            }
+        }
+
+        public async Task<bool> CheckCustomerExistence(int customerId)
+        {
+            var customer = await _dataContext.UserAccounts.FindAsync(customerId);
+            return customer != null;
+        }
+
+        public async Task<List<Order>> GetByHoaDonStatus(int HoaDonStatus)
+        {
+            var hoaDons = await _dataContext.Orders
+               .Where(hd => hd.DeliveryStatus == HoaDonStatus)
+               .ToListAsync();
+
+            return hoaDons;
+        }
+
+
+        public async Task<ResponseDTO> UpdateHoaDonStatus(int id, int HoaDonStatus)
+        {
+            var hoaDon = await _dataContext.Orders.FirstOrDefaultAsync(hd => hd.Id == id);
+            if (hoaDon != null)
+            {
+                var chiTietHoaDon = await _dataContext.OrderDetails
+                    .Include(ct => ct.Book)
+                    .Where(ct => ct.OrderId == hoaDon.Id)
+                    .ToListAsync();
+
+                if ((DeliveryStatus)HoaDonStatus == DeliveryStatus.DangGiaoHang)
+                {
+                    if (hoaDon != null)
+                    {
+                        foreach (var chiTiet in chiTietHoaDon) 
+                        {
+                            var sanPhamChiTiet = chiTiet.Book;
+                            if (sanPhamChiTiet != null)
+                            {
+                                if (sanPhamChiTiet.Count >= chiTiet.Quantity)
+                                {
+                                    sanPhamChiTiet.Count -= chiTiet.Quantity;
+                                }
+                                else
+                                {
+                                    return new ResponseDTO { IsSuccess = false, Message = "Số lượng tồn không đủ", Code = 400 };
+                                }
+                            }
+                        }
+                    }
+                }
+                else if (HoaDonStatus == (int)DeliveryStatus.DaGiaoHang)
+                {
+
+                    if (hoaDon != null)
+                    {
+                        foreach (var chiTiet in chiTietHoaDon)
+                        {
+                            var sanPhamChiTiet = chiTiet.Book;
+                            if (sanPhamChiTiet != null)
+                            {
+                                sanPhamChiTiet.Count += chiTiet.Quantity;
+                                _dataContext.Books.Update(sanPhamChiTiet);
+                            }
+                        }
+
+                        await _dataContext.SaveChangesAsync(); 
+                    }
+                }
+            }
+            if (hoaDon == null)
+                return new ResponseDTO { Message = "Hóa đơn không tồn tại", Code = 404 };
+
+            if ((PaymentStatus)hoaDon.PaymentStatus == PaymentStatus.Chuathanhtoan &&
+              (DeliveryStatus)HoaDonStatus == DeliveryStatus.DaGiaoHang)
+            {
+                if ((PaymentStatus)hoaDon.PaymentStatus == PaymentStatus.Chuathanhtoan)
+                {
+                    hoaDon.PaymentDate = DateTime.Now;
+                    hoaDon.ShippingDate = DateTime.Now;
+                    hoaDon.ReceivedDate = DateTime.Now;
+                }
+                hoaDon.PaymentStatus = (int)PaymentStatus.Dathanhtoan; 
+            }
+            else if ((PaymentStatus)hoaDon.PaymentStatus == PaymentStatus.Dathanhtoan &&
+                     (DeliveryStatus)HoaDonStatus == DeliveryStatus.DaGiaoHang)
+            {
+
+                hoaDon.ShippingDate = DateTime.Now;
+                hoaDon.ReceivedDate = DateTime.Now;
+            }
+            hoaDon.DeliveryStatus = HoaDonStatus;
+            await _dataContext.SaveChangesAsync();
+            return new ResponseDTO { IsSuccess = true, Message = "Cập nhật trạng thái hóa đơn thành công" };
+        }
+
+        public async Task<Order> GetHoaDonByMaHoaDonAsync(string maHoaDon)
+        {
+            return await _dataContext.Orders.FirstOrDefaultAsync(h => h.OrderCode == maHoaDon);
+        }
+
+        public async Task<List<Order>> GetCustomerPurchaseHistory(string customerId)
+        {
+            var user = _dataContext.UserAccounts.FirstOrDefault(x => x.FirstName == customerId).Id;
+            return _dataContext.Orders.Where(hd => hd.UserAccountId == user).ToList();
+        }
+
+
+    }
 }

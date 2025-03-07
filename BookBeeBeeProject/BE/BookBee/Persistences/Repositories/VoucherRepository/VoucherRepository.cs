@@ -65,8 +65,17 @@ namespace BookBee.Persistences.Repositories.VoucherRepository
 		public List<Voucher> GetVouchers(int? page = 1, int? pageSize = 10, string? key = "", string? sortBy = "ID", int? status = null)
 		{
 			var query = _dataContext.Vouchers.Where(v => !v.IsDeleted).AsQueryable();
+            if (status.HasValue)
+            {
+                
+                if (status != 0 && status != 1)
+                {
+                    return new List<Voucher>(); 
+                }
 
-			if (!string.IsNullOrEmpty(key))
+                query = query.Where(v => v.Status == status.Value);
+            }
+            if (!string.IsNullOrEmpty(key))
 			{
 				query = query.Where(v =>
 					v.VoucherName.ToLower().Contains(key.ToLower()) ||

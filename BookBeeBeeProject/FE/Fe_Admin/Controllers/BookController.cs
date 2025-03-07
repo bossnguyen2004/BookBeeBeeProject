@@ -117,6 +117,8 @@ namespace Fe_Admin.Controllers
             content.Add(new StringContent(model.Language), "Language");
             content.Add(new StringContent(model.Count.ToString()), "Count");
             content.Add(new StringContent(model.Price.ToString()), "Price");
+            content.Add(new StringContent(model.GiaNhap.ToString()), "GiaNhap");
+            content.Add(new StringContent(model.GiaThucTe.ToString()), "GiaThucTe");
             content.Add(new StringContent(model.Status.ToString()), "Status");
             content.Add(new StringContent(model.Format ?? ""), "Format");
             content.Add(new StringContent(model.PageSize ?? ""), "PageSize");

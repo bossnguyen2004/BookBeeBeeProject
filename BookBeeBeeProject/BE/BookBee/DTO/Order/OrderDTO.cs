@@ -28,13 +28,22 @@ namespace BookStack.DTOs.Order
 		public int? Status { get; set; }
 		public string? CancellationReason { get; set; }
 		public DateTime Create { get; set; }
-        public DateTime Update { get; set; }    
+        public DateTime Update { get; set; }
+        public int Count { get; set; } = 0;
+        public string? Phuongthucthanhtoan { get; set; }
+        public string? CodeVoucher { get; set; }
+        public double? GiamGia { get; set; }
+        public int AddressId { get; set; }
+        public int? OrderVoucherId { get; set; }
+        public bool IsPayment { get; set; }
+        public int Payment { get; set; }
+      
+        public int? EmployeeId { get; set; }
+        public int UserAccountId { get; set; }
+        public object? BillDetail { get; set; }
+        public virtual List<int> BookIds { get; set; }
+        public List<int> QuantitieCounts { get; set; } = new List<int>();
+        public virtual List<OrderDetailDTO> OrderDetails { get; set; }
 
-        public virtual UserAccountDTO UserAccount { get; set; }
-        public virtual EmployeeDTO Employee { get; set; }
-        public virtual AddressDTO Address { get; set; }
-		public virtual OrderVoucherDTO OrderVoucher { get; set; }
-
-		public virtual List<OrderDetailDTO> OrderDetails { get; set; }
     }
 }

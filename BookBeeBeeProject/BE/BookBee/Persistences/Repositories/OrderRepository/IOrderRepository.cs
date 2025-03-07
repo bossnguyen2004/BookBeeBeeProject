@@ -5,15 +5,17 @@ namespace BookStack.Persistence.Repositories.OrderRepository
 {
     public interface IOrderRepository
     {
-        Task<List<Order>> GetOrders(int? page = 1, int? pageSize = 10, string? key = "", string? sortBy = "ID", string? status = "");
-		Task<List<Order>> GetOrderByUser(int userId, int? page = 1, int? pageSize = 10, string? key = "", string? sortBy = "ID", string? status = "");
-        Task<Order> GetOrderById(int id);
-        Task<ResponseDTO> UpdateOrder(int id,Order order);
+        Task<List<Order>> GetOrderByUser(int userId, int? page = 1, int? pageSize = 10, string? key = "", string? sortBy = "ID", string? status = "", int? orderType = null);
         Task<ResponseDTO> DeleteOrder(int id);
-		Task<ResponseDTO> CreateOrder(Order order);
 		Task<int> GetOrderCountByUser(int userId);
 		Task<int> GetOrderCount();
 		Task<bool> IsSaveChanges();
 		public int Total { get; }
+        Task<List<Order>> GetOrders(int? page = 1, int? pageSize = 10, string? key = "", string? sortBy = "ID", string? status = "", int? orderType = null);
+        Task<ResponseDTO> CreateOrder(Order order);
+        Task<ResponseDTO> UpdateOrder(int id, Order order);
+        Task<Order> GetOrderById(int id);
+
+
     }
 }

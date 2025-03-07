@@ -17,8 +17,8 @@
 </div>
 @{
     var httpContext = ViewContext.HttpContext;
-    var accessRole = httpContext.Session.GetString("Result");
     var accessToken = httpContext.Session.GetString("AccessToken");
+    var accessRole = httpContext.Session.GetString("UserRole");
 }
 
 <section class="section dashboard">
@@ -46,7 +46,7 @@
                                                 <button type="submit" class="btn btn-primary search-btn">
                                                     <i class="fas fa-search"></i> Tìm kiếm
                                                 </button>
-                                                @if (!string.IsNullOrEmpty(accessToken) && accessRole == "admin")
+                                                @if (!string.IsNullOrEmpty(accessToken) && (accessRole == "admin"))
                                                 {
                                                     <button type="button" style="color:black" class="btn btn-light btn-flat"
                                                             title="Thêm mới" id="addNewStaffBtn" data-bs-toggle="modal" data-bs-target="#addStaffModal" aria-label="Close">

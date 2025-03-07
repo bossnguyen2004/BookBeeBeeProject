@@ -1,4 +1,7 @@
-﻿namespace Fe_Admin.DTO.Book
+﻿using Fe_Admin.DTO.Voucher;
+using System.ComponentModel.DataAnnotations;
+
+namespace Fe_Admin.DTO.Book
 {
     public class BookDTO
     {
@@ -21,5 +24,9 @@
         public int SupplierId { get; set; }
         public int? Status { get; set; }
         public IFormFile ImageFile { get; set; }
+        public double GiaNhap { get; set; }
+        public double GiaThucTe { get; set; }
+        public int? StockQuantity { get; set; } = 0;
+        public int? SoldQuantity { get; set; } = 0;
     }
 }
