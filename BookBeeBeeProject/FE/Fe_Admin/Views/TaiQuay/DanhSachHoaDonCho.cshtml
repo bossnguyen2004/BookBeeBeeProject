@@ -89,9 +89,10 @@
                 <div class="col-7" style="margin-left: -15px;">
                     <input type="text" class="form-control" oninput="timKiem(this.value)" id="timKiemSanPham" style="margin-left: 18px;" placeholder="Tìm kiếm sản phẩm">
                 </div>
+
                 <div class="col-5"></div>
             </div>
-            <div class="row" style="height: 775px; overflow-y: scroll; overflow-x: hidden;margin-left: 5px;">
+            <div class="row" style="height: 780px; overflow-y: scroll; overflow-x: hidden;margin-left: 5px;">
                 <div class="row" id="body-danhsach">
                 </div>
             </div>
@@ -101,7 +102,6 @@
                 <div class="card w-100 h-100">
                     <div class="d-flex">
                         <button class="btn btn-primary" id="create-tab" style="width: 200px">Tạo hóa đơn mới</button>
-
 
                     </div>
 
@@ -125,11 +125,11 @@
                                                 <tr>
                                                     <th style="width: 10%; position: sticky; top: 0; background-color: white">STT</th>
                                                     <th style="width: 0%; position: sticky; top: 0; background-color: white; display: none">IdSanPham</th>
-                                                    <th style="width: 20%; position: sticky; top: 0; background-color: white">Mã sản phẩm</th>
-                                                    <th style="width: 35%; position: sticky; top: 0; background-color: white">Tên sản phẩm</th>
-                                                    <th style="width: 15%; position: sticky; top: 0; background-color: white">Giá bán</th>
-                                                    <th style="width: 10%; position: sticky; top: 0; background-color: white">Số lượng</th>
-                                                    <th style="width: 10%; position: sticky; top: 0; background-color: white">Xóa sản phẩm</th>
+                                                    <th style="width: 11px; position: sticky; top: 0; background-color: white">Mã SP</th>
+                                                    <th style="width: 14px; position: sticky; top: 0; background-color: white">Tên SP</th>
+                                                    <th style="width: 16px; position: sticky; top: 0; background-color: white">Giá bán</th>
+                                                    <th style="width: 18px; position: sticky; top: 0; background-color: white">Số lượng</th>
+                                                    <th style="width: 20px; position: sticky; top: 0; background-color: white">Action</th>
                                                 </tr>
                                             </thead>
                                             <tbody>
@@ -145,32 +145,25 @@
             <div class="row" style="height: 400px">
                 <div class="col-12" style="padding:0">
                     <div class="card" style="width: 100%; padding:0; height: 400px;">
-                        <div class="card-header" style=" line-height: 50px">
+                        <div class="card-header" style=" line-height: 50px;color:red;font-size:20px">
                             Thông tin hóa đơn
                         </div>
                         <div class="row">
                             <div class="col-6">
                                 <table>
                                     <tr>
-                                        <td>Mã hóa đơn: </td>
+                                        <td>Mã HD: </td>
                                         <td><input class="form-control" id="MaHoaDonDangChon" type="text" aria-label="default input example" style="border-bottom: 2px solid black;" disabled></td>
-                                    </tr>
-                                    <tr>
-                                        <td>Tên nhân viên: </td>
-                                        <td><input class="form-control" id="TenNhanVien" type="text" aria-label="default input example" style="border-bottom: 2px solid black;" disabled></td>
-                                    </tr>
-                                    <tr>
-                                        <td>Ngày tạo: </td>
-                                        <td><input class="form-control" id="NgayTaoHoaDon" type="text" aria-label="default input example" style="border-bottom: 2px solid black;" disabled></td>
-                                    </tr>
-                                    <tr>
-                                        <td>Số điện thoại khách hàng: </td>
-                                        <td><input class="form-control" id="SoDienThoai" type="text" aria-label="default input example" style="border-bottom: 2px solid black;"></td>
                                     </tr>
                                     <tr>
                                         <td>Tên khách hàng: </td>
                                         <td><input class="form-control" id="TenKhachHang" type="text" aria-label="default input example" style="border-bottom: 2px solid black;"></td>
                                     </tr>
+                                    <tr>
+                                        <td>SDT khách hàng: </td>
+                                        <td><input class="form-control" id="SoDienThoai" type="text" aria-label="default input example" style="border-bottom: 2px solid black;"></td>
+                                    </tr>
+                                    
                                     <tr>
                                         <td>HT thanh toán: </td>
                                         <td>
@@ -205,7 +198,7 @@
                                     </tr>
 
                                     <tr>
-                                        <td>Khuyến mãi giảm:</td>
+                                        <td>Voucher:</td>
                                         <td><input class="form-control" type="text" id="KhuyenMaiGiam" onchange="updateTienThua()" aria-label="default input example" style="border-bottom: 2px solid black;" disabled></td>
                                     </tr>
                                     <tr>
@@ -217,10 +210,28 @@
                                         <td><input class="form-control" type="text" id="SoTienPhaiTra" onchange="updateTienThua()" aria-label="default input example" style="border-bottom: 2px solid black;" disabled></td>
                                     </tr>
                                     <tr>
-                                        <td></td>
-                                        <td><button class="btn btn-success" onclick="showConfirmationThanhToan()">Thanh toán</button> <button class="btn btn-danger" data-toggle="modal"  data-target="#modalHuyHoaDon">Hủy</button></td>
+                                        <td>Tên NV: </td>
+                                        <td><input class="form-control" id="TenNhanVien" type="text" aria-label="default input example" style="border-bottom: 2px solid black;" disabled></td>
                                     </tr>
+                                    <tr>
+                                        <td>Ngày tạo: </td>
+                                        <td><input class="form-control" id="NgayTaoHoaDon" type="text" aria-label="default input example" style="border-bottom: 2px solid black;" disabled></td>
+                                    </tr>
+                                    
                                 </table>
+
+
+                                <tr>
+                                    <td></td>
+                                    <td colspan="2">
+                                        <div class="button-container">
+                                            <button class="btn btn-success" onclick="showConfirmationThanhToan()">Thanh Toán</button>
+                                            <button class="btn btn-danger" data-toggle="modal" data-target="#modalHuyHoaDon">Hủy Hóa Đơn </button>
+                                        </div>
+                                    </td>
+
+                                 
+                                </tr>
                             </div>
                         </div>
                     </div>
@@ -297,7 +308,113 @@
     </div>
 </div>
 <style>
-  
+    body {
+        font-family: "Roboto", Arial, sans-serif;
+    }
+
+    /* Căn chỉnh khoảng cách */
+    .card {
+        padding: 15px;
+        border-radius: 10px; /* Bo góc mềm mại */
+        box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1); /* Đổ bóng nhẹ */
+    }
+
+    /* Làm nổi bật tiêu đề */
+    .card-header {
+        font-size: 16px;
+        font-weight: bold;
+        background-color: #f8f9fa;
+        padding: 10px;
+    }
+
+    /* Bảng dữ liệu */
+    .table th,
+    .table td {
+        text-align: center;
+        vertical-align: middle;
+        white-space: nowrap; /* Tránh chữ bị xuống dòng không mong muốn */
+        padding: 5px;
+    }
+
+    /* Làm cho tiêu đề bảng in đậm */
+    .table thead th {
+        font-weight: bold;
+        font-size: 16px;
+        background-color: #f8f9fa; /* Màu nền nhẹ cho tiêu đề */
+    }
+
+    /* Đảm bảo bảng không bị co lại */
+    .table {
+        width: 100%;
+        table-layout: fixed;
+    }
+
+    /* Cố định tiêu đề bảng khi cuộn */
+    .table-responsive {
+        overflow-y: auto;
+        overflow-x: hidden;
+    }
+
+    /* Chiều cao của bảng để tránh tràn chữ */
+    .table tbody {
+        height: 200px;
+        overflow-y: auto;
+    }
+
+    /* Định dạng nút xóa sản phẩm */
+    .table td:last-child button {
+        background-color: red;
+        color: white;
+        border: none;
+        padding: 5px 10px;
+        cursor: pointer;
+        border-radius: 4px;
+    }
+
+        .table td:last-child button:hover {
+            background-color: darkred;
+        }
+
+    .btn {
+        padding: 8px 15px;
+        border-radius: 5px;
+    }
+
+    .btn-primary {
+        background: #007bff;
+        border-color: #007bff;
+    }
+
+    .btn-success {
+        background: #28a745;
+        border-color: #28a745;
+    }
+
+    .btn-danger {
+        background: #dc3545;
+        border-color: #dc3545;
+    }
+
+    td {
+        font-weight: bold; /* Chữ in đậm */
+        padding: 5px 10px; /* Căn lề cho đẹp */
+        white-space: nowrap; /* Giữ chữ trên một dòng */
+    }
+
+    input.form-control, select.form-select {
+        height: 30px; /* Giảm chiều cao ô input */
+        font-size: 14px; /* Giảm kích thước chữ */
+        padding: 3px 8px; /* Căn chỉnh padding */
+        width: 90%; /* Thu nhỏ ô input */
+        border: 1px solid #ccc; /* Định dạng viền */
+        border-radius: 5px; /* Bo góc mềm mại hơn */
+    }
+
+    .button-container {
+        display: flex;
+        justify-content: center; /* Căn giữa các nút theo chiều ngang */
+        gap: 15px; /* Tạo khoảng cách giữa hai nút */
+    }
 </style>
 
 <script>
@@ -537,7 +654,7 @@
         }
         loading = true;
         $.ajax({
-            url: '/TaiQuay/LoadPartialViewDanhSachSanPham?tukhoa=' + value,
+            url: '/TaiQuay/LoadPartialViewDanhSachSanPham/tukhoa=' + value,
             type: 'GET',
             success: function (result) {
                 $('#body-danhsach').empty();
@@ -660,7 +777,7 @@
                     toastr.success(result.ketQua, 'Thành công');
                     $("#TimKhachHang").val("");
                     $.ajax({
-                        url: '/Admin/BTaiQuay/LoadPartialViewKhachHang',
+                        url: '/Admin/TaiQuay/LoadPartialViewKhachHang',
                         type: 'GET',
                         success: function (result) {
 
@@ -740,7 +857,7 @@
         var maHoaDon = $("#tabs .ui-tabs-active a").text();
         if (0 < newValue && newValue <= 1000) {
             $.ajax({
-                url: '/BanHangTaiQuay/UpdateSoLuong?maHD=' + maHoaDon + '&idSanPham=' + idsanpham + '&SoLuongMoi=' + newValue,
+                url: '/TaiQuay/UpdateSoLuong?maHD=' + maHoaDon + '&idSanPham=' + idsanpham + '&SoLuongMoi=' + newValue,
                 type: 'PUT',
                 success: function (result) {
                     if (result.trangThai) {
@@ -781,11 +898,7 @@
             loading = false;
         }
 
-        // if (newValue == 0 || newValue == "") {
-        //     var foundElement = $("#tab-" + maHoaDon + " table tbody").find("tr[id='hdct-" + idsanpham + "']");
-        //     foundElement.remove();
-        //     LoadChiTiet(maHoaDon);
-        // }
+
     }
     function isInteger(value) {
         return /^\d+$/.test(value);
@@ -800,7 +913,7 @@
         var maHoaDon = $("#tabs .ui-tabs-active a").text();
         var element = document.getElementById(idSanPham);
         $.ajax({
-            url: '/BanHangTaiQuay/XoaSanPhamKhoiHoaDon?maHD=' + maHoaDon + '&idSanPham=' + idSanPham,
+            url: '/TaiQuay/XoaSanPhamKhoiHoaDon?maHD=' + maHoaDon + '&idSanPham=' + idSanPham,
             type: 'DELETE',
             success: function (result) {
                 // alert(result.soLuongConLai);
@@ -897,7 +1010,7 @@
                     var tongGiam = parseFloat($("#TongGiam").val().replace(/[^\d]/g, '')) || 0;
 
                     $.ajax({
-                        url: '/BanHangTaiQuay/ThanhToan?maHD=' + maHoaDon + '&SDT=' + SDT + '&tenKhachHang=' + SDT + '&TongTien=' + tongTienChuaGiam + '&tienMat=' + tienMat + '&chuyenKhoan=' + tienChuyenKhoan + '&idVoucher=' + maVoucher + '&hinhThuc=' + hinhThucThanhToan + '&tongGiam=' + tongGiam,
+                        url: '/TaiQuay/ThanhToan?maHD=' + maHoaDon + '&SDT=' + SDT + '&tenKhachHang=' + SDT + '&TongTien=' + tongTienChuaGiam + '&tienMat=' + tienMat + '&chuyenKhoan=' + tienChuyenKhoan + '&idVoucher=' + maVoucher + '&hinhThuc=' + hinhThucThanhToan + '&tongGiam=' + tongGiam,
                         type: 'POST',
                         success: function (result) {
                             if (result.trangThai) {
@@ -964,7 +1077,7 @@
                 return;
             }
             $.ajax({
-                url: "@Url.Action("ThemSanPhamVaoHoaDon", "BanHangTaiQuay")",
+                url: "@Url.Action("ThemSanPhamVaoHoaDon", "TaiQuay")",
                 type: "POST",
                 data: {
                     "maHD": maHoaDon,

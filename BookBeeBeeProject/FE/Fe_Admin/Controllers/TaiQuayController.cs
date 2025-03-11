@@ -1,4 +1,5 @@
 ﻿using Fe_Admin.DTO;
+using Fe_Admin.DTO.Book;
 using Fe_Admin.DTO.Order;
 using Fe_Admin.DTO.OrderDTO;
 using Fe_Admin.Models;
@@ -305,10 +306,6 @@ namespace Fe_Admin.Controllers
 
         }
 
-
-
-
-
         [HttpGet]
         public async Task<IActionResult> LoadPartialViewDanhSachSanPham(string tukhoa, int currentPage = 1, int pageSize = 10, string key = "")
         {
@@ -317,117 +314,190 @@ namespace Fe_Admin.Controllers
             {
                 return RedirectToAction("Login", "Home");
             }
+
             var client = _httpClientFactory.CreateClient();
             client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", accessToken);
-           
-                var urlSanPham = $"https://localhost:7287/api/Book?page={currentPage}&pageSize={pageSize}&key={Uri.EscapeDataString(key)}";
-                var responseSanPham = await client.GetAsync(urlSanPham);
 
-                if (!responseSanPham.IsSuccessStatusCode)
-                {
-                    return View("Error", "Không thể truy cập dữ liệu từ API sách.");
-                }
+            var urlSanPham = $"https://localhost:7287/api/Book?page={currentPage}&pageSize={pageSize}&key={Uri.EscapeDataString(key)}";
+            var responseSanPham = await client.GetAsync(urlSanPham);
 
-                var jsonSanPham = await responseSanPham.Content.ReadAsStringAsync();
-                var sanPhamObject = JsonConvert.DeserializeObject<JObject>(jsonSanPham);
-                var danhSachSanPham = sanPhamObject?["data"]?.ToObject<List<Book>>() ?? new List<Book>();
+            if (!responseSanPham.IsSuccessStatusCode)
+            {
+                return View("Error", "Không thể truy cập dữ liệu từ API sách.");
+            }
 
-                if (!string.IsNullOrWhiteSpace(tukhoa))
-                {
-                    var listsanphamLoc = JsonConvert.DeserializeObject<List<Book>>(jsonSanPham).Where(c => c.Title.ToLower().Replace(" ", "").Contains(tukhoa.ToLower().Replace(" ", "")) || c.CodeBook.ToLower().Replace(" ", "").Contains(tukhoa.ToLower().Replace(" ", "")));
+            var jsonSanPham = await responseSanPham.Content.ReadAsStringAsync();
+            var sanPhamObject = JsonConvert.DeserializeObject<JObject>(jsonSanPham);
 
-                    return PartialView("_DanhSachSanPhamPartialView", listsanphamLoc);
+            var danhSachSanPham = sanPhamObject?["data"]?.ToObject<List<Book>>() ?? new List<Book>();
 
-                }
+            if (!string.IsNullOrWhiteSpace(tukhoa))
+            {
+                var listsanphamLoc = danhSachSanPham
+                    .Where(c => (c.Title?.ToLower().Replace(" ", "") ?? "").Contains(tukhoa.ToLower().Replace(" ", ""))
+                             || (c.CodeBook?.ToLower().Replace(" ", "") ?? "").Contains(tukhoa.ToLower().Replace(" ", "")))
+                    .ToList();
 
+                return PartialView("_DanhSachSanPhamPartialView", listsanphamLoc);
+            }
 
-                else
-                    return PartialView("_DanhSachSanPhamPartialView", danhSachSanPham);
-           
+            return PartialView("_DanhSachSanPhamPartialView", danhSachSanPham);
         }
 
 
 
 
-        //[HttpPost]
-        //public async Task<IActionResult> ThemSanPhamVaoHoaDon(string maHD, string idSanPham, int currentPage = 1, int pageSize = 10, string key = "")
-        //{
+
+        [HttpPost]
+        public async Task<IActionResult> ThemSanPhamVaoHoaDon(string maHD, string idSanPham, int currentPage = 1, int pageSize = 10, string key = "")
+        {
+            var accessToken = HttpContext.Session.GetString("AccessToken");
+            if (string.IsNullOrEmpty(accessToken))
+            {
+                return RedirectToAction("Login", "Home");
+            }
+            var client = _httpClientFactory.CreateClient();
+            client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", accessToken);
+
+
+            if (string.IsNullOrWhiteSpace(maHD))
+            {
+                return Ok(new { TrangThai = false, TrangThaiHang = false });
+            }
+
+            var urlSanPham = $"https://localhost:7287/api/Book?page={currentPage}&pageSize={pageSize}&key={Uri.EscapeDataString(key)}";
+            var responseSanPham = await client.GetAsync(urlSanPham);
+
+            if (!responseSanPham.IsSuccessStatusCode)
+            {
+                return View("Error", "Không thể truy cập dữ liệu từ API sách.");
+            }
+            var jsonSanPham = await responseSanPham.Content.ReadAsStringAsync();
+            var sanPhamObject = JsonConvert.DeserializeObject<JObject>(jsonSanPham);
+            var danhSachSanPham = sanPhamObject?["data"]?.ToObject<List<Book>>() ?? new List<Book>();
+            var sanpham = danhSachSanPham.FirstOrDefault(c => c.Id == int.Parse(idSanPham));
+            if (sanpham.Count == 0)
+            {
+                return Ok(new { TrangThai = false, TrangThaiHang = true });
+            }
 
 
 
-        //    if (string.IsNullOrWhiteSpace(maHD))
-        //    {
-        //        return Ok(new { TrangThai = false, TrangThaiHang = false });
-        //    }
-
-        //    var accessToken = HttpContext.Session.GetString("AccessToken");
-        //    if (string.IsNullOrEmpty(accessToken))
-        //    {
-        //        return RedirectToAction("Login", "Home");
-        //    }
-        //    var client = _httpClientFactory.CreateClient();
-        //    client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", accessToken);
-
-        //    var urlSanPham = $"https://localhost:7287/api/Book?page={currentPage}&pageSize={pageSize}&key={Uri.EscapeDataString(key)}";
-        //    var responseSanPham = await client.GetAsync(urlSanPham);
-
-        //    if (!responseSanPham.IsSuccessStatusCode)
-        //    {
-        //        return View("Error", "Không thể truy cập dữ liệu từ API sách.");
-        //    }
-
-        //    var jsonSanPham = await responseSanPham.Content.ReadAsStringAsync();
-        //    var sanPhamObject = JsonConvert.DeserializeObject<JObject>(jsonSanPham);
-        //    var danhSachSanPham = sanPhamObject?["data"]?.ToObject<List<Book>>() ?? new List<Book>().FirstOrDefault(sp => sp.Id==Convert.ToInt32(idSanPham) );
-
-
-        //    if (danhSachSanPham.SoLuongTon == 0)
-        //    {
-        //        return Ok(new { TrangThai = false, TrangThaiHang = true });
-        //    }
-
-
-        //    var urlAddBillDetail = $"api/BanHangTaiQuay/AddBillDetail?mahoadon={maHD}&codeProductDetail={sanPham.MaSanPhamChiTiet}";
-        //    var responseAddBillDetail = await client.PostAsync(urlAddBillDetail, null);
-        //    var jsonResponse = await responseAddBillDetail.Content.ReadAsStringAsync();
-        //    var responseDto = JsonConvert.DeserializeObject<ResponseDto>(jsonResponse);
-        //    var message = responseDto.Message;
-        //    var responseHDCT = JsonConvert.DeserializeObject<HoaDonChiTietDto>(responseDto.Content.ToString());
-
-
-        //    var url = $"/api/BanHangTaiQuay/GetAllHdTaiQuay";
-        //    var respone = client.GetAsync(url).Result;
-        //    string data = await respone.Content.ReadAsStringAsync();
-        //    var hoaDon = JsonConvert.DeserializeObject<List<HoaDonChoDTO>>(data.ToString());
-        //    var hoaDonDuocChon = hoaDon.FirstOrDefault(x => x.MaHoaDon == maHD).hoaDonChiTietDTOs.FirstOrDefault(x => x.Id == responseHDCT.Id);
-
-        //    var tongTienThayDoi = hoaDonDuocChon.Price;//gias thuc te trong spct
-        //    var soTienTraLaiThayDoi = hoaDonDuocChon.PriceBan;// gia ban trog hoa don
-        //    var SoTienKhuyenMaiGiam = tongTienThayDoi - soTienTraLaiThayDoi;
-        //    return Ok(new
-        //    {
-        //        TrangThai = true,
-        //        IdHoaDon = hoaDonDuocChon.HoaDonId,
-        //        IdHoaDonChiTiet = hoaDonDuocChon.Id,
-        //        IdSanPhamChiTiet = hoaDonDuocChon.SanPhamChiTietId,
-        //        SoLuong = hoaDonDuocChon.Quantity,
-        //        GiaBan = hoaDonDuocChon.PriceBan,
-        //        GiaGoc = hoaDonDuocChon.Price,
-        //        TenSanPham = sanPham.TenSanPham + "/" + sanPham.TenMauSac + "/" + sanPham.TenThuongHieu,
-        //        MaSanPham = sanPham.MaSanPham,
-        //        TongTienThayDoi = tongTienThayDoi,
-        //        SoTienTraLaiThayDoi = soTienTraLaiThayDoi,
-        //        SoTienKhuyenMaiGiam = SoTienKhuyenMaiGiam,
-        //        SoTienVoucherGiam = 0,
-        //    });
-        //}
+            var urlAddBillDetail = $"https://localhost:7287/api/TaiQuay/AddBillDetail?mahoadon={maHD}&codeProductDetail={sanpham.CodeBook}";
+            var responseAddBillDetail = await client.PostAsync(urlAddBillDetail, null);
+            var jsonResponse = await responseAddBillDetail.Content.ReadAsStringAsync();
+            var hoadonObject = JsonConvert.DeserializeObject<ResponseDto>(jsonResponse); 
+            var message = hoadonObject.Message;
+            var danhSachHDCT = JsonConvert.DeserializeObject<OrderDetailDTO>(hoadonObject.Content.ToString());
 
 
 
 
+            var urlHoaDon = "https://localhost:7287/api/TaiQuay/GetAllHdTaiQuay";
+            var responseHoaDon = await client.GetAsync(urlHoaDon);
+            if (!responseHoaDon.IsSuccessStatusCode)
+            {
+                var errorMessage = await responseHoaDon.Content.ReadAsStringAsync();
+                return View("Error", $"Không thể truy cập dữ liệu từ API. Mã lỗi: {responseHoaDon.StatusCode}, Thông tin lỗi: {errorMessage}");
+            }
+            var jsonHoaDon = await responseHoaDon.Content.ReadAsStringAsync();
+            var danhSachHoaDon = JsonConvert.DeserializeObject<List<HoaDonChoDTO>>(jsonHoaDon) ?? new List<HoaDonChoDTO>();
+
+
+            var hoaDonDuocChon = danhSachHoaDon.FirstOrDefault(x => x.OrderCode == maHD)
+                    .OrderDetailDTOs.FirstOrDefault(x => x.Id == danhSachHDCT.Id);
+
+            var tongTienThayDoi = hoaDonDuocChon?.Price ?? 0;
+            var soTienTraLaiThayDoi = hoaDonDuocChon.PriceBan;
+            var SoTienKhuyenMaiGiam = tongTienThayDoi - soTienTraLaiThayDoi;
+            return Ok(new
+            {
+                TrangThai = true,
+                IdHoaDon = hoaDonDuocChon.OrderId,
+                IdHoaDonChiTiet = hoaDonDuocChon.Id,
+                IdSanPhamChiTiet = hoaDonDuocChon.BookId,
+                SoLuong = hoaDonDuocChon.Quantity,
+                GiaBan = hoaDonDuocChon.PriceBan,
+                GiaGoc = hoaDonDuocChon.Price,
+                TenSanPham = sanpham.Title,
+                MaSanPham = sanpham.CodeBook,
+                TongTienThayDoi = tongTienThayDoi,
+                SoTienTraLaiThayDoi = soTienTraLaiThayDoi,
+                SoTienKhuyenMaiGiam = SoTienKhuyenMaiGiam,
+                SoTienVoucherGiam = 0,
+            });
+        }
 
 
 
+
+
+
+
+        [HttpPost]
+        public async Task<IActionResult> HuyHoaDon(string maHD, string lyDoHuy)
+        {
+
+            var accessToken = HttpContext.Session.GetString("AccessToken");
+            if (string.IsNullOrEmpty(accessToken))
+            {
+                return RedirectToAction("Login", "Home");
+            }
+
+            var client = _httpClientFactory.CreateClient();
+            client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", accessToken);
+            try
+            {
+
+                if (string.IsNullOrEmpty(maHD))
+                {
+                    return Ok(new
+                    {
+                        TrangThai = false,
+                    });
+                }
+                var urlHoaDon = "https://localhost:7287/api/TaiQuay/GetAllHdTaiQuay";
+                var responseHoaDon = await client.GetAsync(urlHoaDon);
+
+                if (!responseHoaDon.IsSuccessStatusCode)
+                {
+                    var errorMessage = await responseHoaDon.Content.ReadAsStringAsync();
+                    return View("Error", $"Không thể truy cập dữ liệu từ API. Mã lỗi: {responseHoaDon.StatusCode}, Thông tin lỗi: {errorMessage}");
+                }
+
+                var jsonHoaDon = await responseHoaDon.Content.ReadAsStringAsync();
+                var danhSachHoaDon = JsonConvert.DeserializeObject<List<HoaDonChoDTO>>(jsonHoaDon) ?? new List<HoaDonChoDTO>();
+                var hoaDon = danhSachHoaDon.FirstOrDefault(x => x.OrderCode == maHD);
+
+
+                var urlHuyHoaDon = "https://localhost:7287/api/TaiQuay/HuyHoaDon?maHD={hoaDon.OrderCode}&lyDoHuy={lyDoHuy}";
+                var responseHuyHoaDon = await client.PutAsync(urlHuyHoaDon, null);
+                var readAsync = responseHuyHoaDon.Content.ReadAsStringAsync();
+                var jsondataHuyHoaDon = responseHuyHoaDon.Content.ReadAsStringAsync();
+                var reponseDto = JsonConvert.DeserializeObject<ResponseDto>(jsondataHuyHoaDon.Result.ToString());
+                if (reponseDto.IsSuccess == true)
+                {
+                    return Ok(
+                    new { TrangThai = true, }
+                    );
+                }
+                return Ok(new
+                {
+                    TrangThai = false,
+                });
+            }
+            catch (Exception)
+            {
+
+                throw;
+            }
+
+
+
+           
+
+          
+        }
 
     }
 }

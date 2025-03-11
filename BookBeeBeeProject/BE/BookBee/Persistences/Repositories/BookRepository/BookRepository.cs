@@ -53,17 +53,18 @@ namespace BookStack.Persistence.Repositories.BookRepository
                 query = query.Where(b => b.Status == 1);
             if (!includeDeleted){query = query.Where(b => !b.IsDeleted);}
 
-			switch (sortBy.ToUpper())
-			{
-				case "TITLE": query = query.OrderBy(b => b.Title);break;
-				case "PRICE": query = query.OrderBy(b => b.Price);break;
-				case "PRICE_DEC": query = query.OrderByDescending(b => b.Price);break;
-				case "PUBLISHDATE": query = query.OrderBy(b => b.PublishDate);break;
-				case "ID":
-				default: query = query.OrderBy(b => b.Id);break;
-			}
-		
-			if (!includeDeleted){query = query.Where(b => !b.IsDeleted);}
+            sortBy = sortBy ?? "ID";
+            switch (sortBy.ToUpper())
+            {
+                case "TITLE": query = query.OrderBy(b => b.Title); break;
+                case "PRICE": query = query.OrderBy(b => b.Price); break;
+                case "PRICE_DEC": query = query.OrderByDescending(b => b.Price); break;
+                case "PUBLISHDATE": query = query.OrderBy(b => b.PublishDate); break;
+                case "ID":
+                default: query = query.OrderBy(b => b.Id); break;
+            }
+
+            if (!includeDeleted){query = query.Where(b => !b.IsDeleted);}
 
 			Total = query.Count(); Total = query.Count();
 

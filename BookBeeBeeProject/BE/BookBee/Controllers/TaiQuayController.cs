@@ -35,12 +35,12 @@ namespace BookBee.Controllers
 
 
         [HttpPost("AddBillDetail")]
-        public async Task<IActionResult> AddBillDetail(string mahoadon, string codeProductDetail, int? soluong)
+        public async Task<IActionResult> AddBillDetail([FromBody]  string mahoadon, string codeProductDetail, int? soluong)
         {
             var result = await _taiQuayServices.AddBillDetail(mahoadon, codeProductDetail, soluong);
-            if (!result.IsSuccess)
+            if (result == null)
             {
-                return BadRequest(result);
+                return BadRequest("Không thể tạo chi tiết hóa đơn.");
             }
             return Ok(result);
         }
@@ -50,10 +50,7 @@ namespace BookBee.Controllers
         public IActionResult UpdateBillDetail(string mahoadon, string codeProductDetail, int soluong)
         {
             var result = _taiQuayServices.CapNhatSoLuongHoaDonChiTietTaiQuay(mahoadon, codeProductDetail, soluong);
-            if (!result.IsSuccess)
-            {
-                return BadRequest(result);
-            }
+            
             return Ok(result);
         }
 
@@ -61,10 +58,7 @@ namespace BookBee.Controllers
         public IActionResult TruQuantityBillDetail(int idBillDetail)
         {
             var result = _taiQuayServices.TruQuantityBillDetail(idBillDetail).Result;
-            if (!result.IsSuccess)
-            {
-                return BadRequest(result);
-            }
+           
             return Ok(result);
         }
 
@@ -72,10 +66,7 @@ namespace BookBee.Controllers
         public IActionResult CongQuantityBillDetail(int idBillDetail)
         {
             var result = _taiQuayServices.CongQuantityBillDetail(idBillDetail).Result;
-            if (!result.IsSuccess)
-            {
-                return BadRequest(result);
-            }
+            
             return Ok(result);
         }
 
@@ -84,10 +75,7 @@ namespace BookBee.Controllers
         public IActionResult ThanhToanTaiQuay(Order _hoaDon)
         {
             var result = _taiQuayServices.ThanhToan(_hoaDon);
-            if (!result)
-            {
-                return BadRequest(result);
-            }
+           
             return Ok(result);
         }
 
@@ -96,22 +84,15 @@ namespace BookBee.Controllers
         public IActionResult XoaSanPhamKhoiHoaDon(string maHD, string maSP)
         {
             var result = _taiQuayServices.XoaSanPhamKhoiHoaDon(maHD, maSP);
-            if (string.IsNullOrEmpty(result))
-            {
-                return BadRequest(result);
-            }
+           
             return Ok(result);
         }
 
 
         [HttpPut("HuyHoaDon")]
-        public IActionResult HuyHoaDon(string maHD, string lyDoHuy)
+        public async Task<IActionResult> HuyHoaDon([FromBody]  string maHD, string lyDoHuy)
         {
-            var result = _taiQuayServices.HuyHoaDonAsync(maHD, lyDoHuy).Result;
-            if (!result.IsSuccess)
-            {
-                return BadRequest(result);
-            }
+            var result = await _taiQuayServices.HuyHoaDonAsync(maHD, lyDoHuy);
             return Ok(result);
         }
     }

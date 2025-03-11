@@ -16,13 +16,13 @@
             {
                 var cookieToken = context.Request.Cookies["AccessToken"];
                 var cookieRole = context.Request.Cookies["UserRole"];
-                var cookieUserId = context.Request.Cookies["UserAccountId"]; // 🔥 Thêm dòng này
+                var cookieUserId = context.Request.Cookies["UserAccountId"]; 
 
                 if (!string.IsNullOrEmpty(cookieToken) && !string.IsNullOrEmpty(cookieRole) && !string.IsNullOrEmpty(cookieUserId))
                 {
                     context.Session.SetString("AccessToken", cookieToken);
                     context.Session.SetString("UserRole", cookieRole);
-                    context.Session.SetString("UserAccountId", cookieUserId); // 🔥 Thêm dòng này
+                    context.Session.SetString("UserAccountId", cookieUserId); 
                 }
             }
 

@@ -82,7 +82,17 @@ namespace BookBee.Services.TaiQuayServices
                 }
                 else soluong = soluong.Value;
 
-                var sanPhamChiTietDTO1 = _bookRepository.GetBooks(page: null,pageSize: null,key: null,sortBy: null,tagId: null,voucherId: null,includeDeleted: false,publisherId: null,authorId: null,supplierId: null,status: null).Result.FirstOrDefault();
+                var sanPhamChiTietDTO1 = _bookRepository.GetBooks(page: 1, // Tránh null
+                  pageSize: 10,
+                  key: "",
+                  sortBy: "ID", // Đảm bảo có giá trị
+                  tagId: null,
+                  voucherId: null,
+                  includeDeleted: false,
+                  publisherId: null,
+                  authorId: null,
+                  supplierId: null,
+                  status: null);
                 var sanPhamChiTietDTO = _bookRepository.GetBooks(1).Result.Where(x => x.CodeBook == codeProductDetail).FirstOrDefault();
 
                 var sanPhamChiTiet = await _bookRepository.GetBooks();
@@ -164,6 +174,12 @@ namespace BookBee.Services.TaiQuayServices
             {
                 return new ResponseDTO { IsSuccess = false, Code = 500, Message = e.Message };
             }
+
+
+
+
+
+
         }
 
         public ResponseDTO CapNhatSoLuongHoaDonChiTietTaiQuay(string maHoaDon, string maSPCT, int soLuong)
@@ -600,27 +616,37 @@ namespace BookBee.Services.TaiQuayServices
 
         public async Task<ResponseDTO> HuyHoaDonAsync(string maHoaDon, string lyDoHuy)
         {
-            var _getBillByInvoiceCodez = _taiQuayRepository.GetBillByInvoiceCode(maHoaDon).Result;
-            var billDetail = _orderDetailRepository.GetAllAsync().Result.Where(x => x.OrderId == _getBillByInvoiceCodez.Id).ToList();
+            var _getBillByInvoiceCodez = await _taiQuayRepository.GetBillByInvoiceCode(maHoaDon); // ✅ Đảm bảo là async
 
-            if (billDetail.Count() == 0)
+            var billDetails = await _orderDetailRepository.GetAllAsync(); // ✅ Truy vấn async toàn bộ danh sách
+            var billDetail = billDetails.Where(x => x.OrderId == _getBillByInvoiceCodez.Id).ToList(); // ✅ Dùng Where sau khi đã await
+
+            if (!billDetail.Any()) // ✅ Kiểm tra danh sách thay vì count()
             {
-                var hoadon = _taiQuayRepository.GetAll().Find(x => x.OrderCode == maHoaDon);
+                var hoadon =  _taiQuayRepository.GetAll().FirstOrDefault(x => x.OrderCode == maHoaDon);
+                if (hoadon == null)
+                    return new ResponseDTO { IsSuccess = false, Code = 400, Message = "Không tìm thấy hóa đơn" };
+
                 hoadon.DeliveryStatus = 4;
                 hoadon.CancellationReason = lyDoHuy;
+
                 _dataContext.Orders.Update(hoadon);
-                _dataContext.SaveChanges();
+                await _dataContext.SaveChangesAsync(); // ✅ Sử dụng SaveChangesAsync()
 
                 return new ResponseDTO { IsSuccess = true, Code = 200, Message = "Hủy hóa đơn thành công" };
             }
+
             if (billDetail.Any())
             {
-                var hoadon = _taiQuayRepository.GetAll().Find(x => x.OrderCode == maHoaDon);
+                var hoadon =  _taiQuayRepository.GetAll().FirstOrDefault(x => x.OrderCode == maHoaDon);
+                if (hoadon == null)
+                    return new ResponseDTO { IsSuccess = false, Code = 400, Message = "Không tìm thấy hóa đơn" };
+
                 hoadon.DeliveryStatus = 4;
                 hoadon.CancellationReason = lyDoHuy;
 
                 _dataContext.Orders.Update(hoadon);
-                _dataContext.SaveChanges();
+                await _dataContext.SaveChangesAsync(); // ✅ Dùng async
 
                 foreach (var item in billDetail)
                 {
@@ -628,7 +654,37 @@ namespace BookBee.Services.TaiQuayServices
                 }
                 return new ResponseDTO { IsSuccess = true, Code = 200, Message = "Hủy hóa đơn thành côngz" };
             }
+
             return new ResponseDTO { IsSuccess = false, Code = 400, Message = "Hủy hóa đơn thất bại" };
+            //var _getBillByInvoiceCodez = _taiQuayRepository.GetBillByInvoiceCode(maHoaDon).Result;
+            //var billDetail = _orderDetailRepository.GetAllAsync().Result.Where(x => x.OrderId == _getBillByInvoiceCodez.Id).ToList();
+
+            //if (billDetail.Count() == 0)
+            //{
+            //    var hoadon = _taiQuayRepository.GetAll().Find(x => x.OrderCode == maHoaDon);
+            //    hoadon.DeliveryStatus = 4;
+            //    hoadon.CancellationReason = lyDoHuy;
+            //    _dataContext.Orders.Update(hoadon);
+            //    _dataContext.SaveChanges();
+
+            //    return new ResponseDTO { IsSuccess = true, Code = 200, Message = "Hủy hóa đơn thành công" };
+            //}
+            //if (billDetail.Any())
+            //{
+            //    var hoadon = _taiQuayRepository.GetAll().Find(x => x.OrderCode == maHoaDon);
+            //    hoadon.DeliveryStatus = 4;
+            //    hoadon.CancellationReason = lyDoHuy;
+
+            //    _dataContext.Orders.Update(hoadon);
+            //    _dataContext.SaveChanges();
+
+            //    foreach (var item in billDetail)
+            //    {
+            //        await UpdateSoLuongSanPhamChiTietAynsc(item.BookId.Value, -item.Quantity);
+            //    }
+            //    return new ResponseDTO { IsSuccess = true, Code = 200, Message = "Hủy hóa đơn thành côngz" };
+            //}
+            //return new ResponseDTO { IsSuccess = false, Code = 400, Message = "Hủy hóa đơn thất bại" };
         }
 
         public async Task<ResponseDTO> PGetBillByInvoiceCode(string invoiceCode)

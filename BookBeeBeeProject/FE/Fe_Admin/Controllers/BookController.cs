@@ -109,7 +109,7 @@ namespace Fe_Admin.Controllers
             }
 
             using var content = new MultipartFormDataContent();
-
+            content.Add(new StringContent(model.CodeBook), "CodeBook");
             content.Add(new StringContent(model.Title), "Title");
             content.Add(new StringContent(model.Description), "Description");
             content.Add(new StringContent(model.NumberOfPages.ToString()), "NumberOfPages");

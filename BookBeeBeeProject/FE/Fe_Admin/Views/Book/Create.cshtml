@@ -30,6 +30,11 @@
                     <h3 class="text-center mb-4">Thêm Sách Mới</h3>
                     <form id="form-create" method="post" enctype="multipart/form-data">
                         <div class="mb-3">
+                            <label for="bookCode" class="form-label">Mã Sách</label>
+                            <input type="text" id="bookCode" class="form-control" asp-for="CodeBook" placeholder="Nhập Mã Sách">
+                        </div>
+
+                        <div class="mb-3">
                             <label for="bookTitle" class="form-label">Tên Sách</label>
                             <input type="text" id="bookTitle" class="form-control" asp-for="Title" placeholder="Nhập Tên Sách">
                         </div>

@@ -1,4 +1,5 @@
-﻿using Fe_Admin.DTO.Voucher;
+﻿using Fe_Admin.DTO.Author;
+using Fe_Admin.DTO.Voucher;
 using System.ComponentModel.DataAnnotations;
 
 namespace Fe_Admin.DTO.Book
@@ -6,6 +7,7 @@ namespace Fe_Admin.DTO.Book
     public class BookDTO
     {
         public int Id { get; set; }
+        public string CodeBook { get; set; }
         public string Title { get; set; }
         public string Description { get; set; }
         public int NumberOfPages { get; set; }
@@ -28,5 +30,6 @@ namespace Fe_Admin.DTO.Book
         public double GiaThucTe { get; set; }
         public int? StockQuantity { get; set; } = 0;
         public int? SoldQuantity { get; set; } = 0;
+
     }
 }
