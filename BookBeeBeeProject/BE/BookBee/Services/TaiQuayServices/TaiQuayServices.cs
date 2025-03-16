@@ -55,7 +55,7 @@ namespace BookBee.Services.TaiQuayServices
             _orderRepository = orderRepository;
             _mapper = mapper;
             _reponseBill = new OrderDTO();
-            _reponse= new ResponseDTO();
+            _reponse = new ResponseDTO();
             _bookRepository = bookRepository;
             _userRepository = userRepository;
             _addressRepository = addressRepository;
@@ -67,7 +67,7 @@ namespace BookBee.Services.TaiQuayServices
             _detailedPaymentRepository = detailedPaymentRepository;
             _paymentMethodRepository = paymentMethodRepository;
             _cartDetailsRepository = cartDetailsRepository;
-            _taiQuayRepository=taiQuayRepository;
+            _taiQuayRepository = taiQuayRepository;
             _dataContext = dataContext;
             _orderDetailRepository = orderDetailRepository;
         }
@@ -121,13 +121,13 @@ namespace BookBee.Services.TaiQuayServices
                         if (update.IsSuccess)
                         {
                             var spct = _bookRepository.GetBooks().Result.Where(x => x.Id == sanPhamChiTietDTO.Id).FirstOrDefault();
-                            spct.StockQuantity = sanPhamChiTietDTO.StockQuantity - 1;
+                            spct.Count = sanPhamChiTietDTO.Count - 1;
                             spct.SoldQuantity = sanPhamChiTietDTO.SoldQuantity + 1;
                             _dataContext.Books.Update(spct);
                             _dataContext.SaveChanges();
                             return new ResponseDTO { Content = update.Content, IsSuccess = true, Code = 200, Message = "Cập sản phẩm vào giỏ hàng thành công" };
                         }
-                        else if (sanPhamChiTietDTO.StockQuantity < checkProductInBillDetail.Quantity + soluong)
+                        else if (sanPhamChiTietDTO.Count < checkProductInBillDetail.Quantity + soluong)
                         {
                             return new ResponseDTO { IsSuccess = false, Code = 400, Message = "Vượt quá số lượng" };
 
@@ -148,7 +148,7 @@ namespace BookBee.Services.TaiQuayServices
                         };
 
                         var spct = _bookRepository.GetBooks().Result.Where(x => x.Id == sanPhamChiTietDTO.Id).FirstOrDefault();
-                        spct.StockQuantity = sanPhamChiTietDTO.StockQuantity - 1;
+                        spct.Count = sanPhamChiTietDTO.Count - 1;
                         spct.SoldQuantity = sanPhamChiTietDTO.SoldQuantity + 1;
                         _dataContext.Books.Update(spct);
                         _dataContext.SaveChanges();
@@ -202,7 +202,7 @@ namespace BookBee.Services.TaiQuayServices
                 }
                 var SLThayDoi = soLuong - billDetail.Quantity;
                 billDetail.Quantity = soLuong;
-                
+
 
                 var spct = _bookRepository.GetBooks().Result.Where(x => x.Id == sanPhamChiTietDTO.Id).FirstOrDefault();
 
@@ -476,7 +476,7 @@ namespace BookBee.Services.TaiQuayServices
                         Message = "Đã vượt quá số lượng ID cho phép"
                     };
                 }
-               
+
 
                 Order hdtq = new Order()
                 {
@@ -484,12 +484,12 @@ namespace BookBee.Services.TaiQuayServices
                     UserAccountId = requestHDTaiQuay.IdNguoiDung,
                     CreatedDate = DateTime.Now,
                     OrderCode = TaoMaHoaDon(),
-                    DeliveryStatus = 5, 
+                    DeliveryStatus = 5,
                     PaymentStatus = 0,
 
                 };
 
-              var result = _dataContext.Orders.Add(hdtq);
+                var result = _dataContext.Orders.Add(hdtq);
                 _dataContext.SaveChanges();
 
                 if (result.State != 0)
@@ -499,7 +499,8 @@ namespace BookBee.Services.TaiQuayServices
                         IsSuccess = true,
                         Code = 200,
                         Content = hdtq,
-                        Message = "Tạo Hóa Đơn Thành Công"
+                        Message = "Tạo Hóa Đơn Thành Công",
+                        Data = hdtq
                     };
                 }
                 else
@@ -537,7 +538,7 @@ namespace BookBee.Services.TaiQuayServices
             return await CongOrTruQuantityBillDetail(idBillDetail, 1);
         }
 
-     
+
 
         public Task<ResponseDTO> CreateHoaDonTaiQuay(RequestBillDTO requestBill)
         {
@@ -600,6 +601,7 @@ namespace BookBee.Services.TaiQuayServices
                         OrderId = x.Id,
                         BookId = y.BookId,
                         CodeBook = z.CodeBook,
+                        Title = z.Title,
                         Quantity = y.Quantity,
                         Price = (double)z.GiaThucTe,
                         PriceBan = (double)y.Price
@@ -623,7 +625,7 @@ namespace BookBee.Services.TaiQuayServices
 
             if (!billDetail.Any()) // ✅ Kiểm tra danh sách thay vì count()
             {
-                var hoadon =  _taiQuayRepository.GetAll().FirstOrDefault(x => x.OrderCode == maHoaDon);
+                var hoadon = _taiQuayRepository.GetAll().FirstOrDefault(x => x.OrderCode == maHoaDon);
                 if (hoadon == null)
                     return new ResponseDTO { IsSuccess = false, Code = 400, Message = "Không tìm thấy hóa đơn" };
 
@@ -638,7 +640,7 @@ namespace BookBee.Services.TaiQuayServices
 
             if (billDetail.Any())
             {
-                var hoadon =  _taiQuayRepository.GetAll().FirstOrDefault(x => x.OrderCode == maHoaDon);
+                var hoadon = _taiQuayRepository.GetAll().FirstOrDefault(x => x.OrderCode == maHoaDon);
                 if (hoadon == null)
                     return new ResponseDTO { IsSuccess = false, Code = 400, Message = "Không tìm thấy hóa đơn" };
 
@@ -749,7 +751,7 @@ namespace BookBee.Services.TaiQuayServices
             var _getBillByInvoiceCode = _taiQuayRepository.GetBillByInvoiceCode(maHoaDon).Result;
             var sanPhamChiTietDTO = _bookRepository.GetBooks(1).Result.Where(x => x.CodeBook == maSPCT).FirstOrDefault();
             var hoaDonChiTiet = _orderDetailRepository.GetAllAsync().Result.FirstOrDefault(x => x.OrderId == _getBillByInvoiceCode.Id && x.BookId == sanPhamChiTietDTO.Id);
-            
+
             var soLuongSanPham = hoaDonChiTiet.Quantity;
             _dataContext.OrderDetails.Remove(hoaDonChiTiet);
 
@@ -759,7 +761,8 @@ namespace BookBee.Services.TaiQuayServices
             //var spct = new ChiTietSanPham()
             //{
 
-            spct.StockQuantity = sanPhamChiTietDTO.StockQuantity + soLuongSanPham;
+            spct.Count += soLuongSanPham;
+            //spct.Count = sanPhamChiTietDTO.Count + soLuongSanPham;
             _dataContext.Books.Update(spct);
             _dataContext.SaveChanges();
             return soLuongSanPham.ToString();
@@ -779,7 +782,7 @@ namespace BookBee.Services.TaiQuayServices
 
                 }
 
-               
+
                 billDetail.Quantity += changeAmount;
 
                 if (billDetail.Quantity == 0)
@@ -789,7 +792,7 @@ namespace BookBee.Services.TaiQuayServices
                 }
                 if (Update(billDetail).IsSuccess)
                 {
-                  
+
                     return new ResponseDTO { IsSuccess = true, Code = 200, Message = $"{(changeAmount > 0 ? "Tăng" : "Giảm")} số lượng sản phẩm thành công" };
                 }
                 else
@@ -808,8 +811,8 @@ namespace BookBee.Services.TaiQuayServices
             try
             {
                 var sanPhamChiTiet = await _dataContext.Books.FindAsync(id);
-                sanPhamChiTiet!.StockQuantity = sanPhamChiTiet.StockQuantity - soLuong;
-                sanPhamChiTiet!.SoldQuantity += soLuong;
+                sanPhamChiTiet!.Count = sanPhamChiTiet.Count - soLuong;
+                sanPhamChiTiet!.SoldQuantity += soLuong;// sản phẩm đã bán được
                 _dataContext.Books.Update(sanPhamChiTiet);
                 await _dataContext.SaveChangesAsync();
             }

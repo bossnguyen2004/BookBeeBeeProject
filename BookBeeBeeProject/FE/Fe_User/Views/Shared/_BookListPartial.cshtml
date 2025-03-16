@@ -1,0 +1,113 @@
+﻿@using X.PagedList
+@using X.PagedList.Mvc.Core
+@using System.Linq
+@model IPagedList<Fe_User.DTO.BookDTO>
+@addTagHelper *, Microsoft.AspNetCore.Mvc.TagHelpers
+
+
+@if (Model != null && Model.Count > 0)
+{
+   <div class="col">
+        <div class="product-grid" data-isotope='{ "itemSelector": ".product-item", "layoutMode": "fitRows" }'>
+            @foreach (var book in Model)
+            {
+                var isAvailable = book?.Count > 0;
+                var hasDiscount = book?.GiaThucTe < book?.Price;
+                var discountPercent = (book?.Price > 0) ? (int)Math.Round((1 - (book.GiaThucTe / book.Price)) * 100) : 0;
+                var soldQuantity = book?.SoldQuantity ?? 0; 
+
+                <div class="product-item">
+                    <div class="product discount product_filter @(isAvailable ? "" : "out-of-stock")">
+                        <div class="product_image">
+                            <img src="@book.ImageUrl" alt="@book?.Title">
+                        </div>
+                        <div class="favorite favorite_left"></div>
+
+                        @if (hasDiscount)
+                        {
+                            <div class="product_bubble product_bubble_right product_bubble_red d-flex flex-column align-items-center">
+                                <span>-@discountPercent%</span>
+                            </div>
+                        }
+
+                        <div class="product_info">
+                            <h6 class="product_name">
+                                <a href="/chi-tiet/@book.Title.ToLower().Replace(" ", "-")-p@(book.Id)">@book?.Title</a>
+                            </h6>
+
+                            <div class="product_price">
+                                @if (book.GiaThucTe < book.Price)
+                                {
+                                    <span class="text-danger">@book.GiaThucTe.ToString("N0") VNĐ</span>
+                                    <span class="original-price">@book.Price.ToString("N0") VNĐ</span>
+                                }
+                                else
+                                {
+                                    <span class="text-dark">@book.Price.ToString("N0") VNĐ</span>
+                                }
+                            </div>
+
+                            <div class="sold-quantity">Đã bán: @book.SoldQuantity</div>
+                        </div>
+                    </div>
+                    <div class="red_button add_to_cart_button">
+                        <a href="@Url.Action("AddToCart", "Cart", new { id = book?.Id })"
+                           class="@(isAvailable ? "" : "disabled-link")">
+                            @(isAvailable ? "Thêm vào giỏ" : "Hết hàng")
+                        </a>
+                    </div>
+
+                </div>
+            }
+        </div>
+   </div>
+
+}
+else
+{
+    <p>Không có sách nào để hiển thị.</p>
+}
+<script src="~/Scripts/jsShopping.js"></script>
+<style>
+    .product-grid {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px; 
+    }
+
+    .product-item {
+        flex: 1 1 calc(20% - 15px); 
+        max-width: calc(20% - 15px);
+    }
+
+    .sold-quantity {
+        font-size: 14px;
+        color: red; 
+        font-weight: bold; 
+        margin-bottom: 5px;
+    }
+
+
+    product_price .original-price {
+        text-decoration: line-through;
+        color: #000;
+        margin-left: 8px;
+    }
+
+
+    .product_price .text-danger {
+        color: red;
+        font-weight: bold;
+    }
+
+
+    .product_price .text-dark {
+        color: #333;
+        font-weight: normal;
+    }
+</style>
+@section scripts {
+  
+}
+
+

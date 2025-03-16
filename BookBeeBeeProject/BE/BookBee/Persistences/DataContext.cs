@@ -25,7 +25,7 @@ namespace BookBee.Persistences
         public DbSet<OrderVoucher> OrderVouchers { get; set; }
         public DbSet<VoucherDetail> VoucherDetails { get; set; }
         public DbSet<UserAccount> UserAccounts { get; set; }
-
+        public DbSet<BookTag> BookTags { get; set; }
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             modelBuilder.Entity<Order>()

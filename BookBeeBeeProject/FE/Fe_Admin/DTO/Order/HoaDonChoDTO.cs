@@ -4,7 +4,7 @@ namespace Fe_Admin.DTO.OrderDTO
 {
     public class HoaDonChoDTO
     {
-        //public int Id { get; set; }
+        public int? Id { get; set; }
         public int? IdNguoiDung { get; set; }
         public int? EmployeeId { get; set; }
         public int? IdVoucher { get; set; }

@@ -1,4 +1,5 @@
 ﻿using BookBee.DTO.Response;
+using BookBee.Model;
 using BookStack.DTO.CartBook;
 using BookStack.DTOs.Order;
 
@@ -14,6 +15,7 @@ namespace BookBee.Services.OrderService
         //Task<ResponseDTO> SelfCreateOrder(OrderDTO selfCreateOrderDTO);
         Task<ResponseDTO> GetOrderByUser(int userId, int? page = 1, int? pageSize = 10, string? key = "", string? sortBy = "ID", int? orderType = null);
         Task<ResponseDTO> GetSelfOrders(int? page = 1, int? pageSize = 10, string? key = "", string? sortBy = "ID");
+        Task<Order> GetOrDerByCode(string orderCode);
 
 
     }

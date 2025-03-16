@@ -1,5 +1,26 @@
-﻿@*
-    For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
-*@
+﻿@model IEnumerable<Fe_Admin.DTO.Order.OrderDetailDTO>;
 @{
+    int stt = 1;
+}
+@foreach (var hoaDonChiTiet in Model)
+{
+    <tr scope="col" id="hdct-@hoaDonChiTiet.Id">
+        <td>@stt</td>
+        <td hidden>@hoaDonChiTiet.BookId</td>
+        <td>@hoaDonChiTiet.CodeBook</td>
+        <td>@hoaDonChiTiet.TitleBook</td>
+        @{
+            if (hoaDonChiTiet.Price != hoaDonChiTiet.PriceBan)
+            {
+                <td><strike>@string.Format(new System.Globalization.CultureInfo("vi-VN"), "{0:C0}", hoaDonChiTiet.Price)</strike> <br>@string.Format(new System.Globalization.CultureInfo("vi-VN"), "{0:C0}", hoaDonChiTiet.PriceBan)</td>
+            }
+            else
+            {
+                <td>@string.Format(new System.Globalization.CultureInfo("vi-VN"), "{0:C0}", hoaDonChiTiet.PriceBan)</td>
+            }
+        }
+        <td><input type="number" max="1000" min="1" pattern="[0-9]*" oninput="this.value = this.value.replace(/[^0-9]/g, '')" onchange="suaSoLuongSanPham('@hoaDonChiTiet.BookId',this)" value="@hoaDonChiTiet.Quantity" /></td>
+        <td><a class="btn btn-tone" onclick="XoaSanPhamTrongHoaDon('hdct-@hoaDonChiTiet.BookId','@hoaDonChiTiet.BookId')">X</a></td>
+    </tr>
+    stt++;
 }

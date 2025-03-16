@@ -8,7 +8,7 @@ namespace BookStack.Persistence.Repositories.BookRepository
         int Total { get; }
 
 		Task<List<Book>> GetBooks(int? page = 1, int? pageSize = 10, string? key = "", string? sortBy = "ID",
-						  int? tagId = 0, int? voucherId = 0, bool includeDeleted = false,
+						  int? tagId = null, int? voucherId = 0, bool includeDeleted = false,
 						  int? publisherId = null, int? authorId = null, int? supplierId = null,int? status=null);
 
 		Task<List<Book>> GetCart(List<int> bookIds);

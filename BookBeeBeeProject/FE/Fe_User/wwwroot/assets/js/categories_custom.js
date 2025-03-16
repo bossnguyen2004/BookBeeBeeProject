@@ -1,4 +1,4 @@
-/* JS Document */
+﻿/* JS Document */
 
 /******************************
 
@@ -308,78 +308,136 @@ jQuery(document).ready(function($)
 
 	*/
 
-    function initIsotopeFiltering()
-    {
-    	var sortTypes = $('.type_sorting_btn');
-    	var sortNums = $('.num_sorting_btn');
-    	var sortTypesSelected = $('.sorting_type .item_sorting_btn is-checked span');
-    	var filterButton = $('.filter_button');
+	// Hàm định dạng tiền VND (thêm dấu chấm phân cách)
+	function formatVND(number) {
+		return number.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".") + "VND";
+	}
 
-    	if($('.product-grid').length)
-    	{
-    		$('.product-grid').isotope({
-    			itemSelector: '.product-item',
-	            getSortData: {
-	            	price: function(itemElement)
-	            	{
-	            		var priceEle = $(itemElement).find('.product_price').text().replace( '$', '' );
-	            		return parseFloat(priceEle);
-	            	},
-	            	name: '.product_name'
-	            },
-	            animationOptions: {
-	                duration: 750,
-	                easing: 'linear',
-	                queue: false
-	            }
-	        });
+	function initIsotopeFiltering() {
+		var sortTypes = $('.type_sorting_btn');
+		var sortNums = $('.num_sorting_btn');
+		var sortTypesSelected = $('.sorting_type .item_sorting_btn is-checked span');
+		var filterButton = $('.filter_button');
 
-    		// Short based on the value from the sorting_type dropdown
-	        sortTypes.each(function()
-	        {
-	        	$(this).on('click', function()
-	        	{
-	        		$('.type_sorting_text').text($(this).text());
-	        		var option = $(this).attr('data-isotope-option');
-	        		option = JSON.parse( option );
-    				$('.product-grid').isotope( option );
-	        	});
-	        });
+		if ($('.product-grid').length) {
+			// Khởi tạo slider khoảng giá (nếu có)
+			if ($("#slider-range").length) {
+				$("#slider-range").slider({
+					range: true,
+					min: 0,
+					max: 10000000, // 10 triệu
+					values: [0, 10000000],
+					slide: function (event, ui) {
+						// Cập nhật giá trị hiển thị
+						$("#amount").val(
+							formatVND(ui.values[0]) + " - " + formatVND(ui.values[1])
+						);
+					}
+				});
 
-	        // Show only a selected number of items
-	        sortNums.each(function()
-	        {
-	        	$(this).on('click', function()
-	        	{
-	        		var numSortingText = $(this).text();
+				// Set giá trị ban đầu cho input
+				$("#amount").val(
+					formatVND($("#slider-range").slider("values", 0)) + " - " +
+					formatVND($("#slider-range").slider("values", 1))
+				);
+			}
+
+			// Khởi tạo Isotope
+			$('.product-grid').isotope({
+				itemSelector: '.product-item',
+				getSortData: {
+					price: function (itemElement) {
+						// Xử lý giá VND (xóa dấu chấm và chữ VND)
+						var priceEle = $(itemElement).find('.product_price').text()
+							.replace('VND', '')
+							.replace(/\./g, ''); // Xóa dấu phân cách
+						return parseFloat(priceEle);
+					},
+					name: '.product_name'
+				},
+				animationOptions: {
+					duration: 750,
+					easing: 'linear',
+					queue: false
+				}
+			});
+
+			// Xử lý sắp xếp
+			sortTypes.each(function () {
+				$(this).on('click', function () {
+					$('.type_sorting_text').text($(this).text());
+					var option = $(this).attr('data-isotope-option');
+					option = JSON.parse(option);
+					$('.product-grid').isotope(option);
+				});
+			});
+
+			// Xử lý số lượng sản phẩm hiển thị
+			sortNums.each(function () {
+				$(this).on('click', function () {
+					var numSortingText = $(this).text();
 					var numFilter = ':nth-child(-n+' + numSortingText + ')';
-	        		$('.num_sorting_text').text($(this).text());
-    				$('.product-grid').isotope({filter: numFilter });
-	        	});
-	        });	
+					$('.num_sorting_text').text($(this).text());
+					$('.product-grid').isotope({ filter: numFilter });
+				});
+			});
 
-	        // Filter based on the price range slider
-	        filterButton.on('click', function()
-	        {
-	        	$('.product-grid').isotope({
-		            filter: function()
-		            {
-		            	var priceRange = $('#amount').val();
-			        	var priceMin = parseFloat(priceRange.split('-')[0].replace('$', ''));
-			        	var priceMax = parseFloat(priceRange.split('-')[1].replace('$', ''));
-			        	var itemPrice = $(this).find('.product_price').clone().children().remove().end().text().replace( '$', '' );
+			// Xử lý lọc theo khoảng giá
+			filterButton.on('click', function () {
+				$('.product-grid').isotope({
+					filter: function () {
+						var priceRange = $('#amount').val();
 
-			        	return (itemPrice > priceMin) && (itemPrice < priceMax);
-		            },
-		            animationOptions: {
-		                duration: 750,
-		                easing: 'linear',
-		                queue: false
-		            }
-		        });
-	        });
-    	}
-    }
+						// Tách giá min/max từ chuỗi VND
+						var priceParts = priceRange.split(' - ');
+
+						// Xử lý giá min
+						var priceMin = parseFloat(
+							priceParts[0]
+								.replace('VND', '')
+								.replace(/\./g, '') // Xóa dấu chấm
+								.trim()
+						);
+
+						// Xử lý giá max
+						var priceMax = parseFloat(
+							priceParts[1]
+								.replace('VND', '')
+								.replace(/\./g, '') // Xóa dấu chấm
+								.trim()
+						);
+
+						// Lấy giá sản phẩm
+						var itemPrice = parseFloat(
+							$(this).find('.product_price')
+								.clone()
+								.children()
+								.remove()
+								.end()
+								.text()
+								.replace('VND', '')
+								.replace(/\./g, '') // Xóa dấu chấm
+						);
+
+						// So sánh giá
+						return (itemPrice >= priceMin) && (itemPrice <= priceMax);
+					},
+					animationOptions: {
+						duration: 750,
+						easing: 'linear',
+						queue: false
+					}
+				});
+			});
+		}
+	}
+
+
+
+
+
+
+
 
     /* 
 
@@ -387,22 +445,27 @@ jQuery(document).ready(function($)
 
 	*/
 
-    function initPriceSlider()
-    {
-		$( "#slider-range" ).slider(
-		{
+	function initPriceSlider() {
+		var minPrice = 0;
+		var maxPrice = 10000000; // 10 triệu VND
+
+		$("#slider-range").slider({
 			range: true,
-			min: 0,
-			max: 1000,
-			values: [ 0, 580 ],
-			slide: function( event, ui )
-			{
-				$( "#amount" ).val( "$" + ui.values[ 0 ] + " - $" + ui.values[ 1 ] );
+			min: minPrice,
+			max: maxPrice,
+			values: [minPrice, maxPrice],
+			slide: function (event, ui) {
+				$("#amount").val(formatVND(ui.values[0]) + " - " + formatVND(ui.values[1]));
 			}
 		});
-			
-		$( "#amount" ).val( "$" + $( "#slider-range" ).slider( "values", 0 ) + " - $" + $( "#slider-range" ).slider( "values", 1 ) );
-    }
+
+		// Set giá trị hiển thị ban đầu
+		$("#amount").val(
+			formatVND($("#slider-range").slider("values", 0)) + " - " +
+			formatVND($("#slider-range").slider("values", 1))
+		);
+	}
+
 
     /* 
 

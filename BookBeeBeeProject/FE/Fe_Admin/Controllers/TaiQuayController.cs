@@ -1,20 +1,16 @@
 ﻿using Fe_Admin.DTO;
-using Fe_Admin.DTO.Book;
 using Fe_Admin.DTO.Order;
 using Fe_Admin.DTO.OrderDTO;
 using Fe_Admin.Models;
-using Microsoft.AspNetCore.DataProtection.KeyManagement;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.ViewFeatures;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
-using System;
 using System.Data;
 using System.IdentityModel.Tokens.Jwt;
 using System.Net.Http.Headers;
-using System.Reflection;
 using System.Text;
-using X.PagedList.Extensions;
+
 
 namespace Fe_Admin.Controllers
 {
@@ -141,7 +137,7 @@ namespace Fe_Admin.Controllers
                 response.EnsureSuccessStatusCode();
                 var jsonHoaDon = await response.Content.ReadAsStringAsync();
 
-                var responseData = JsonConvert.DeserializeObject<Response<HoaDonChoDTO>>(jsonHoaDon);
+                var responseData = JsonConvert.DeserializeObject<Response<Order>>(jsonHoaDon);
 
                 if (responseData == null || responseData.Data == null)
                 {
@@ -201,7 +197,7 @@ namespace Fe_Admin.Controllers
             var danhSachHoaDon = JsonConvert.DeserializeObject<List<HoaDonChoDTO>>(jsonHoaDon) ?? new List<HoaDonChoDTO>();
 
             var hoaDonDuocChon = danhSachHoaDon.FirstOrDefault(x => x.OrderCode == maHD);
-            
+
             var user = HttpContext.Session.GetString("TenNguoiDung");
 
             if (hoaDonDuocChon == null)
@@ -251,7 +247,7 @@ namespace Fe_Admin.Controllers
 
 
         [HttpGet]
-        public async Task<IActionResult> ChiTietHoaDonDuocChon(string maHD,int currentPage = 1, int pageSize = 10, string key = "")
+        public async Task<IActionResult> ChiTietHoaDonDuocChon(string maHD, int currentPage = 1, int pageSize = 10, string key = "")
         {
             var accessToken = HttpContext.Session.GetString("AccessToken");
             if (string.IsNullOrEmpty(accessToken))
@@ -297,12 +293,13 @@ namespace Fe_Admin.Controllers
                 foreach (var item2 in hoaDonDuocChon)
                 {
                     var sanpham = danhSachSanPham.FirstOrDefault(c => c.Id == item2.BookId);
-                    item2.TitleBook = sanpham.Title + "/" + sanpham.Author.Name ;
+                    item2.OrderCode = maHD;
                     item2.CodeBook = sanpham.CodeBook;
+                    item2.TitleBook = sanpham.Title;
                 }
-                return PartialView("_HoaDonChiTietPartialView", hoaDonDuocChon);
+                return PartialView("_HoaDonChiTietPartialViewModel", hoaDonDuocChon);
             }
-            return PartialView("_HoaDonChiTietPartialView", null);
+            return PartialView("_HoaDonChiTietPartialViewModel", null);
 
         }
 
@@ -386,7 +383,7 @@ namespace Fe_Admin.Controllers
             var urlAddBillDetail = $"https://localhost:7287/api/TaiQuay/AddBillDetail?mahoadon={maHD}&codeProductDetail={sanpham.CodeBook}";
             var responseAddBillDetail = await client.PostAsync(urlAddBillDetail, null);
             var jsonResponse = await responseAddBillDetail.Content.ReadAsStringAsync();
-            var hoadonObject = JsonConvert.DeserializeObject<ResponseDto>(jsonResponse); 
+            var hoadonObject = JsonConvert.DeserializeObject<ResponseDto>(jsonResponse);
             var message = hoadonObject.Message;
             var danhSachHDCT = JsonConvert.DeserializeObject<OrderDetailDTO>(hoadonObject.Content.ToString());
 
@@ -470,7 +467,7 @@ namespace Fe_Admin.Controllers
                 var hoaDon = danhSachHoaDon.FirstOrDefault(x => x.OrderCode == maHD);
 
 
-                var urlHuyHoaDon = "https://localhost:7287/api/TaiQuay/HuyHoaDon?maHD={hoaDon.OrderCode}&lyDoHuy={lyDoHuy}";
+                var urlHuyHoaDon = $"https://localhost:7287/api/TaiQuay/HuyHoaDon?maHD={hoaDon.OrderCode}&lyDoHuy={lyDoHuy}";
                 var responseHuyHoaDon = await client.PutAsync(urlHuyHoaDon, null);
                 var readAsync = responseHuyHoaDon.Content.ReadAsStringAsync();
                 var jsondataHuyHoaDon = responseHuyHoaDon.Content.ReadAsStringAsync();
@@ -494,10 +491,371 @@ namespace Fe_Admin.Controllers
 
 
 
-           
 
-          
+
+
         }
+
+        [HttpDelete]
+        public async Task<IActionResult> XoaSanPhamKhoiHoaDon(string maHD, string idSanPham)
+        {
+            if (string.IsNullOrWhiteSpace(maHD))
+            {
+                return Ok(new { TrangThai = false });
+            }
+            //var hoaDon = (await _hoaDonServices.GetAllHoaDonCho()).FirstOrDefault(hd => hd.MaHoaDon == maHD);
+
+            var accessToken = HttpContext.Session.GetString("AccessToken");
+            if (string.IsNullOrEmpty(accessToken))
+            {
+                return RedirectToAction("Login", "Home");
+            }
+
+            var client = _httpClientFactory.CreateClient();
+            client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", accessToken);
+
+            var urlHoaDon = "https://localhost:7287/api/TaiQuay/GetAllHdTaiQuay";
+            var respone = await client.GetAsync(urlHoaDon);
+
+            if (!respone.IsSuccessStatusCode)
+            {
+                var errorMessage = await respone.Content.ReadAsStringAsync();
+                return View("Error", $"Không thể truy cập dữ liệu từ API. Mã lỗi: {respone.StatusCode}, Thông tin lỗi: {errorMessage}");
+            }
+
+            var jsonHoaDon = await respone.Content.ReadAsStringAsync();
+            var danhSachHoaDon = JsonConvert.DeserializeObject<List<HoaDonChoDTO>>(jsonHoaDon) ?? new List<HoaDonChoDTO>();
+
+
+            string data = await respone.Content.ReadAsStringAsync();
+            var hoaDonChoDtoList = JsonConvert.DeserializeObject<List<HoaDonChoDTO>>(data.ToString());
+            var hoaDon = hoaDonChoDtoList.FirstOrDefault(x => x.OrderCode == maHD);
+
+
+            var urlSPCT = $"https://localhost:7287/api/Book?page={1}&pageSize={10}&key={Uri.EscapeDataString("")}";
+            var responeSPCT = await client.GetAsync(urlSPCT);
+
+            if (!responeSPCT.IsSuccessStatusCode)
+            {
+                return View("Error", "Không thể truy cập dữ liệu từ API sách.");
+            }
+            var dataSPCT = await responeSPCT.Content.ReadAsStringAsync();
+            var sanPhamObject = JsonConvert.DeserializeObject<JObject>(dataSPCT);
+            var danhSachSanPham = sanPhamObject?["data"]?.ToObject<List<Book>>() ?? new List<Book>();
+            var sanpham = danhSachSanPham.FirstOrDefault(c => c.Id == int.Parse(idSanPham));
+
+
+            //var urlSPCT = $"/api/ChiTietSanPham/GetAllDto?status=1";
+            //var responeSPCT = client.GetAsync(urlSPCT).Result;
+            //string dataSPCT = await responeSPCT.Content.ReadAsStringAsync();
+            //var responsedataSPCT = JsonConvert.DeserializeObject<ResponseDto>(dataSPCT);
+            //var sanPhamXoa = JsonConvert.DeserializeObject<List<Book>>(dataSPCT).FirstOrDefault(sp => sp.Id == Convert.ToInt32(idSanPham));
+
+            var urlXoaSPHoaDon = $"https://localhost:7287/api/TaiQuay/XoaSanPhamKhoiHoaDon?maHD={maHD}&maSP={sanpham.CodeBook}";
+
+            var responeThanhToan = await client.DeleteAsync(urlXoaSPHoaDon);
+            var soLuongThayDoi = responeThanhToan.Content.ReadAsStringAsync().Result;
+
+            var tongTienThayDoi = -Convert.ToInt32(soLuongThayDoi) * (double)hoaDon.OrderDetailDTOs.FirstOrDefault(c => c.BookId == Convert.ToInt32(idSanPham)).Price;
+            var soTienTraLaiThayDoi = -Convert.ToInt32(soLuongThayDoi) * (double)hoaDon.OrderDetailDTOs.FirstOrDefault(c => c.BookId == Convert.ToInt32(idSanPham)).PriceBan;
+            var SoTienKhuyenMaiGiam = tongTienThayDoi - soTienTraLaiThayDoi;
+
+
+
+
+            var urlSPCT2 = $"https://localhost:7287/api/Book?page={1}&pageSize={10}&key={Uri.EscapeDataString("")}";
+            var responeSPCT2 = await client.GetAsync(urlSPCT2);
+
+            if (!responeSPCT2.IsSuccessStatusCode)
+            {
+                return View("Error", "Không thể truy cập dữ liệu từ API sách.");
+            }
+            var dataSPCT2 = await responeSPCT2.Content.ReadAsStringAsync();
+            var sanPhamObject2 = JsonConvert.DeserializeObject<JObject>(dataSPCT2);
+            var danhSachSanPham2 = sanPhamObject2?["data"]?.ToObject<List<Book>>() ?? new List<Book>();
+            var sanPhamSauXoaKhoiHoaDon = danhSachSanPham2.FirstOrDefault(c => c.Id == int.Parse(idSanPham));
+
+
+            //var urlSPCT2 = $"/api/Book/GetAllDto?status=1";
+            //var responeSPCT2 = client.GetAsync(urlSPCT2).Result;
+            //string dataSPCT2 = await responeSPCT2.Content.ReadAsStringAsync();
+            //var sanPham2 = JsonConvert.DeserializeObject<List<BookDTO>>(dataSPCT2).FirstOrDefault(sp => sp.Id == Convert.ToInt32(idSanPham));
+
+            return Ok(new
+            {
+                SoLuongConLai = sanPhamSauXoaKhoiHoaDon.Count,
+                TongTienThayDoi = tongTienThayDoi,
+                SoTienTraLaiThayDoi = soTienTraLaiThayDoi,
+                SoTienKhuyenMaiGiam = SoTienKhuyenMaiGiam,
+                SoTienVoucherGiam = 0,
+            });
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> CapNhapThongTinTien(string maHD)
+        {
+
+            //var client = _httpClientFactory.CreateClient("BeHat");
+            //var url = $"/api/BanHangTaiQuay/GetAllHdTaiQuay";
+            //var respone = client.GetAsync(url).Result;
+            //string data = await respone.Content.ReadAsStringAsync();
+            //var hoaDon = JsonConvert.DeserializeObject<List<HoaDonChoDTO>>(data.ToString());
+            //var hoaDonDuocChon = hoaDon.FirstOrDefault(x => x.OrderCode == maHD).OrderDetailDTOs;
+
+            if (string.IsNullOrWhiteSpace(maHD))
+            {
+                return Ok(new { TrangThai = false });
+            }
+            //var hoaDon = (await _hoaDonServices.GetAllHoaDonCho()).FirstOrDefault(hd => hd.MaHoaDon == maHD);
+
+            var accessToken = HttpContext.Session.GetString("AccessToken");
+            if (string.IsNullOrEmpty(accessToken))
+            {
+                return RedirectToAction("Login", "Home");
+            }
+
+            var client = _httpClientFactory.CreateClient();
+            client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", accessToken);
+            var url = "https://localhost:7287/api/TaiQuay/GetAllHdTaiQuay";
+
+            var responseHoaDon = await client.GetAsync(url);
+
+            if (!responseHoaDon.IsSuccessStatusCode)
+            {
+                var errorMessage = await responseHoaDon.Content.ReadAsStringAsync();
+                return View("Error", $"Không thể truy cập dữ liệu từ API. Mã lỗi: {responseHoaDon.StatusCode}, Thông tin lỗi: {errorMessage}");
+            }
+
+            var jsonHoaDon = await responseHoaDon.Content.ReadAsStringAsync();
+            var hoaDon = JsonConvert.DeserializeObject<List<HoaDonChoDTO>>(jsonHoaDon) ?? new List<HoaDonChoDTO>();
+            var hoaDonDuocChon = hoaDon.FirstOrDefault(x => x.OrderCode == maHD).OrderDetailDTOs;
+
+            double tongTienThayDoi = 0;
+            double soTienTraLaiThayDoi = 0;
+            if (hoaDon != null)
+            {
+                foreach (var item in hoaDonDuocChon)
+                {
+                    tongTienThayDoi += (double)item.Price * (double)item.Quantity;
+                    soTienTraLaiThayDoi += (double)item.PriceBan * (double)item.Quantity;
+                }
+                var SoTienKhuyenMaiGiam = tongTienThayDoi - soTienTraLaiThayDoi;
+                return Ok(new
+                {
+                    TrangThai = true,
+                    TongTienThayDoi = tongTienThayDoi,
+                    SoTienTraLaiThayDoi = soTienTraLaiThayDoi,
+                    SoTienKhuyenMaiGiam = SoTienKhuyenMaiGiam,
+                    SoTienVoucherGiam = 0,
+                });
+            }
+            return Ok(new
+            {
+                TrangThai = false,
+                TongTienThayDoi = 0,
+                SoTienTraLaiThayDoi = 0,
+                SoTienKhuyenMaiGiam = 0,
+                SoTienVoucherGiam = 0,
+            });
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> ThanhToan(string maHD, string SDT, string tenKhachHang, double tongTien, double tienMat, double chuyenKhoan, string idVoucher, int hinhThuc, double tongGiam)
+        {
+            if (string.IsNullOrEmpty(maHD))
+            {
+                return Ok(new
+                {
+                    TrangThai = false,
+                    Chuoi = "Vui lòng chọn hóa đơn",
+                });
+            }
+
+            var accessToken = HttpContext.Session.GetString("AccessToken");
+            if (string.IsNullOrEmpty(accessToken))
+            {
+                return RedirectToAction("Login", "Home");
+            }
+
+            var client = _httpClientFactory.CreateClient();
+            client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", accessToken);
+            var url = "https://localhost:7287/api/TaiQuay/GetAllHdTaiQuay";
+
+            var respone = client.GetAsync(url).Result;
+            string data = await respone.Content.ReadAsStringAsync();
+            var hoaDonChoDtoList = JsonConvert.DeserializeObject<List<HoaDonChoDTO>>(data.ToString());
+            var hoaDon = hoaDonChoDtoList.FirstOrDefault(x => x.OrderCode == maHD);
+
+            var hoaDonChiTiet = hoaDonChoDtoList.FirstOrDefault(x => x.OrderCode == maHD).OrderDetailDTOs;
+
+
+
+            if (hoaDonChiTiet.Count() == 0)
+            {
+                return Ok(new
+                {
+                    TrangThai = false,
+                });
+            }
+
+
+            var hoaDonUpdate = new Order()
+            {
+                Id = (int)hoaDon.Id,
+                OrderCode = hoaDon.OrderCode,
+                UserAccountId = hoaDon.IdNguoiDung,
+                CreatedDate = (DateTime)hoaDon.NgayTao,
+                DeliveryStatus = 5, // tại quầy
+                PaymentStatus = 1, //DaThanhToan
+                TotalAmount = tongTien,
+                DiscountAmount = tongGiam,
+                PaymentDate = DateTime.Now,
+                CustomerName = tenKhachHang,
+                PhoneNumber = SDT,
+            };
+
+            var urlThanhToan = $"https://localhost:7287/api/TaiQuay/ThanhToanTaiQuay";
+            var responeThanhToan = await client.PutAsJsonAsync(urlThanhToan, hoaDonUpdate);
+            if (responeThanhToan.IsSuccessStatusCode)
+            {
+                //return await res.Content.ReadAsAsync<bool>();
+
+                if (hinhThuc == 1)
+                {
+                    var pttt = await GetPTTT("TienMat");
+                    if (await TaoPTTTChiTiet(hoaDonUpdate.Id, pttt, tienMat, 1))
+                    {
+                        return Ok(new
+                        {
+                            TrangThai = true,
+                        });
+                    }
+
+                }
+                if (hinhThuc == 2)
+                {
+                    var pttt = await GetPTTT("ChuyenKhoan");
+
+                    if (await TaoPTTTChiTiet(hoaDonUpdate.Id, pttt, chuyenKhoan, 1))
+                    {
+                        return Ok(new
+                        {
+                            TrangThai = true,
+                        });
+                    }
+                }
+                if (hinhThuc == 3)
+                {
+                    var pttt = await GetPTTT("ChuyenKhoan");
+
+                    if (await TaoPTTTChiTiet(hoaDonUpdate.Id, pttt, chuyenKhoan, 1))
+                    {
+                        pttt = await GetPTTT("TienMat");
+
+                        if (await TaoPTTTChiTiet(hoaDonUpdate.Id, pttt, tienMat, 1))
+                        {
+                            return Ok(new
+                            {
+                                TrangThai = true,
+                            });
+                        }
+                        //else
+                        //{
+                        //    _hoaDonServices.XoaPhuongThucThanhToanChiTietBangIdHoaDon(hoaDonUpdate.IdHoaDon);
+                        //    return Ok(new
+                        //    {
+                        //        TrangThai = false,
+                        //        Chuoi = "Thanh toán không thành công"
+                        //    });
+                        //}
+                    }
+                    return Ok(new
+                    {
+                        TrangThai = false,
+                        Chuoi = "Thanh toán không thành công"
+                    });
+                }
+            }
+
+            return Ok(new
+            {
+                TrangThai = false,
+                Chuoi = "Thanh toán không thành công"
+            });
+        }
+
+        public async Task<int> GetPTTT(string ten)
+        {
+            var accessToken = HttpContext.Session.GetString("AccessToken");
+
+            var client = _httpClientFactory.CreateClient();
+            client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", accessToken);
+            var result = await client.GetStringAsync($"https://localhost:7287/api/Pay/PhuongThucThanhToanByName?name={ten}");
+
+            if (int.TryParse(result.Trim('"'), out int idPTTT))
+            {
+                return idPTTT;
+            }
+            else
+            {
+                throw new Exception("Invalid GUID format");
+            }
+        }
+
+        public async Task<bool> TaoPTTTChiTiet(int idHoaDon, int idPTTT, double soTien, int trangThai)
+        {
+            try
+            {
+                var accessToken = HttpContext.Session.GetString("AccessToken");
+
+                var client = _httpClientFactory.CreateClient();
+                client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", accessToken);
+
+                var res = await client.PostAsync($"https://localhost:7287/api/Pay/AddPhuongThucThanhToanChiTietTaiQuay?IdHoaDon={idHoaDon}&IdThanhToan={idPTTT}&SoTien={soTien}&TrangThai={trangThai}", null);
+
+                if (res.IsSuccessStatusCode)
+                {
+                    var content = await res.Content.ReadAsStringAsync();
+                    return System.Text.Json.JsonSerializer.Deserialize<bool>(content);
+                }
+
+                Console.WriteLine(await res.Content.ReadAsStringAsync());
+                throw new Exception("Not IsSuccessStatusCode");
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+                throw new Exception("Not IsSuccessStatusCode");
+            }
+        }
+        [HttpGet]
+        public async Task<IActionResult> ExportBill(string maHD)
+        {
+            try
+            {
+                var accessToken = HttpContext.Session.GetString("AccessToken");
+
+                var client = _httpClientFactory.CreateClient();
+                client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", accessToken);
+
+                var res = await client.GetAsync($"https://localhost:7287/api/Order/generatepdf?InvoiceNo={maHD}");
+
+                if (res.IsSuccessStatusCode)
+                {
+                    var content = await res.Content.ReadAsByteArrayAsync();
+                    return File(content, "application/pdf", $"Invoice_{maHD}.pdf");
+                }
+
+                Console.WriteLine(await res.Content.ReadAsStringAsync());
+                throw new Exception("Failed to generate PDF.");
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+                return StatusCode(500, "Error generating PDF.");
+            }
+        }
+
 
     }
 }

@@ -52,8 +52,8 @@ namespace Fe_User.Models
 		public virtual List<OrderDetail> OrderDetails { get; set; } = new List<OrderDetail>();
 		public virtual List<CartDetail> CartDetails { get; set; } = new List<CartDetail>();
 		public virtual List<VoucherDetail> VoucherDetails { get; set; } = new List<VoucherDetail>();
-
-		public int? StockQuantity { get; set; } = 0;
+        public virtual List<BookTag> BookTags { get; set; } = new List<BookTag>();
+        public int? StockQuantity { get; set; } = 0;
 
 		public int? SoldQuantity { get; set; } = 0;
 
@@ -74,5 +74,6 @@ namespace Fe_User.Models
 				throw new Exception("Không đủ sách trong kho!");
 			}
 		}
-	}
+        public bool HasDiscount => GiaThucTe < Price;
+    }
 }

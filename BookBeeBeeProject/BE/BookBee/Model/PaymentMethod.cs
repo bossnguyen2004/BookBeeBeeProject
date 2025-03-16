@@ -7,7 +7,7 @@ namespace BookBee.Model
         [Key]
         public int Id { get; set; }
         [Required]
-        public string? CodePay{ get; set; }
+        public string? CodePay { get; set; }
         [Required]
         public string? PaymentName { get; set; }
         public string? Description { get; set; }

@@ -1,4 +1,5 @@
-﻿using BookBee.DTO.Voucher;
+﻿using BookBee.DTO.Tag;
+using BookBee.DTO.Voucher;
 using System.ComponentModel.DataAnnotations;
 using System.Text.Json.Serialization;
 
@@ -28,6 +29,16 @@ namespace BookBee.DTO.Book
         public int? SoldQuantity { get; set; } = 0;  
         public int? StockQuantity { get; set; } = 0; 
         public string? CodeBook { get; set; }
+
         public double? GiaThucTe { get; set; }
+
+
+        public List<TagDTO> Tags { get; set; } = new List<TagDTO>();
+
+
+
+
+        public string? AuthorName { get; set; }
+        public string? PublisherName { get; set; }
     }
 }

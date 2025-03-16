@@ -30,14 +30,23 @@ namespace BookBee.Persistences.Repositories.CartRepository
         {
 			return await _dataContext.Carts.FirstOrDefaultAsync(a => a.Id == id);
 		}
-        public async Task<Cart> GetCartByUser(int userId)
+
+        public async Task<Cart> GetCartByUser(int? userId, string guestCartId)
         {
-            var user =await _dataContext.UserAccounts.Include(c => c.Cart).FirstOrDefaultAsync(c => c.Id == userId);
-
-            if (user == null) return null;
-
-            var cart =await _dataContext.Carts.Include(c => c.CartDetails).ThenInclude(c => c.Book).FirstOrDefaultAsync(c => c.Id == user.Cart.Id);
-            return cart;
+            if (userId.HasValue)
+            {
+                return await _dataContext.Carts
+                    .Include(c => c.CartDetails)
+                    .ThenInclude(cd => cd.Book)
+                    .FirstOrDefaultAsync(c => c.Id == userId);
+            }
+            else 
+            {
+                return await _dataContext.Carts
+                    .Include(c => c.CartDetails)
+                    .ThenInclude(cd => cd.Book)
+                    .FirstOrDefaultAsync(c => c.GuestCartId == guestCartId);
+            }
         }
 
         public async Task<ResponseDTO> ClearCartBook(int userId,List<int> ids)

@@ -127,7 +127,7 @@ namespace BookBee.Migrations
                     b.Property<double>("GiaNhap")
                         .HasColumnType("float");
 
-                    b.Property<double>("GiaThucTe")
+                    b.Property<double?>("GiaThucTe")
                         .HasColumnType("float");
 
                     b.Property<string>("Image")
@@ -191,6 +191,29 @@ namespace BookBee.Migrations
                     b.ToTable("Books");
                 });
 
+            modelBuilder.Entity("BookBee.Model.BookTag", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"), 1L, 1);
+
+                    b.Property<int?>("IdBook")
+                        .HasColumnType("int");
+
+                    b.Property<int?>("IdTag")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("IdBook");
+
+                    b.HasIndex("IdTag");
+
+                    b.ToTable("BookTags");
+                });
+
             modelBuilder.Entity("BookBee.Model.Cart", b =>
                 {
                     b.Property<int>("Id")
@@ -201,6 +224,10 @@ namespace BookBee.Migrations
 
                     b.Property<DateTime>("Create")
                         .HasColumnType("datetime2");
+
+                    b.Property<string>("GuestCartId")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<int>("Status")
                         .HasColumnType("int");
@@ -849,6 +876,21 @@ namespace BookBee.Migrations
                     b.Navigation("Supplier");
                 });
 
+            modelBuilder.Entity("BookBee.Model.BookTag", b =>
+                {
+                    b.HasOne("BookBee.Model.Book", "Book")
+                        .WithMany("BookTags")
+                        .HasForeignKey("IdBook");
+
+                    b.HasOne("BookBee.Model.Tag", "Tag")
+                        .WithMany()
+                        .HasForeignKey("IdTag");
+
+                    b.Navigation("Book");
+
+                    b.Navigation("Tag");
+                });
+
             modelBuilder.Entity("BookBee.Model.CartDetail", b =>
                 {
                     b.HasOne("BookBee.Model.Book", "Book")
@@ -1013,6 +1055,8 @@ namespace BookBee.Migrations
 
             modelBuilder.Entity("BookBee.Model.Book", b =>
                 {
+                    b.Navigation("BookTags");
+
                     b.Navigation("CartDetails");
 
                     b.Navigation("OrderDetails");

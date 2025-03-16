@@ -14,6 +14,7 @@ using BookStack.DTOs.Order;
 using BookStack.Persistence.Repositories.BookRepository;
 using BookStack.Persistence.Repositories.OrderRepository;
 using System.Text;
+using System.Threading.Tasks;
 
 namespace BookBee.Services.OrderService
 {
@@ -43,7 +44,7 @@ namespace BookBee.Services.OrderService
             _cartRepository = cartRepository;
             _userAccessor = userAccessor;
             _mailService = mailService;
-            _employeeRepository= employeeRepository;
+            _employeeRepository = employeeRepository;
             _orderVoucherRepository = orderVoucherRepository;
         }
 
@@ -71,7 +72,7 @@ namespace BookBee.Services.OrderService
             };
 
 
-            var address =await _addressRepository.GetAddressById(createOrderDTO.AddressId);
+            var address = await _addressRepository.GetAddressById(createOrderDTO.AddressId);
             if (address == null) return new ResponseDTO()
             {
                 Code = 400,
@@ -119,7 +120,7 @@ namespace BookBee.Services.OrderService
                 }
             }
 
-           await _orderRepository.CreateOrder(order);
+            await _orderRepository.CreateOrder(order);
 
             if (await _orderRepository.IsSaveChanges())
             {
@@ -136,7 +137,7 @@ namespace BookBee.Services.OrderService
                         if (book.Count >= orderBook.Quantity)
                         {
                             book.Count -= orderBook.Quantity;
-                          await  _bookRepository.UpdateBook(book.Id,book);
+                            await _bookRepository.UpdateBook(book.Id, book);
                         }
                         else
                         {
@@ -149,13 +150,13 @@ namespace BookBee.Services.OrderService
                     }
                 }
 
-                if ( await _bookRepository.IsSaveChanges())
+                if (await _bookRepository.IsSaveChanges())
                 {
 
                     await _cartRepository.ClearCartBook(order.UserAccountId.Value, order.OrderDetails
                                         .Select(c => c.BookId)
-                                        .Where(bookId => bookId.HasValue) 
-                                        .Select(bookId => bookId.Value)  
+                                        .Where(bookId => bookId.HasValue)
+                                        .Select(bookId => bookId.Value)
                                         .ToList());
 
 
@@ -163,7 +164,7 @@ namespace BookBee.Services.OrderService
                     return new ResponseDTO()
                     {
                         Message = "Tạo thành công",
-                        Data = orderId 
+                        Data = orderId
                     };
                 }
 
@@ -211,171 +212,9 @@ namespace BookBee.Services.OrderService
             throw new NotImplementedException();
         }
 
-        private string GenerateInvoice(Order order)
+        public async Task<Order> GetOrDerByCode(string orderCode)
         {
-            var invoiceBuilder = new StringBuilder();
-
-            invoiceBuilder.AppendLine($"<h2>Hóa đơn cho đơn hàng #{order.Id}</h2>");
-            invoiceBuilder.AppendLine("<p><strong>Ngày đặt hàng:</strong> " + order.Create.ToString("dd/MM/yyyy HH:mm") + "</p>");
-            invoiceBuilder.AppendLine("<br/>");
-            invoiceBuilder.AppendLine("<h3>Thông tin khách hàng:</h3>");
-            invoiceBuilder.AppendLine($"<p><strong>Họ và tên:</strong> {order.UserAccount.FirstName} {order.UserAccount.LastName}</p>");
-            invoiceBuilder.AppendLine($"<p><strong>Email:</strong> {order.UserAccount.Email}</p>");
-            invoiceBuilder.AppendLine($"<p><strong>Số điện thoại:</strong> {order.UserAccount.Phone}</p>");
-            invoiceBuilder.AppendLine("<br/>");
-
-            invoiceBuilder.AppendLine("<h3>Địa chỉ giao hàng:</h3>");
-            invoiceBuilder.AppendLine($"<p><strong>Tên người nhận:</strong> {order.Address.Name}</p>");
-            invoiceBuilder.AppendLine($"<p><strong>Địa chỉ:</strong> {order.Address.Street}, {order.Address.City}, {order.Address.State}</p>");
-            invoiceBuilder.AppendLine($"<p><strong>Số điện thoại:</strong> {order.Address.Phone}</p>");
-            invoiceBuilder.AppendLine("<br/>");
-
-            invoiceBuilder.AppendLine("<h3>Chi tiết đơn hàng:</h3>");
-            invoiceBuilder.AppendLine("<table style='width:100%; border-collapse:collapse;'>");
-            invoiceBuilder.AppendLine("<thead><tr><th>Tên sách</th><th>Số lượng</th><th>Đơn giá</th><th>Tổng cộng</th></tr></thead>");
-            invoiceBuilder.AppendLine("<tbody>");
-
-            double totalAmount = 0;
-            foreach (var orderBook in order.OrderDetails)
-            {
-                var lineTotal = orderBook.Quantity * orderBook.Price;
-                invoiceBuilder.AppendLine($"<tr><td>{orderBook.Book.Title}</td><td>{orderBook.Quantity}</td><td>{orderBook.Price.ToString("N0")} VND</td><td>{lineTotal.ToString("N0")} VND</td></tr>");
-                totalAmount += lineTotal;
-            }
-
-            invoiceBuilder.AppendLine("</tbody></table>");
-            invoiceBuilder.AppendLine($"<h3>Tổng cộng: {totalAmount.ToString("N0")} VND</h3>");
-            //note line
-            invoiceBuilder.AppendLine("<p><strong>Lưu ý: đơn hàng đã bao gồm VAT nhưng chưa bao gồm phí vận chuyển.</strong> </p>");
-            invoiceBuilder.AppendLine("<br/>");
-            return invoiceBuilder.ToString();
-        }
-
-        private string GenerateInvoiceEmail(string invoiceContent)
-        {
-            return $$"""
-                <!DOCTYPE html>
-                <html lang="vi">
-                <head>
-                    <meta charset="UTF-8">
-                    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-                <style>
-                    body {
-                        font-family: Arial, sans-serif;
-                        background-color: #f4f4f4;
-                        margin: 0;
-                        padding: 20px;
-                    }
-                    .email-container {
-                        background-color: #ffffff;
-                        max-width: 600px;
-                        margin: 0 auto;
-                        padding: 20px;
-                        border-radius: 8px;
-                        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-                    }
-                    .logo {
-                       text-align: center;
-                       margin-bottom: 10px;
-                    }
-                    .logo img {
-                        width: 120px;
-                    }
-                    .header {
-                        text-align: center;
-                        padding: 10px 0;
-                        color: #333;
-                    }
-                    .header img {
-                        max-width: 150px;
-                        height: auto;
-                    }
-                    .header h1 {
-                        color: #007bff;
-                        font-size: 24px;
-                    }
-                    .content {
-                        padding: 20px 0;
-                        text-align: left;
-                    }
-                    .content p {
-                        color: #555;
-                        line-height: 1.5;
-                    }
-                    .invoice-content {
-                        background-color: #f9f9f9;
-                        padding: 15px;
-                        border-radius: 5px;
-                        border: 1px solid #ddd;
-                        overflow-x: auto; /* Allows horizontal scrolling if needed */
-                    }
-                    table {
-                        width: 100%;
-                        border-collapse: collapse;
-                        margin-bottom: 20px;
-                        border: 1px solid #ddd;
-                    }
-                    th, td {
-                        border: 1px solid #ddd;
-                        padding: 10px;
-                        text-align: left;
-                        white-space: nowrap; /* Prevents text from wrapping */
-                        overflow: hidden; /* Ensures text overflow is hidden */
-                        text-overflow: ellipsis; /* Adds ellipsis for overflowed text */
-                    }
-                    th {
-                        background-color: #555; /* Green background for header */
-                        color: white;
-                    }
-                    .footer {
-                        text-align: center;
-                        padding: 10px 0;
-                        color: #888;
-                        font-size: 12px;
-                        border-top: 1px solid #dddddd;
-                        margin-top: 30px;
-                    }
-                    /* Responsive design */
-                    @media screen and (max-width: 600px) {
-                        .invoice-content {
-                            padding: 10px;
-                        }
-                        table {
-                            width: 100%;
-                            border: none;
-                        }
-                        th, td {
-                            display: block;
-                            width: 100%;
-                            box-sizing: border-box;
-                            white-space: normal; /* Allows text wrapping on small screens */
-                        }
-                    }
-                </style>
-                </head>
-                <body>
-                    <div class="email-container">
-                        <div class="logo">
-                            <img src="https://i.pinimg.com/736x/36/24/e6/3624e650ec342dd00e8bf2b05ead4062.jpg" alt="BookBee Logo">
-                        </div>
-                        <div class="header">
-                            <h1>Hóa đơn từ BookBee</h1>
-                        </div>
-                        <div class="content">
-                            <p>Chào bạn,</p>
-                            <p>Cảm ơn bạn đã đặt hàng từ BookBee. Dưới đây là hóa đơn của bạn:</p>
-                            <div class="invoice-content">
-                                {{invoiceContent}}
-                            </div>
-                            <p>Xin cảm ơn bạn đã đặt hàng từ BookBee!</p>
-                        </div>
-                        <div class="footer">
-                            <p>&copy; 2024 BookStack. All rights reserved.</p>
-                        </div>
-                    </div>
-                </body>
-                </html>
-            """;
+            return await _orderRepository.GetOrderByOrderCode(orderCode);
         }
     }
 }

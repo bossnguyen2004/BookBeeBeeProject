@@ -39,9 +39,9 @@ else
                        
                         <br>
                         <span>SL:</span>
-                        @if (item?.StockQuantity != null && item.StockQuantity > 0)
+                        @if (item?.Count != null && item.Count > 0)
                         {
-                            <span id="@item.Id">@item.StockQuantity</span>
+                            <span id="@item.Id">@item.Count</span>
                         }
                         else if (item?.Count > 0)
                         {

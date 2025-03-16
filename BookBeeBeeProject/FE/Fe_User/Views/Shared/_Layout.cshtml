@@ -13,9 +13,11 @@
 	<link rel="stylesheet" type="text/css" href="~/assets/plugins/OwlCarousel2-2.2.1/owl.carousel.css">
 	<link rel="stylesheet" type="text/css" href="~/assets/plugins/OwlCarousel2-2.2.1/owl.theme.default.css">
 	<link rel="stylesheet" type="text/css" href="~/assets/plugins/OwlCarousel2-2.2.1/animate.css">
-	<link rel="stylesheet" type="text/css" href="~/assets/styles/main_styles.css">
 	<link rel="stylesheet" type="text/css" href="~/assets/styles/responsive.css">
 	<link rel="stylesheet" type="text/css" href="~/assets/plugins/jquery-ui-1.12.1.custom/jquery-ui.css"> 
+
+
+
 
     <meta name="description" content="@ViewBag.SeoDescription" />
     <meta name="keywords" itemprop="keywords" content="@ViewBag.SeoKeyWord" />
@@ -31,7 +33,6 @@
     <meta content="https://cdn.24h.com.vn/upload/2-2018/images/2018-06-14/logo-chan-trang-24h.png" property="og:image" itemprop="thumbnailUrl" />
 	<link rel="stylesheet" type="text/css" href="~/assets/styles/responsive.css">
 	<script src="~/assets/js/jquery-3.2.1.min.js"></script>
-
 
 
 
@@ -139,11 +140,10 @@
 									</button>
 								</form>
 							<ul class="navbar_user">
-								
 								<li class="checkout">
 									<a href="#">
 										<i class="fa fa-shopping-cart" aria-hidden="true"></i>
-										<span id="checkout_items" class="checkout_items">2</span>
+										<span id="checkout_items" class="checkout_items">0</span>
 									</a>
 								</li>
 							</ul>
@@ -155,43 +155,17 @@
 	    	</div>
 	    
 	    </header>
-	    
-	    <div class="fs_menu_overlay"></div>
-	    <div class="hamburger_menu">
-	    	<div class="hamburger_close"><i class="fa fa-times" aria-hidden="true"></i></div>
-	    	<div class="hamburger_menu_content text-right">
-	    		<ul class="menu_top_nav">
-	    			<h3 style="font-size: 20px; color: crimson;">Danh Mục Sản Phẩm</h3>
-	    			<li class="menu_item"><a href="#">LỊCH SỬ TRUYỀN THỐNG</a></li>
-	    			<li class="menu_item"><a href="#">VĂN HỌC VIỆT NAM</a></li>
-	    			<li class="menu_item"><a href="#">VĂN HỌC NƯỚC NGOÀI</a></li>
-	    			<li class="menu_item"><a href="#">TRUYỆN TRANH</a></li>
-	    			<li class="menu_item"><a href="#">KIẾN THỨC KHOA HỌC</a></li>
-	    			<li class="menu_item has-children">
-	    				<a href="#">
-	    					ĐỘ TUỔI
-	    					<i class="fa fa-angle-down"></i>
-	    				</a>
-	    				<ul class="menu_selection">
-	    					<li><a href="#">Nhà trẻ, mẫu giáo (0-5 Tuổi)</a></li>
-	    					<li><a href="#">Nhi đồng (6-10Tuổi)</a></li>
-	    					<li><a href="#">Thiếu niên (11-15Tuổi)</a></li>
-	    					<li><a href="#">Tuổi mới lớn (16-18Tuổi)</a></li>
-	    				</ul>
-	    			</li> 
-	    
-	    
-	    
-	    		</ul>
-	    	</div>
-	    </div>
+
+		<div class="fs_menu_overlay"></div>
+		<div class="hamburger_menu">
+			<div class="hamburger_close"><i class="fa fa-times" aria-hidden="true"></i></div>
+			<div class="hamburger_menu_content text-right" id="danhmuc-container">
+			</div>
+		</div>
 	    
 	  
         @RenderBody()
 
-        <!-- Newsletter -->
-        @*    @Html.Action("Partial_Subcrice", "Home")*@
-        <!-- Footer -->
 
 		<footer class="footer">
 			<div class="container">
@@ -241,12 +215,39 @@
 	<script src="~/assets/plugins/easing/easing.js"></script>
 	<script src="~/assets/plugins/jquery-ui-1.12.1.custom/jquery-ui.js"></script>
 	<script src="~/assets/js/custom.js"></script>
-
-
+	<script src="~/assets/js/categories_custom.js"></script>
+	<script src="~/assets/js/single_custom.js"></script>
 	<script src="~/lib/jquery/dist/jquery.min.js"></script>
 	<script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
 	<script src="~/js/site.js" asp-append-version="true"></script>
+	<script src="~/Scripts/jsShopping.js"></script>
+
 	@await RenderSectionAsync("Scripts", required: false)
+
+
+
+	<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+	<script>
+		$(window).on("load", function () {
+			$.ajax({
+				url: "/Menu/DanhMuc?page=1&pageSize=10&isPartial=true",
+				type: "GET",
+				success: function (data) {
+					console.log("Dữ liệu danh mục nhận được:", data);
+					$("#danhmuc-container").html(data);
+				},
+				error: function (xhr, status, error) {
+					console.error("Lỗi khi tải danh mục:", error);
+					console.log("Chi tiết lỗi từ server:", xhr.responseText);
+					$("#danhmuc-container").html("<p>Không thể tải danh mục.</p>");
+				}
+			});
+		});
+	</script>
+
+
+
 
 </body>
 </html>
+

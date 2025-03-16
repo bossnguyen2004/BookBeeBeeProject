@@ -7,14 +7,16 @@ namespace BookStack.Persistence.Repositories.OrderRepository
     {
         Task<List<Order>> GetOrderByUser(int userId, int? page = 1, int? pageSize = 10, string? key = "", string? sortBy = "ID", string? status = "", int? orderType = null);
         Task<ResponseDTO> DeleteOrder(int id);
-		Task<int> GetOrderCountByUser(int userId);
-		Task<int> GetOrderCount();
-		Task<bool> IsSaveChanges();
-		public int Total { get; }
+        Task<int> GetOrderCountByUser(int userId);
+        Task<int> GetOrderCount();
+        Task<bool> IsSaveChanges();
+        public int Total { get; }
         Task<List<Order>> GetOrders(int? page = 1, int? pageSize = 10, string? key = "", string? sortBy = "ID", string? status = "", int? orderType = null);
         Task<ResponseDTO> CreateOrder(Order order);
         Task<ResponseDTO> UpdateOrder(int id, Order order);
         Task<Order> GetOrderById(int id);
+
+        Task<Order> GetOrderByOrderCode(string orderCode);
 
 
     }

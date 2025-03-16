@@ -1,4 +1,5 @@
-﻿using Fe_User.DTO.Account;
+﻿
+using Fe_User.DTO.Account;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json;
@@ -6,7 +7,9 @@ using System.Text;
 
 namespace Fe_User.Controllers
 {
-    public class AccountController : Controller
+	[Area("User")]
+	[Route("User/[controller]/[action]")]
+	public class AccountController : Controller
     {
         private readonly IHttpClientFactory _httpClientFactory;
 

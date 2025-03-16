@@ -31,7 +31,7 @@ namespace BookStack.Services.CartService
 
         }
 
-		public async Task<ResponseDTO> AddToCart(int id,int userId, int bookId, int count)
+		public async Task<ResponseDTO> AddToCart(int id, int? userId, string guestCartId, int bookId, int count)
 		{
             var book = await _bookRepository.GetBookById(bookId);
             if (book == null)
@@ -43,12 +43,13 @@ namespace BookStack.Services.CartService
             if (count > book.Count)
                 return new ResponseDTO { Code = 400, Message = "Số lượng sách không đủ" };
 
-            var cart = await _cartRepository.GetCartByUser(userId);
+            var cart = await _cartRepository.GetCartByUser(userId, guestCartId);
             if (cart == null)
             {
                 cart = new Cart
                 {
-                    Id = userId,
+                    Id = userId ?? 0, 
+                    GuestCartId = guestCartId,
                     CartDetails = new List<CartDetail>(),
                     Create = DateTime.Now,
                     Update = DateTime.Now
@@ -92,10 +93,10 @@ namespace BookStack.Services.CartService
 
         }
         
-        public async Task<ResponseDTO> SelfAddToCart(int id, int bookId, int count)
+        public async Task<ResponseDTO> SelfAddToCart(int id, string guestCartId, int bookId, int count)
         {
             var userId =  _userAccessor.GetCurrentUserId();
-            if (userId != null) return await AddToCart(id,(int)userId, bookId, count);
+            if (userId != null) return await AddToCart(id,(int)userId, guestCartId, bookId, count);
             return new ResponseDTO
             {
                 Code = 400,
@@ -103,28 +104,28 @@ namespace BookStack.Services.CartService
             };
         }
 
-        public async Task<ResponseDTO> GetCartByUser(int userId)
+        public async Task<ResponseDTO> GetCartByUser(int? userId, string guestCartId)
         {
-			var cart = await _cartRepository.GetCartByUser(userId);
+			var cart = await _cartRepository.GetCartByUser(userId, guestCartId);
 			if (cart == null){return new ResponseDTO{Code = 404,Message = "Giỏ hàng của user này không tồn tại"};}
 			var cartDTO = _mapper.Map<CartDTO>(cart);
 			return new ResponseDTO{Code = 200,Message = "Lấy giỏ hàng thành công",Data = cartDTO};
 		}
 
-        public async Task<ResponseDTO> GetSelfCart()
-        {
-			var userId = _userAccessor.GetCurrentUserId();
-			if (!userId.HasValue)
-			{
-				return new ResponseDTO
-				{
-					Code = 400,
-					Message = "User không tồn tại"
-				};
-			}
+  //      public async Task<ResponseDTO> GetSelfCart()
+  //      {
+		//	var userId = _userAccessor.GetCurrentUserId();
+		//	if (!userId.HasValue)
+		//	{
+		//		return new ResponseDTO
+		//		{
+		//			Code = 400,
+		//			Message = "User không tồn tại"
+		//		};
+		//	}
 
-			return await GetCartByUser(userId.Value);
-		}
+		//	return await GetCartByUser(userId.Value);
+		//}
 
         public async Task<ResponseDTO> IncreaseQuantity(int cartDetailId)
         {

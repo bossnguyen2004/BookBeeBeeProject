@@ -13,28 +13,28 @@ using BookStack.Persistence.Repositories.BookRepository;
 
 namespace BookStack.Services.BookService
 {
-    public class BookService : IBookService
-    {
-        private readonly IBookRepository _bookRepository;
-        private readonly ITagRepository _tagRepository;
-        private readonly IAuthorRepository _authorRepository;
-        private readonly IPublisherRepository _publisherRepository;
+	public class BookService : IBookService
+	{
+		private readonly IBookRepository _bookRepository;
+		private readonly ITagRepository _tagRepository;
+		private readonly IAuthorRepository _authorRepository;
+		private readonly IPublisherRepository _publisherRepository;
 		private readonly ISupplierRepository _supplierRepository;
 		private readonly IVoucherRepository _voucherRepository;
-        private readonly IHttpContextAccessor _httpContextAccessor;
-        private readonly IMapper _mapper;
-        public BookService(IBookRepository bookRepository, IMapper mapper, ITagRepository tagRepository,
-            IAuthorRepository authorRepository, IHttpContextAccessor httpContextAccessor, IPublisherRepository publisherRepository,ISupplierRepository supplierRepository, IVoucherRepository voucherRepository)
-        {
-            _bookRepository = bookRepository;
-            _mapper = mapper;
-            _tagRepository = tagRepository;
-            _authorRepository = authorRepository;
-            _publisherRepository = publisherRepository;
-            _supplierRepository = supplierRepository;
-            _voucherRepository = voucherRepository; 
+		private readonly IHttpContextAccessor _httpContextAccessor;
+		private readonly IMapper _mapper;
+		public BookService(IBookRepository bookRepository, IMapper mapper, ITagRepository tagRepository,
+			IAuthorRepository authorRepository, IHttpContextAccessor httpContextAccessor, IPublisherRepository publisherRepository, ISupplierRepository supplierRepository, IVoucherRepository voucherRepository)
+		{
+			_bookRepository = bookRepository;
+			_mapper = mapper;
+			_tagRepository = tagRepository;
+			_authorRepository = authorRepository;
+			_publisherRepository = publisherRepository;
+			_supplierRepository = supplierRepository;
+			_voucherRepository = voucherRepository;
 			_httpContextAccessor = httpContextAccessor;
-        }
+		}
 
 
 		public async Task<ResponseDTO> CreateBook(BookDTO bookDTO)
@@ -154,31 +154,31 @@ namespace BookStack.Services.BookService
 
 		public async Task<ResponseDTO> GetBooks(int? page = 1, int? pageSize = 10, string? key = "", string? sortBy = "ID", int? tagId = 0, int? voucherId = 0, bool includeDeleted = false, int? publisherId = null, int? authorId = null, int? supplier = null, int? status = null)
 		{
-			if (page <= 0 || pageSize <= 0){return new ResponseDTO{Code = 400,Message = "Số trang và kích thước trang phải lớn hơn 0."};}
+			if (page <= 0 || pageSize <= 0) { return new ResponseDTO { Code = 400, Message = "Số trang và kích thước trang phải lớn hơn 0." }; }
 
-            if (status != null && status != 0 && status != 1)
-            {
-                return new ResponseDTO
-                {
-                    Code = 400,
-                    Message = "Trạng thái không hợp lệ. Chỉ chấp nhận 0 (Dừng) hoặc 1 (Hoạt động)."
-                };
-            }
-            if (voucherId.HasValue && voucherId != 0)
-            {
-                bool isVoucherActive = await IsVoucherActive(voucherId.Value);
-                if (!isVoucherActive)
-                {
-                    return new ResponseDTO
-                    {
-                        Code = 400,
-                        Message = "Voucher không hợp lệ hoặc đã bị vô hiệu hóa."
-                    };
-                }
-            }
-            var books =await _bookRepository.GetBooks(page, pageSize, key, sortBy, tagId, voucherId, includeDeleted, publisherId, authorId,status);
+			if (status != null && status != 0 && status != 1)
+			{
+				return new ResponseDTO
+				{
+					Code = 400,
+					Message = "Trạng thái không hợp lệ. Chỉ chấp nhận 0 (Dừng) hoặc 1 (Hoạt động)."
+				};
+			}
+			if (voucherId.HasValue && voucherId != 0)
+			{
+				bool isVoucherActive = await IsVoucherActive(voucherId.Value);
+				if (!isVoucherActive)
+				{
+					return new ResponseDTO
+					{
+						Code = 400,
+						Message = "Voucher không hợp lệ hoặc đã bị vô hiệu hóa."
+					};
+				}
+			}
+			var books = await _bookRepository.GetBooks(page, pageSize, key, sortBy, tagId, voucherId, includeDeleted, publisherId, authorId, status);
 
-			return new ResponseDTO(){Data = _mapper.Map<List<BookDTO>>(books),Total = _voucherRepository.Total};
+			return new ResponseDTO() { Data = _mapper.Map<List<BookDTO>>(books), Total = _voucherRepository.Total };
 		}
 
 		public async Task<ResponseDTO> GetCart(List<int> bookIds)
@@ -195,7 +195,7 @@ namespace BookStack.Services.BookService
 				return new ResponseDTO { Code = 404, Message = "Không tìm thấy sách trong giỏ hàng" };
 			}
 
-			return new ResponseDTO(){Data = _mapper.Map<List<BookDTO>>(books),Total = books.Count};
+			return new ResponseDTO() { Data = _mapper.Map<List<BookDTO>>(books), Total = books.Count };
 		}
 
 		public async Task<ResponseDTO> GetTopOrderedBooks(int topCount = 10)
@@ -209,15 +209,15 @@ namespace BookStack.Services.BookService
 			};
 		}
 
-		public async  Task<ResponseDTO> RestoreBook(int id)
+		public async Task<ResponseDTO> RestoreBook(int id)
 		{
 			var book = await _bookRepository.GetBookById(id);
-			if (book == null){return new ResponseDTO{Code = 400,Message = "Book không tồn tại"};}
+			if (book == null) { return new ResponseDTO { Code = 400, Message = "Book không tồn tại" }; }
 			book.IsDeleted = false;
-		    await	_bookRepository.UpdateBook(id,book);
+			await _bookRepository.UpdateBook(id, book);
 			var isSaved = await _bookRepository.IsSaveChanges();
-			if (isSaved){return new ResponseDTO{Code = 200,Message = "Khôi phục thành công"};}
-			else{return new ResponseDTO{Code = 500,Message = "Khôi phục thất bại, vui lòng thử lại sau"};}
+			if (isSaved) { return new ResponseDTO { Code = 200, Message = "Khôi phục thành công" }; }
+			else { return new ResponseDTO { Code = 500, Message = "Khôi phục thất bại, vui lòng thử lại sau" }; }
 		}
 
 		public async Task<ResponseDTO> UpdateBook(int id, BookDTO BookDTO)
@@ -226,7 +226,7 @@ namespace BookStack.Services.BookService
 			if (book == null) return new ResponseDTO { Code = 400, Message = "Book không tồn tại" };
 
 			book.CodeBook = BookDTO.CodeBook;
-            book.Title = BookDTO.Title;
+			book.Title = BookDTO.Title;
 			book.Description = BookDTO.Description;
 			book.NumberOfPages = BookDTO.NumberOfPages;
 			book.PublishDate = BookDTO.PublishDate;
@@ -240,17 +240,17 @@ namespace BookStack.Services.BookService
 			book.AuthorId = BookDTO.AuthorId;
 			book.SupplierId = BookDTO.SupplierId;
 			book.Status = BookDTO.Status;
-            book.GiaNhap = BookDTO.GiaNhap;
-            book.GiaThucTe = BookDTO.GiaThucTe??0;
-            if (book.StockQuantity.HasValue)
-                book.StockQuantity = BookDTO.StockQuantity;
+			book.GiaNhap = BookDTO.GiaNhap;
+			book.GiaThucTe = BookDTO.GiaThucTe ?? 0;
+			if (book.StockQuantity.HasValue)
+				book.StockQuantity = BookDTO.StockQuantity;
 
-            if (book.SoldQuantity.HasValue)
-                book.SoldQuantity = BookDTO.SoldQuantity;
-            book.Tags = new List<Tag>();
+			if (book.SoldQuantity.HasValue)
+				book.SoldQuantity = BookDTO.SoldQuantity;
+			book.Tags = new List<Tag>();
 			foreach (var tagId in BookDTO.TagIds)
 			{
-				Tag tag =await _tagRepository.GetTagById(tagId);
+				Tag tag = await _tagRepository.GetTagById(tagId);
 				if (tag != null)
 					book.Tags.Add(tag);
 			}
@@ -278,14 +278,14 @@ namespace BookStack.Services.BookService
 		public async Task<ResponseDTO> BookStatus(int id, int status)
 		{
 			var book = await _bookRepository.GetBookById(id);
-			if (book == null){return new ResponseDTO{Code = 400,Message = "Sách không tồn tại"};}
-			if (status != 0 && status != 1){return new ResponseDTO{Code = 400,Message = "Trạng thái không hợp lệ. Chỉ chấp nhận 0 (Dừng) hoặc 1 (Hoạt động)."};}
-			if (book.Status == status){return new ResponseDTO{Code = 400,Message = $"Sách đã ở trạng thái {(status == 1 ? "Hoạt động" : "Dừng hoạt động")} rồi."};}
-            book.Status = status;
-            await _bookRepository.UpdateBook(id, book);
-            if (await _bookRepository.IsSaveChanges()) return new ResponseDTO() { Message = "Tạo thành công" };
-            else return new ResponseDTO() { Code = 400, Message = "Tạo thất bại" };
-        }
+			if (book == null) { return new ResponseDTO { Code = 400, Message = "Sách không tồn tại" }; }
+			if (status != 0 && status != 1) { return new ResponseDTO { Code = 400, Message = "Trạng thái không hợp lệ. Chỉ chấp nhận 0 (Dừng) hoặc 1 (Hoạt động)." }; }
+			if (book.Status == status) { return new ResponseDTO { Code = 400, Message = $"Sách đã ở trạng thái {(status == 1 ? "Hoạt động" : "Dừng hoạt động")} rồi." }; }
+			book.Status = status;
+			await _bookRepository.UpdateBook(id, book);
+			if (await _bookRepository.IsSaveChanges()) return new ResponseDTO() { Message = "Tạo thành công" };
+			else return new ResponseDTO() { Code = 400, Message = "Tạo thất bại" };
+		}
 
 		public async Task<ResponseDTO> GetInactiveBooks(int? page = 1, int? pageSize = 10, string? key = "", string? sortBy = "ID", int? tagId = 0, int? voucherId = 0,
 		  bool includeDeleted = false, int? publisherId = null, int? authorId = null, int? supplierId = null)
@@ -304,25 +304,25 @@ namespace BookStack.Services.BookService
 			};
 		}
 
-        private double CalculateDiscountedPrice(double price, Voucher voucher)
-        {
-            if (voucher == null || voucher.DiscountValue == null)
-            {
-                return price;
-            }
+		private double CalculateDiscountedPrice(double price, Voucher voucher)
+		{
+			if (voucher == null || voucher.DiscountValue == null)
+			{
+				return price;
+			}
 
-            double discountPercentage = (double)voucher.DiscountValue / 100;
+			double discountPercentage = (double)voucher.DiscountValue / 100;
 
-            return price * (1 - discountPercentage);
-        }
+			return price * (1 - discountPercentage);
+		}
 
-        public async Task<bool> IsVoucherActive(int voucherId)
-        {
-            if (voucherId == 0 || voucherId == null)
-                return false; 
+		public async Task<bool> IsVoucherActive(int voucherId)
+		{
+			if (voucherId == 0 || voucherId == null)
+				return false;
 
-            var voucher = await _voucherRepository.GetVoucherById(voucherId);
-            return voucher != null && voucher.Status == 1;
-        }
-    }
+			var voucher = await _voucherRepository.GetVoucherById(voucherId);
+			return voucher != null && voucher.Status == 1;
+		}
+	}
 }

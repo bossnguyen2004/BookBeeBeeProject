@@ -5,12 +5,11 @@
 @{
     ViewData["Title"] = "Bán hàng tại quầy";
 }
-
 <body>
-
+    @* load danh sách sản phẩm *@
 </body>
 
-
+<!-- Modal -->
 <div class="modal fade" id="exampleModalScrollable" data-backdrop="static">
     <div class="modal-dialog modal-dialog-scrollable draggable">
         <div class="modal-content">
@@ -29,6 +28,7 @@
 </div>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.4.0/jspdf.umd.min.js"></script>
+<!-- JSQR Library -->
 <script src="https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.min.js"></script>
 
 <script>
@@ -36,7 +36,7 @@
     function CapNhapLaiTien(maHD) {
         debugger
         $.ajax({
-            url: '/BanHangTaiQuay/CapNhapThongTinTien?maHD=' + maHD,
+            url: '/TaiQuay/CapNhapThongTinTien?maHD=' + maHD,
             type: 'GET',
             success: function (result) {
                 console.log(result.tongTienThayDoi);
@@ -89,10 +89,9 @@
                 <div class="col-7" style="margin-left: -15px;">
                     <input type="text" class="form-control" oninput="timKiem(this.value)" id="timKiemSanPham" style="margin-left: 18px;" placeholder="Tìm kiếm sản phẩm">
                 </div>
-
                 <div class="col-5"></div>
             </div>
-            <div class="row" style="height: 780px; overflow-y: scroll; overflow-x: hidden;margin-left: 5px;">
+            <div class="row" style="height: 775px; overflow-y: scroll; overflow-x: hidden;margin-left: 5px;">
                 <div class="row" id="body-danhsach">
                 </div>
             </div>
@@ -102,6 +101,7 @@
                 <div class="card w-100 h-100">
                     <div class="d-flex">
                         <button class="btn btn-primary" id="create-tab" style="width: 200px">Tạo hóa đơn mới</button>
+
 
                     </div>
 
@@ -144,94 +144,98 @@
             </div>
             <div class="row" style="height: 400px">
                 <div class="col-12" style="padding:0">
-                    <div class="card" style="width: 100%; padding:0; height: 400px;">
-                        <div class="card-header" style=" line-height: 50px;color:red;font-size:20px">
-                            Thông tin hóa đơn
-                        </div>
-                        <div class="row">
-                            <div class="col-6">
-                                <table>
-                                    <tr>
-                                        <td>Mã HD: </td>
-                                        <td><input class="form-control" id="MaHoaDonDangChon" type="text" aria-label="default input example" style="border-bottom: 2px solid black;" disabled></td>
-                                    </tr>
-                                    <tr>
-                                        <td>Tên khách hàng: </td>
-                                        <td><input class="form-control" id="TenKhachHang" type="text" aria-label="default input example" style="border-bottom: 2px solid black;"></td>
-                                    </tr>
-                                    <tr>
-                                        <td>SDT khách hàng: </td>
-                                        <td><input class="form-control" id="SoDienThoai" type="text" aria-label="default input example" style="border-bottom: 2px solid black;"></td>
-                                    </tr>
-                                    
-                                    <tr>
-                                        <td>HT thanh toán: </td>
-                                        <td>
-                                            <select class="form-select" onchange="ChonHinhThucThanhToan()" id="PTTT" aria-label="Default select example">
-                                                <option value="1">Tiền mặt</option>
-                                                <option value="2">Chuyển khoản</option>
-                                                <option value="3">Cả tiền mặt cả chuyển khoản</option>
-                                            </select>
-                                        </td>
-                                    </tr>
-                                    <tr id="TienMat">
-                                        <td>Tiền mặt: </td>
-                                        <td><input class="form-control format-price" id="inputTienMat" type="text" oninput="validateNumberInput(this);updateTienThua()" aria-label="default input example" style="border-bottom: 2px solid black;"></td>
-                                    </tr>
-                                    <tr id="ChuyenKhoan">
-                                        <td>Tiền chuyển khoản: </td>
-                                        <td><input class="form-control format-price" id="inputChuyenKhoan" type="text" oninput="validateNumberInput(this);updateTienThua()" aria-label="default input example" style="border-bottom: 2px solid black;"></td>
-                                    </tr>
-                                    <tr>
-                                        <td>Tiền thừa: </td>
-                                        <td><input class="form-control" type="text" id="TienThua" aria-label="default input example" style="border-bottom: 2px solid black;" disabled></td>
-                                    </tr>
+                    <div class="row" style="height: 400px">
+                        <div class="col-12" style="padding:0">
+                            <div class="card" style="width: 100%; padding:0; height: 400px;">
+                                <div class="card-header" style=" line-height: 50px;color:red;font-size:20px">
+                                    Thông tin hóa đơn
+                                </div>
+                                <div class="row">
+                                    <div class="col-6">
+                                        <table>
+                                            <tr>
+                                                <td>Mã HD: </td>
+                                                <td><input class="form-control" id="MaHoaDonDangChon" type="text" aria-label="default input example" style="border-bottom: 2px solid black;" disabled></td>
+                                            </tr>
+                                            <tr>
+                                                <td>Tên khách hàng: </td>
+                                                <td><input class="form-control" id="TenKhachHang" type="text" aria-label="default input example" style="border-bottom: 2px solid black;"></td>
+                                            </tr>
+                                            <tr>
+                                                <td>SDT khách hàng: </td>
+                                                <td><input class="form-control" id="SoDienThoai" type="text" aria-label="default input example" style="border-bottom: 2px solid black;"></td>
+                                            </tr>
 
-                                </table>
-                            </div>
-                            <div class="col-6">
-                                <table>
+                                            <tr>
+                                                <td>HT thanh toán: </td>
+                                                <td>
+                                                    <select class="form-select" onchange="ChonHinhThucThanhToan()" id="PTTT" aria-label="Default select example">
+                                                        <option value="1">Tiền mặt</option>
+                                                        <option value="2">Chuyển khoản</option>
+                                                        <option value="3">Cả tiền mặt cả chuyển khoản</option>
+                                                    </select>
+                                                </td>
+                                            </tr>
+                                            <tr id="TienMat">
+                                                <td>Tiền mặt: </td>
+                                                <td><input class="form-control format-price" id="inputTienMat" type="text" oninput="validateNumberInput(this);updateTienThua()" aria-label="default input example" style="border-bottom: 2px solid black;"></td>
+                                            </tr>
+                                            <tr id="ChuyenKhoan">
+                                                <td>Tiền chuyển khoản: </td>
+                                                <td><input class="form-control format-price" id="inputChuyenKhoan" type="text" oninput="validateNumberInput(this);updateTienThua()" aria-label="default input example" style="border-bottom: 2px solid black;"></td>
+                                            </tr>
+                                            <tr>
+                                                <td>Tiền thừa: </td>
+                                                <td><input class="form-control" type="text" id="TienThua" aria-label="default input example" style="border-bottom: 2px solid black;" disabled></td>
+                                            </tr>
 
-                                    <tr>
-                                        <td>Tổng tiền hàng: </td>
-                                        <td><input class="form-control" type="text" id="TongTienHoaDon" onchange="updateTienThua()" aria-label="default input example" style="border-bottom: 2px solid black;" disabled></td>
-                                    </tr>
+                                        </table>
+                                    </div>
+                                    <div class="col-6">
+                                        <table>
 
-                                    <tr>
-                                        <td>Voucher:</td>
-                                        <td><input class="form-control" type="text" id="KhuyenMaiGiam" onchange="updateTienThua()" aria-label="default input example" style="border-bottom: 2px solid black;" disabled></td>
-                                    </tr>
-                                    <tr>
-                                        <td>Tổng giảm:</td>
-                                        <td><input class="form-control" type="text" id="TongGiam" onchange="updateTienThua()" aria-label="default input example" style="border-bottom: 2px solid black;" disabled></td>
-                                    </tr>
-                                    <tr>
-                                        <td>Tổng tiền: </td>
-                                        <td><input class="form-control" type="text" id="SoTienPhaiTra" onchange="updateTienThua()" aria-label="default input example" style="border-bottom: 2px solid black;" disabled></td>
-                                    </tr>
-                                    <tr>
-                                        <td>Tên NV: </td>
-                                        <td><input class="form-control" id="TenNhanVien" type="text" aria-label="default input example" style="border-bottom: 2px solid black;" disabled></td>
-                                    </tr>
-                                    <tr>
-                                        <td>Ngày tạo: </td>
-                                        <td><input class="form-control" id="NgayTaoHoaDon" type="text" aria-label="default input example" style="border-bottom: 2px solid black;" disabled></td>
-                                    </tr>
-                                    
-                                </table>
+                                            <tr>
+                                                <td>Tổng tiền hàng: </td>
+                                                <td><input class="form-control" type="text" id="TongTienHoaDon" onchange="updateTienThua()" aria-label="default input example" style="border-bottom: 2px solid black;" disabled></td>
+                                            </tr>
+
+                                            <tr>
+                                                <td>Voucher:</td>
+                                                <td><input class="form-control" type="text" id="KhuyenMaiGiam" onchange="updateTienThua()" aria-label="default input example" style="border-bottom: 2px solid black;" disabled></td>
+                                            </tr>
+                                            <tr>
+                                                <td>Tổng giảm:</td>
+                                                <td><input class="form-control" type="text" id="TongGiam" onchange="updateTienThua()" aria-label="default input example" style="border-bottom: 2px solid black;" disabled></td>
+                                            </tr>
+                                            <tr>
+                                                <td>Tổng tiền: </td>
+                                                <td><input class="form-control" type="text" id="SoTienPhaiTra" onchange="updateTienThua()" aria-label="default input example" style="border-bottom: 2px solid black;" disabled></td>
+                                            </tr>
+                                            <tr>
+                                                <td>Tên NV: </td>
+                                                <td><input class="form-control" id="TenNhanVien" type="text" aria-label="default input example" style="border-bottom: 2px solid black;" disabled></td>
+                                            </tr>
+                                            <tr>
+                                                <td>Ngày tạo: </td>
+                                                <td><input class="form-control" id="NgayTaoHoaDon" type="text" aria-label="default input example" style="border-bottom: 2px solid black;" disabled></td>
+                                            </tr>
+
+                                        </table>
 
 
-                                <tr>
-                                    <td></td>
-                                    <td colspan="2">
-                                        <div class="button-container">
-                                            <button class="btn btn-success" onclick="showConfirmationThanhToan()">Thanh Toán</button>
-                                            <button class="btn btn-danger" data-toggle="modal" data-target="#modalHuyHoaDon">Hủy Hóa Đơn </button>
-                                        </div>
-                                    </td>
+                                        <tr>
+                                            <td></td>
+                                            <td colspan="2">
+                                                <div class="button-container">
+                                                    <button class="btn btn-success" onclick="showConfirmationThanhToan()">Thanh Toán</button>
+                                                    <button class="btn btn-danger" data-toggle="modal" data-target="#modalHuyHoaDon">Hủy Hóa Đơn </button>
+                                                </div>
+                                            </td>
 
-                                 
-                                </tr>
+
+                                        </tr>
+                                    </div>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -307,116 +311,6 @@
         </div>
     </div>
 </div>
-<style>
-    body {
-        font-family: "Roboto", Arial, sans-serif;
-    }
-
-    /* Căn chỉnh khoảng cách */
-    .card {
-        padding: 15px;
-        border-radius: 10px; /* Bo góc mềm mại */
-        box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1); /* Đổ bóng nhẹ */
-    }
-
-    /* Làm nổi bật tiêu đề */
-    .card-header {
-        font-size: 16px;
-        font-weight: bold;
-        background-color: #f8f9fa;
-        padding: 10px;
-    }
-
-    /* Bảng dữ liệu */
-    .table th,
-    .table td {
-        text-align: center;
-        vertical-align: middle;
-        white-space: nowrap; /* Tránh chữ bị xuống dòng không mong muốn */
-        padding: 5px;
-    }
-
-    /* Làm cho tiêu đề bảng in đậm */
-    .table thead th {
-        font-weight: bold;
-        font-size: 16px;
-        background-color: #f8f9fa; /* Màu nền nhẹ cho tiêu đề */
-    }
-
-    /* Đảm bảo bảng không bị co lại */
-    .table {
-        width: 100%;
-        table-layout: fixed;
-    }
-
-    /* Cố định tiêu đề bảng khi cuộn */
-    .table-responsive {
-        overflow-y: auto;
-        overflow-x: hidden;
-    }
-
-    /* Chiều cao của bảng để tránh tràn chữ */
-    .table tbody {
-        height: 200px;
-        overflow-y: auto;
-    }
-
-    /* Định dạng nút xóa sản phẩm */
-    .table td:last-child button {
-        background-color: red;
-        color: white;
-        border: none;
-        padding: 5px 10px;
-        cursor: pointer;
-        border-radius: 4px;
-    }
-
-        .table td:last-child button:hover {
-            background-color: darkred;
-        }
-
-    .btn {
-        padding: 8px 15px;
-        border-radius: 5px;
-    }
-
-    .btn-primary {
-        background: #007bff;
-        border-color: #007bff;
-    }
-
-    .btn-success {
-        background: #28a745;
-        border-color: #28a745;
-    }
-
-    .btn-danger {
-        background: #dc3545;
-        border-color: #dc3545;
-    }
-
-    td {
-        font-weight: bold; /* Chữ in đậm */
-        padding: 5px 10px; /* Căn lề cho đẹp */
-        white-space: nowrap; /* Giữ chữ trên một dòng */
-    }
-
-    input.form-control, select.form-select {
-        height: 30px; /* Giảm chiều cao ô input */
-        font-size: 14px; /* Giảm kích thước chữ */
-        padding: 3px 8px; /* Căn chỉnh padding */
-        width: 90%; /* Thu nhỏ ô input */
-        border: 1px solid #ccc; /* Định dạng viền */
-        border-radius: 5px; /* Bo góc mềm mại hơn */
-    }
-
-    .button-container {
-        display: flex;
-        justify-content: center; /* Căn giữa các nút theo chiều ngang */
-        gap: 15px; /* Tạo khoảng cách giữa hai nút */
-    }
-</style>
-
 <script>
 
     $
@@ -447,6 +341,7 @@
                         $("#KhuyenMaiGiam").val(result.soTienKhuyenMaiGiam.toLocaleString('vi-VN', { style: 'currency', currency: 'VND' }));
                         $("#VoucherGiam").val(result.soTienVoucherGiam.toLocaleString('vi-VN', { style: 'currency', currency: 'VND' }));
                         $("#MaVoucher").val("");
+                        // $('#SoDienThoai').val("0123456789");
                         $("#TenNhanVien").val(result.tenNhanVien);
                         $("#TongGiam").val((result.tongTienGoc - result.tienPhaiTra).toLocaleString('vi-VN', { style: 'currency', currency: 'VND' }));
                         var autoNumericInstance = AutoNumeric.getAutoNumericElement(document.getElementById('inputChuyenKhoan'));
@@ -479,8 +374,8 @@
                     type: "POST",
                     dataType: 'json',
                     success: function (response) {
-                        tabIndex = response;
-                        tabTitle = response;
+                        tabIndex = response.orderCode;
+                        tabTitle = response.orderCode;
                         var tabContent = tabIndex
                         $("<li><a href='#tab-" + tabIndex + "'>" + tabTitle + "</a></li>").appendTo("#tabs ul");
                         $("<div id='tab-" + tabIndex + "' style='height: 300px'></div>").appendTo("#tabs");
@@ -565,6 +460,7 @@
                         responsiveDivElement.appendChild(tableElement);
                         const divElement = document.getElementById('tab-' + tabIndex);
                         divElement.appendChild(responsiveDivElement);
+                        debugger
                         $("#tabs").tabs("refresh");
                         loading = false;
                     },
@@ -654,7 +550,7 @@
         }
         loading = true;
         $.ajax({
-            url: '/TaiQuay/LoadPartialViewDanhSachSanPham/tukhoa=' + value,
+            url: '/TaiQuay/LoadPartialViewDanhSachSanPham?tukhoa=' + value,
             type: 'GET',
             success: function (result) {
                 $('#body-danhsach').empty();
@@ -898,7 +794,11 @@
             loading = false;
         }
 
-
+        // if (newValue == 0 || newValue == "") {
+        //     var foundElement = $("#tab-" + maHoaDon + " table tbody").find("tr[id='hdct-" + idsanpham + "']");
+        //     foundElement.remove();
+        //     LoadChiTiet(maHoaDon);
+        // }
     }
     function isInteger(value) {
         return /^\d+$/.test(value);
@@ -958,6 +858,110 @@
         }
     }
 
+    // function GetVoucher(id) {
+    //     if (loading) {
+    //         return;
+    //     }
+    //     loading = true
+    //     if (id != "") {
+    //         $.ajax({
+    //             url: '/TaiQuay/GetVocherTaiQuay?id=' + id,
+    //             type: 'GET',
+    //             success: function (result) {
+    //                 if (result.trangThai) {
+    //                     var tongTienHoaDon = parseFloat($("#TongTienHoaDon").val().replace(/[^\d]/g, '')) || 0;
+    //                     var tongTienPhaiTra = parseFloat($("#SoTienPhaiTra").val().replace(/[^\d]/g, '')) || 0;
+    //                     if (result.dieuKien <= tongTienPhaiTra) {
+    //                         if (result.loaiHinhUuDai == 0) {
+    //                             $("#VoucherGiam").val(result.mucGiam.toLocaleString('vi-VN', { style: 'currency', currency: 'VND' }));
+    //                             var KhuyenMaiGiam = parseFloat($("#KhuyenMaiGiam").val().replace(/[^\d]/g, '')) || 0;
+    //                             var tongTienHoaDon = parseFloat($("#TongTienHoaDon").val().replace(/[^\d]/g, '')) || 0; // Assuming there is a variable named tongTienHoaDon
+    //                             var tongTien = parseFloat($("#SoTienPhaiTra").val().replace(/[^\d]/g, '')) || 0;
+    //                             $("#TongGiam").val((result.mucGiam + KhuyenMaiGiam).toLocaleString('vi-VN', { style: 'currency', currency: 'VND' }));
+
+    //                             tongTien = tongTienHoaDon - result.mucGiam - KhuyenMaiGiam;
+
+    //                             if (tongTien < 0) {
+    //                                 $("#VoucherGiam").val((result.mucGiam + tongTien).toLocaleString('vi-VN', { style: 'currency', currency: 'VND' }));
+    //                                 $("#TongGiam").val((result.mucGiam + KhuyenMaiGiam + tongTien).toLocaleString('vi-VN', { style: 'currency', currency: 'VND' }));
+    //                                 tongTien = 0;
+    //                             }
+    //                             $("#SoTienPhaiTra").val(tongTien.toLocaleString('vi-VN', { style: 'currency', currency: 'VND' }));
+    //                         }
+    //                         else {
+    //                             $("#VoucherGiam").val(result.mucGiam + "%");
+    //                             var tongTien = parseFloat($("#SoTienPhaiTra").val().replace(/[^\d]/g, '')) || 0;
+    //                             var KhuyenMaiGiam = parseFloat($("#KhuyenMaiGiam").val().replace(/[^\d]/g, '')) || 0;
+    //                             tongTien = tongTienHoaDon - KhuyenMaiGiam;
+    //                             tongTien = tongTien - tongTien / 100 * result.mucGiam;
+    //                             $("#SoTienPhaiTra").val(tongTien.toLocaleString('vi-VN', { style: 'currency', currency: 'VND' }));
+    //                             $("#TongGiam").val((tongTienHoaDon - tongTien).toLocaleString('vi-VN', { style: 'currency', currency: 'VND' }));
+
+    //                         }
+    //                         toastr.success('Đã sử dụng voucher', 'Thành công');
+    //                         loading = false;
+    //                     }
+    //                     else {
+    //                         toastr.error('Không đủ điều kiện của voucher', 'Lỗi');
+    //                         var tienVoucher = 0;
+    //                         $("#VoucherGiam").val(tienVoucher.toLocaleString('vi-VN', { style: 'currency', currency: 'VND' }));
+    //                         var KhuyenMaiGiam = parseFloat($("#KhuyenMaiGiam").val().replace(/[^\d]/g, '')) || 0;
+    //                         $("#SoTienPhaiTra").val((tongTienHoaDon - KhuyenMaiGiam).toLocaleString('vi-VN', { style: 'currency', currency: 'VND' }));
+    //                         $("#TongGiam").val(KhuyenMaiGiam.toLocaleString('vi-VN', { style: 'currency', currency: 'VND' }));
+
+    //                         loading = false;
+    //                     }
+    //                     updateTienThua();
+
+    //                 }
+    //                 else {
+    //                     var tienVoucher = 0;
+    //                     var tongTienHoaDon = parseFloat($("#TongTienHoaDon").val().replace(/[^\d]/g, '')) || 0;
+    //                     $("#VoucherGiam").val(tienVoucher.toLocaleString('vi-VN', { style: 'currency', currency: 'VND' }));
+    //                     var KhuyenMaiGiam = parseFloat($("#KhuyenMaiGiam").val().replace(/[^\d]/g, '')) || 0;
+    //                     $("#SoTienPhaiTra").val((tongTienHoaDon - KhuyenMaiGiam).toLocaleString('vi-VN', { style: 'currency', currency: 'VND' }));
+    //                     $("#TongGiam").val(KhuyenMaiGiam.toLocaleString('vi-VN', { style: 'currency', currency: 'VND' }));
+    //                     toastr.error('Voucher không hợp lệ', 'Lỗi');
+    //                     loading = false;
+    //                     updateTienThua();
+    //                 }
+    //             },
+    //             error: function (xhr, status, error) {
+
+    //             }
+    //         });
+    //     }
+    //     else {
+    //         var tienVoucher = 0;
+    //         var tongTienHoaDon = parseFloat($("#TongTienHoaDon").val().replace(/[^\d]/g, '')) || 0;
+    //         $("#VoucherGiam").val(tienVoucher.toLocaleString('vi-VN', { style: 'currency', currency: 'VND' }));
+    //         var KhuyenMaiGiam = parseFloat($("#KhuyenMaiGiam").val().replace(/[^\d]/g, '')) || 0;
+    //         $("#SoTienPhaiTra").val((tongTienHoaDon - KhuyenMaiGiam).toLocaleString('vi-VN', { style: 'currency', currency: 'VND' }));
+    //         $("#TongGiam").val(KhuyenMaiGiam.toLocaleString('vi-VN', { style: 'currency', currency: 'VND' }));
+    //         toastr.error('Voucher không hợp lệ', 'Lỗi');
+    //         loading = false;
+    //     }
+    // }
+    // function ThemSanPhamThanhCong() {
+    //     var audio = new Audio();
+    //     audio.src = '/audio/themSpThanhCong.mp3'
+    //     audio.play();
+    // }
+    // function ThemVoucherThanhCong() {
+    //     var audio = new Audio();
+    //     audio.src = '/audio/ThemVoucherThanhCong.mp3'
+    //     audio.play();
+    // }
+    // function VoucherKhongHopLe() {
+    //     var audio = new Audio();
+    //     audio.src = '/audio/VoucherKhongHopLe.mp3'
+    //     audio.play();
+    // }
+    // function KhongDuDieuKien() {
+    //     var audio = new Audio();
+    //     audio.src = '/audio/KhongDuDieuKien.mp3'
+    //     audio.play();
+    // }
 
     function KhongHuy() {
         $('#LyDoHuy').val("");
@@ -996,65 +1000,118 @@
                     return;
                 }
                 loading = true;
+
                 var tongTien = parseFloat($("#SoTienPhaiTra").val().replace(/[^\d]/g, '')) || 0;
                 var tienMat = parseFloat($("#TienMat input").val().replace(/[^\d]/g, '')) || 0;
                 var tienChuyenKhoan = parseFloat($("#ChuyenKhoan input").val().replace(/[^\d]/g, '')) || 0;
                 var tienThua = tienMat + tienChuyenKhoan - tongTien;
+
                 if (tienThua >= 0) {
                     var maVoucher = $("#MaVoucher").val();
                     var maHoaDon = $("#tabs .ui-tabs-active a").text();
                     var hinhThucThanhToan = $("#PTTT").val();
                     var SDT = $('#SoDienThoai').val();
-                    var SDT = $('#TenKhachHang').val();
+                    var tenKhachHang = $('#TenKhachHang').val(); // Sửa lỗi gán nhầm
                     var tongTienChuaGiam = parseFloat($("#TongTienHoaDon").val().replace(/[^\d]/g, '')) || 0;
                     var tongGiam = parseFloat($("#TongGiam").val().replace(/[^\d]/g, '')) || 0;
 
                     $.ajax({
-                        url: '/TaiQuay/ThanhToan?maHD=' + maHoaDon + '&SDT=' + SDT + '&tenKhachHang=' + SDT + '&TongTien=' + tongTienChuaGiam + '&tienMat=' + tienMat + '&chuyenKhoan=' + tienChuyenKhoan + '&idVoucher=' + maVoucher + '&hinhThuc=' + hinhThucThanhToan + '&tongGiam=' + tongGiam,
+                        url: '/TaiQuay/ThanhToan',
                         type: 'POST',
+                        data: {
+                            maHD: maHoaDon,
+                            SDT: SDT,
+                            tenKhachHang: tenKhachHang,
+                            TongTien: tongTienChuaGiam,
+                            tienMat: tienMat,
+                            chuyenKhoan: tienChuyenKhoan,
+                            idVoucher: maVoucher,
+                            hinhThuc: hinhThucThanhToan,
+                            tongGiam: tongGiam
+                        },
                         success: function (result) {
                             if (result.trangThai) {
-                                console.log(maHoaDon);
-                                var maHd = $("#tabs .ui-tabs-active a").text();
-                                console.log(maHd);
-                                Swal.fire('Đã thanh toán', 'Thanh toán hóa đơn ' + maHd + ' thành công.', 'success');
-                                var selectedTabId = $("#tabs .ui-tabs-active a").attr("href"); // Lấy ID của tab đang được chọn
-                                $(selectedTabId).remove(); // Xóa nội dung tab
-                                $("#tabs ul li.ui-tabs-active").remove(); // Xóa tab từ danh sách tab
-                                $("#tabs").tabs("refresh");
-                                loading = false;
-                                maHoaDon = $("#tabs .ui-tabs-active a").text();
-                                $('#SoDienThoai').val("");
-                                if (maHoaDon.length == 0) {
-                                    $('#NgayTaoHoaDon').val("");
-                                    $('#TenNhanVien').val("");
-                                    $('#MaHoaDonDangChon').val("");
-                                }
-                                CapNhapLaiTien(maHoaDon);
-                                LoadLaiSanPham();
-                            }
-                            else {
+                                Swal.fire({
+                                    title: 'Đã thanh toán',
+                                    text: 'Thanh toán hóa đơn ' + maHoaDon + ' thành công. Bạn có muốn xuất hóa đơn PDF không?',
+                                    icon: 'success',
+                                    showCancelButton: true,
+                                    confirmButtonText: 'Có',
+                                    cancelButtonText: 'Không'
+                                }).then((res) => {
+                                    if (res.isConfirmed) {
+                                        // Gọi ExportBill để xuất PDF
+                                        $.ajax({
+                                            url: '/TaiQuay/ExportBill',
+                                            type: 'GET',
+                                            data: { maHD: maHoaDon },
+                                            xhrFields: {
+                                                responseType: 'blob'
+                                            },
+                                            success: function (data) {
+                                                const blob = new Blob([data], { type: 'application/pdf' });
+                                                const url = window.URL.createObjectURL(blob);
+                                                const a = document.createElement('a');
+                                                a.href = url;
+                                                a.download = 'HoaDon_' + maHoaDon + '.pdf';
+                                                document.body.appendChild(a);
+                                                a.click();
+                                                window.URL.revokeObjectURL(url);
+                                                document.body.removeChild(a);
+                                            },
+                                            error: function () {
+                                                Swal.fire('Lỗi', 'Xuất hóa đơn PDF thất bại.', 'error');
+                                            },
+                                            complete: function () {
+                                                // Dọn dẹp giao diện sau khi xử lý PDF
+                                                cleanupAfterPayment();
+                                            }
+                                        });
+                                    } else {
+                                        cleanupAfterPayment(); // Nếu không xuất PDF cũng cleanup
+                                    }
+                                });
+                            } else {
                                 Swal.fire('Đã hủy bỏ', 'Hành động không được thực hiện.', 'error');
                                 loading = false;
                             }
-                            loading = false;
                         },
-                        error: function (xhr, status, error) {
-
+                        error: function () {
+                            Swal.fire('Lỗi', 'Thanh toán thất bại.', 'error');
+                            loading = false;
                         }
                     });
-
-                }
-                else {
+                } else {
                     Swal.fire('Đã hủy bỏ', 'Không thể thanh toán do thiếu tiền.', 'error');
                     loading = false;
                 }
-            } else if (result.dismiss === Swal.DismissReason.cancel) {
-                // Xử lý khi người dùng nhấp vào "Hủy bỏ"
+            } else {
                 Swal.fire('Đã hủy bỏ', 'Hành động không được thực hiện.', 'error');
             }
         });
     }
+
+    // Hàm dọn dẹp sau thanh toán
+    function cleanupAfterPayment() {
+        var selectedTabId = $("#tabs .ui-tabs-active a").attr("href");
+        $(selectedTabId).remove();
+        $("#tabs ul li.ui-tabs-active").remove();
+        $("#tabs").tabs("refresh");
+
+        var maHoaDon = $("#tabs .ui-tabs-active a").text();
+        $('#SoDienThoai').val("");
+
+        if (maHoaDon.length == 0) {
+            $('#NgayTaoHoaDon').val("");
+            $('#TenNhanVien').val("");
+            $('#MaHoaDonDangChon').val("");
+        }
+
+        CapNhapLaiTien(maHoaDon);
+        LoadLaiSanPham();
+        loading = false;
+    }
+
 </script>
 
 

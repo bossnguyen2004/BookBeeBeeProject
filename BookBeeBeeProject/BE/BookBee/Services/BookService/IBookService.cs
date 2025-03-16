@@ -7,7 +7,7 @@ namespace BookStack.Services.BookService
 {
     public interface IBookService
     {
-		Task<ResponseDTO> GetBooks(int? page = 1, int? pageSize = 10, string? key = "", string? sortBy = "ID", int? tagId = 0,int? voucherId =0,
+		Task<ResponseDTO> GetBooks(int? page = 1, int? pageSize = 10, string? key = "", string? sortBy = "ID", int? tagId = null,int? voucherId =0,
             bool includeDeleted = false, int? publisherId = null, int? authorId = null, int? supplier= null, int? status = null);
         Task<ResponseDTO> GetTopOrderedBooks(int topCount = 10);
         Task<ResponseDTO> GetBookById(int id);

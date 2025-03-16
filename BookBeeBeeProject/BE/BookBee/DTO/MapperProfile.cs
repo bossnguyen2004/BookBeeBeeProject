@@ -34,11 +34,40 @@ namespace BookBee.DTO
 			CreateMap<PaymentMethodDTO, Model.PaymentMethod>().ReverseMap();
             CreateMap<EmployeeDTO, Model.Employee>().ReverseMap();
             CreateMap<OrderVoucherDTO, Model.OrderVoucher>().ReverseMap();
-            CreateMap<BookDTO, Model.Book>()
-                .ForMember(dest => dest.Image, opt => opt.MapFrom(src => src.ImageUrl))
-                .ReverseMap();
-
+            //CreateMap<BookDTO, Model.Book>()
+            //    .ForMember(dest => dest.Image, opt => opt.MapFrom(src => src.ImageUrl))
+            //    .ReverseMap();
+            CreateMap<BookDTO, Model.Book>().ForMember(dest => dest.Tags, opt => opt.MapFrom(src => src.Tags));
             CreateMap<CartDTO, Model.Cart>().ReverseMap();
-		}
+
+
+            CreateMap<BookDTO, Model.Book>()
+             .ForMember(dest => dest.Image,
+                        opt => opt.MapFrom(src => !string.IsNullOrEmpty(src.ImageUrl) ? src.ImageUrl : "/images/default.jpg")) // Gán ảnh mặc định
+             .ReverseMap();
+           
+
+
+
+
+
+
+
+
+
+            // Mapping từ Book sang BookDTO (ĐỌC DỮ LIỆU)
+            CreateMap<Model.Book, BookDTO>()
+                .ForMember(dest => dest.AuthorName, opt => opt.MapFrom(src => src.Author.Name)) // Map tên tác giả
+                .ForMember(dest => dest.PublisherName, opt => opt.MapFrom(src => src.Publisher.Name)) // Map tên NXB
+                .ForMember(dest => dest.AuthorId, opt => opt.MapFrom(src => src.Author.Id))
+                .ForMember(dest => dest.PublisherId, opt => opt.MapFrom(src => src.Publisher.Id));
+
+            // Mapping từ BookDTO sang Book (GHI DỮ LIỆU)
+            CreateMap<BookDTO, Model.Book>()
+                .ForMember(dest => dest.Author, opt => opt.Ignore()) // Bỏ qua navigation property
+                .ForMember(dest => dest.Publisher, opt => opt.Ignore());
+
+
+        }
     }
 }

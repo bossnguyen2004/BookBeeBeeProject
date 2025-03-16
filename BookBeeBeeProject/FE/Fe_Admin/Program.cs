@@ -4,60 +4,61 @@ namespace Fe_Admin
 {
     public class Program
     {
-        public static void Main(string[] args)
-        {
-            var builder = WebApplication.CreateBuilder(args);
+		public static void Main(string[] args)
+		{
+			var builder = WebApplication.CreateBuilder(args);
 
-            builder.Services.AddControllersWithViews();
+			builder.Services.AddControllersWithViews();
 
+			var apiBaseUrl = builder.Configuration["ApiSettings:BaseUrl"];
+			builder.Services.AddHttpClient("BackendApi", client =>
+			{
+				client.BaseAddress = new Uri(apiBaseUrl);
+			});
 
+			builder.Services.AddDistributedMemoryCache();
+			builder.Services.AddSession(options =>
+			{
+				options.IdleTimeout = TimeSpan.FromMinutes(5);
+				options.Cookie.HttpOnly = true;
+				options.Cookie.IsEssential = true;
+			});
 
-            var apiBaseUrl = builder.Configuration["ApiSettings:BaseUrl"];
+			builder.Services.AddCors(options =>
+			{
+				options.AddPolicy("AllowAll", policy => policy.AllowAnyOrigin().AllowAnyMethod().AllowAnyHeader());
+			});
 
-            builder.Services.AddHttpClient("BackendApi", client =>
-            {
-                client.BaseAddress = new Uri(apiBaseUrl);
-            });
+			builder.Services.AddRazorPages();
+			builder.Services.AddServerSideBlazor();
+			builder.Services.AddHttpClient();
 
-            builder.Services.AddDistributedMemoryCache();
-            builder.Services.AddSession(options =>
-            {
-                options.IdleTimeout = TimeSpan.FromMinutes(5);
-                options.Cookie.HttpOnly = true;
-                options.Cookie.IsEssential = true;
-            });
-            builder.Services.AddCors(options =>
-            {
-                options.AddPolicy("AllowAll",
-                    policy => policy.AllowAnyOrigin().AllowAnyMethod().AllowAnyHeader());
-            });
+			var app = builder.Build();
 
+			if (!app.Environment.IsDevelopment())
+			{
+				app.UseExceptionHandler("/Home/Error");
+				app.UseHsts();
+			}
 
-            builder.Services.AddRazorPages();
-            builder.Services.AddServerSideBlazor();
-            builder.Services.AddHttpClient();
+			app.UseSession();
+			app.UseHttpsRedirection();
+			app.UseStaticFiles();
+			app.UseRouting();
 
-            var app = builder.Build();
+			// ??ng t?n policy
+			app.UseCors("AllowAll");
 
-            if (!app.Environment.IsDevelopment())
-            {
-                app.UseExceptionHandler("/Home/Error");
-                app.UseHsts();
-            }
-            app.UseSession();
-            app.UseHttpsRedirection();
-            app.UseStaticFiles();
-            app.UseRouting();
-            app.UseMiddleware<SessionInitializationMiddleware>();
-            
-            app.UseCors("AllowAllOrigins");
-            app.UseAuthorization();
+			app.UseAuthorization();
 
-            app.MapControllerRoute(
-                name: "default",
-                pattern: "{controller=Account}/{action=Login}/{id?}");
+			// Di chuy?n middleware xu?ng sau UseAuthorization
+			app.UseMiddleware<SessionInitializationMiddleware>();
 
-            app.Run();
-        }
-    }
+			app.MapControllerRoute(
+				name: "default",
+				pattern: "{controller=Account}/{action=Login}/{id?}");
+
+			app.Run();
+		}
+	}
 }

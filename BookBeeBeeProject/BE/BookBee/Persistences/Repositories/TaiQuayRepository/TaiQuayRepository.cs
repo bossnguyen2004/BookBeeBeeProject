@@ -2,7 +2,7 @@
 using BookBee.DTOs.OrderDetail;
 using BookBee.Model;
 using BookStack.DTOs.Order;
-using System.Data.Entity;
+using Microsoft.EntityFrameworkCore;
 using System.Drawing;
 using static BookBee.Model.TrangThai;
 
@@ -69,7 +69,7 @@ namespace BookBee.Persistences.Repositories.TaiQuayRepository
             }
         }
 
-        public async  Task<bool> CheckCustomerExistence(int id)
+        public async Task<bool> CheckCustomerExistence(int id)
         {
             var customer = await _dataContext.UserAccounts.FindAsync(id);
             return customer != null;
@@ -204,13 +204,13 @@ namespace BookBee.Persistences.Repositories.TaiQuayRepository
                 if (hoadon == null)
                     return new ResponseDTO { IsSuccess = false, Code = 404, Message = "Không tìm thấy hóa đơn." };
 
-                if (hoadon.PaymentStatus == (int)PaymentStatus.Dathanhtoan) 
+                if (hoadon.PaymentStatus == (int)PaymentStatus.Dathanhtoan)
                 {
 
                     hoadon.ReceivedDate = NgayNhan ?? hoadon.ReceivedDate;
                     hoadon.ShippingDate = NgayShip ?? hoadon.ShippingDate;
                 }
-                else 
+                else
                 {
 
                     hoadon.PaymentDate = NgayThanhToan ?? hoadon.PaymentDate;
@@ -316,8 +316,8 @@ namespace BookBee.Persistences.Repositories.TaiQuayRepository
                 PaymentStatus = x.PaymentStatus,
                 DeliveryStatus = x.DeliveryStatus,
                 CancellationReason = x.CancellationReason,
-                Status= x.Status,
-                
+                Status = x.Status,
+
             });
 
 
@@ -331,3 +331,5 @@ namespace BookBee.Persistences.Repositories.TaiQuayRepository
         }
     }
 }
+
+

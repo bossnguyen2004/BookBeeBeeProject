@@ -52,7 +52,7 @@ namespace BookBee.Model
         public virtual List<OrderDetail> OrderDetails { get; set; } = new List<OrderDetail>();
         public virtual List<CartDetail> CartDetails { get; set; } = new List<CartDetail>();
         public virtual List<VoucherDetail> VoucherDetails { get; set; } = new List<VoucherDetail>();
-
+        public virtual List<BookTag> BookTags { get; set; } = new List<BookTag>();
         public int? StockQuantity { get; set; } = 0;
 
         public int? SoldQuantity { get; set; } = 0; 

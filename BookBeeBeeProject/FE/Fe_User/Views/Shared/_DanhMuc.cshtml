@@ -1,0 +1,23 @@
+﻿@using X.PagedList
+@using X.PagedList.Mvc.Core
+@using System.Linq
+@model IPagedList<Fe_User.Models.Tag>
+@addTagHelper *, Microsoft.AspNetCore.Mvc.TagHelpers
+
+@if (Model != null && Model.Count > 0)
+{
+    <ul class="menu_top_nav">
+        <h3 style="font-size: 20px; color: crimson;">Danh Mục Sản Phẩm</h3>
+        @foreach (var tag in Model)
+        {
+            <li class="menu_item">
+                <a href="@Url.Action("Index", "Book", new { category = tag.Id })">@tag.Name</a>
+            </li>
+        }
+    </ul>
+}
+else
+{
+    <p>Không có danh mục nào.</p>
+}
+

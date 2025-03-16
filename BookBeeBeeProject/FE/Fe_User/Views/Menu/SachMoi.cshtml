@@ -1,0 +1,10 @@
+﻿@using X.PagedList
+@using X.PagedList.Mvc.Core
+@model IPagedList<Fe_User.Models.Book>
+<h2>Danh sách sách mới</h2>
+<ul>
+    @foreach (var book in Model)
+    {
+        <li>@book.Title</li>
+    }
+</ul>
